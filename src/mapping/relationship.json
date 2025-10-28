@@ -1,0 +1,34 @@
+{
+    "relationships": [
+        {
+            "并发症": "acompany_with"
+        },
+        {
+            "属于": "belongs_to"
+        },
+        {
+            "常用药品": "common_drug"
+        },
+        {
+            "治疗方法": "name"
+        },
+        {
+            "宜吃": "do_eat"
+        },
+        {
+            "生产药品": "drugs_of"
+        },
+        {
+            "症状": "has_symptom"
+        },
+        {
+            "忌吃": "no_eat"
+        },
+        {
+            "好评药品": "recommand_drug"
+        },
+        {
+            "推荐食谱": "recommand_eat"
+        }
+    ]
+}
