@@ -1,0 +1,9 @@
+{
+    "疾病": "Disease",
+    "症状": "Symptom",
+    "药物": "Drug",
+    "部门": "Department",
+    "食物": "Food",
+    "检查": "Check",
+    "厂商": "Producer"
+}

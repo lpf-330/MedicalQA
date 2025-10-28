@@ -1,0 +1,425 @@
+{
+    "查找关系": {
+        "description": "查找实体间关系",
+        "neo4j_interface": "find_connections_between_entities",
+        "requires": [
+            "entities",
+            "relationships"
+        ]
+    },
+    "查找连接": {
+        "description": "查找实体间连接",
+        "neo4j_interface": "find_connections_between_entities",
+        "requires": [
+            "entities",
+            "relationships"
+        ]
+    },
+    "查找链接": {
+        "description": "查找实体间链接",
+        "neo4j_interface": "find_connections_between_entities",
+        "requires": [
+            "entities",
+            "relationships"
+        ]
+    },
+    "检查关联": {
+        "description": "检查实体关联",
+        "neo4j_interface": "find_connections_between_entities",
+        "requires": [
+            "entities",
+            "relationships"
+        ]
+    },
+    "如何关联": {
+        "description": "如何关联",
+        "neo4j_interface": "find_connections_between_entities",
+        "requires": [
+            "entities",
+            "relationships"
+        ]
+    },
+    "是否相关": {
+        "description": "是否相关",
+        "neo4j_interface": "find_connections_between_entities",
+        "requires": [
+            "entities",
+            "relationships"
+        ]
+    },
+    "关系_between": {
+        "description": "实体间关系",
+        "neo4j_interface": "find_connections_between_entities",
+        "requires": [
+            "entities",
+            "relationships"
+        ]
+    },
+    "连接_between": {
+        "description": "实体间连接",
+        "neo4j_interface": "find_connections_between_entities",
+        "requires": [
+            "entities",
+            "relationships"
+        ]
+    },
+    "描述": {
+        "description": "描述实体",
+        "neo4j_interface": "find_properties_of_entity",
+        "requires": [
+            "entities"
+        ]
+    },
+    "定义": {
+        "description": "定义实体",
+        "neo4j_interface": "find_properties_of_entity",
+        "requires": [
+            "entities"
+        ]
+    },
+    "是什么": {
+        "description": "是什么",
+        "neo4j_interface": "find_properties_of_entity",
+        "requires": [
+            "entities"
+        ]
+    },
+    "告诉我关于": {
+        "description": "告诉我关于",
+        "neo4j_interface": "find_properties_of_entity",
+        "requires": [
+            "entities"
+        ]
+    },
+    "解释": {
+        "description": "解释实体",
+        "neo4j_interface": "find_properties_of_entity",
+        "requires": [
+            "entities"
+        ]
+    },
+    "获取信息": {
+        "description": "获取信息",
+        "neo4j_interface": "find_properties_of_entity",
+        "requires": [
+            "entities"
+        ]
+    },
+    "获取定义": {
+        "description": "获取定义",
+        "neo4j_interface": "find_properties_of_entity",
+        "requires": [
+            "entities"
+        ]
+    },
+    "获取描述": {
+        "description": "获取描述",
+        "neo4j_interface": "find_properties_of_entity",
+        "requires": [
+            "entities"
+        ]
+    },
+    "查找病因": {
+        "description": "查找病因",
+        "neo4j_interface": "find_related_entities_by_relationship",
+        "requires": [
+            "entities",
+            "relationships"
+        ]
+    },
+    "查找症状": {
+        "description": "查找症状",
+        "neo4j_interface": "find_related_entities_by_relationship",
+        "requires": [
+            "entities",
+            "relationships"
+        ]
+    },
+    "查找治疗方法": {
+        "description": "查找治疗方法",
+        "neo4j_interface": "find_related_entities_by_relationship",
+        "requires": [
+            "entities",
+            "relationships"
+        ]
+    },
+    "查找药物": {
+        "description": "查找药物",
+        "neo4j_interface": "find_related_entities_by_relationship",
+        "requires": [
+            "entities",
+            "relationships"
+        ]
+    },
+    "查找并发症": {
+        "description": "查找并发症",
+        "neo4j_interface": "find_related_entities_by_relationship",
+        "requires": [
+            "entities",
+            "relationships"
+        ]
+    },
+    "查找预防方法": {
+        "description": "查找预防方法",
+        "neo4j_interface": "find_related_entities_by_relationship",
+        "requires": [
+            "entities",
+            "relationships"
+        ]
+    },
+    "查找效果": {
+        "description": "查找效果/副作用",
+        "neo4j_interface": "find_related_entities_by_relationship",
+        "requires": [
+            "entities",
+            "relationships"
+        ]
+    },
+    "什么导致": {
+        "description": "什么导致",
+        "neo4j_interface": "find_related_entities_by_relationship",
+        "requires": [
+            "entities",
+            "relationships"
+        ]
+    },
+    "什么有症状": {
+        "description": "什么有症状",
+        "neo4j_interface": "find_related_entities_by_relationship",
+        "requires": [
+            "entities",
+            "relationships"
+        ]
+    },
+    "什么治疗": {
+        "description": "什么治疗",
+        "neo4j_interface": "find_related_entities_by_relationship",
+        "requires": [
+            "entities",
+            "relationships"
+        ]
+    },
+    "治疗什么": {
+        "description": "治疗什么",
+        "neo4j_interface": "find_related_entities_by_relationship",
+        "requires": [
+            "entities",
+            "relationships"
+        ]
+    },
+    "由引起": {
+        "description": "由...引起",
+        "neo4j_interface": "find_related_entities_by_relationship",
+        "requires": [
+            "entities",
+            "relationships"
+        ]
+    },
+    "由预防": {
+        "description": "由...预防",
+        "neo4j_interface": "find_related_entities_by_relationship",
+        "requires": [
+            "entities",
+            "relationships"
+        ]
+    },
+    "查找共同症状": {
+        "description": "查找共同症状",
+        "neo4j_interface": "find_common_connections",
+        "requires": [
+            "entities",
+            "relationships"
+        ]
+    },
+    "查找共同治疗方法": {
+        "description": "查找共同治疗方法",
+        "neo4j_interface": "find_common_connections",
+        "requires": [
+            "entities",
+            "relationships"
+        ]
+    },
+    "比较状况": {
+        "description": "比较状况",
+        "neo4j_interface": "find_common_connections",
+        "requires": [
+            "entities",
+            "relationships"
+        ]
+    },
+    "有什么相似之处": {
+        "description": "有什么相似之处",
+        "neo4j_interface": "find_common_connections",
+        "requires": [
+            "entities",
+            "relationships"
+        ]
+    },
+    "共同副作用": {
+        "description": "共同副作用",
+        "neo4j_interface": "find_common_connections",
+        "requires": [
+            "entities",
+            "relationships"
+        ]
+    },
+    "共同并发症": {
+        "description": "共同并发症",
+        "neo4j_interface": "find_common_connections",
+        "requires": [
+            "entities",
+            "relationships"
+        ]
+    },
+    "列出关系": {
+        "description": "列出关系",
+        "neo4j_interface": "query_entity_relationships",
+        "requires": [
+            "entities"
+        ]
+    },
+    "能做什么": {
+        "description": "能做什么/对什么有影响",
+        "neo4j_interface": "query_entity_relationships",
+        "requires": [
+            "entities"
+        ]
+    },
+    "对有什么影响": {
+        "description": "对...有什么影响",
+        "neo4j_interface": "query_entity_relationships",
+        "requires": [
+            "entities"
+        ]
+    },
+    "发出的关系": {
+        "description": "发出的关系",
+        "neo4j_interface": "query_entity_relationships",
+        "requires": [
+            "entities"
+        ]
+    },
+    "指向的关系": {
+        "description": "指向的关系",
+        "neo4j_interface": "query_entity_relationships",
+        "requires": [
+            "entities"
+        ]
+    },
+    "实体模式": {
+        "description": "实体模式/实体关系图",
+        "neo4j_interface": "query_entity_relationships",
+        "requires": [
+            "entities"
+        ]
+    },
+    "有什么关系": {
+        "description": "有什么关系",
+        "neo4j_interface": "query_entity_relationships",
+        "requires": [
+            "entities"
+        ]
+    },
+    "列出连接的类型": {
+        "description": "列出连接的类型",
+        "neo4j_interface": "query_entity_connections",
+        "requires": [
+            "entities"
+        ]
+    },
+    "什么与相连": {
+        "description": "什么与...相连",
+        "neo4j_interface": "query_entity_connections",
+        "requires": [
+            "entities"
+        ]
+    },
+    "探索连接": {
+        "description": "探索连接",
+        "neo4j_interface": "query_entity_connections",
+        "requires": [
+            "entities"
+        ]
+    },
+    "查找邻居": {
+        "description": "查找邻居",
+        "neo4j_interface": "query_entity_connections",
+        "requires": [
+            "entities"
+        ]
+    },
+    "连接的实体": {
+        "description": "连接的实体",
+        "neo4j_interface": "query_entity_connections",
+        "requires": [
+            "entities"
+        ]
+    },
+    "根据适应症查找": {
+        "description": "根据适应症查找",
+        "neo4j_interface": "find_entities_by_property",
+        "requires": [
+            "entities"
+        ]
+    },
+    "根据效果查找": {
+        "description": "根据效果查找",
+        "neo4j_interface": "find_entities_by_property",
+        "requires": [
+            "entities"
+        ]
+    },
+    "查找用于": {
+        "description": "查找用于...的药物",
+        "neo4j_interface": "find_entities_by_property",
+        "requires": [
+            "entities"
+        ]
+    },
+    "查找导致": {
+        "description": "查找导致...的状况",
+        "neo4j_interface": "find_entities_by_property",
+        "requires": [
+            "entities"
+        ]
+    },
+    "按属性搜索": {
+        "description": "按属性搜索",
+        "neo4j_interface": "find_entities_by_property",
+        "requires": [
+            "entities"
+        ]
+    },
+    "获取强度": {
+        "description": "获取强度",
+        "neo4j_interface": "query_relationship_properties",
+        "requires": [
+            "entities",
+            "relationships"
+        ]
+    },
+    "获取来源": {
+        "description": "获取来源",
+        "neo4j_interface": "query_relationship_properties",
+        "requires": [
+            "entities",
+            "relationships"
+        ]
+    },
+    "获取置信度": {
+        "description": "获取置信度",
+        "neo4j_interface": "query_relationship_properties",
+        "requires": [
+            "entities",
+            "relationships"
+        ]
+    },
+    "获取关系详情": {
+        "description": "获取关系详情",
+        "neo4j_interface": "query_relationship_properties",
+        "requires": [
+            "entities",
+            "relationships"
+        ]
+    }
+}
