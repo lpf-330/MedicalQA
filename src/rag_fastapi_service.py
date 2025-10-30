@@ -3,7 +3,10 @@
 from vllm.engine.arg_utils import AsyncEngineArgs
 from vllm.engine.async_llm_engine import AsyncLLMEngine
 from vllm.entrypoints.openai.serving_chat import OpenAIServingChat
-from vllm.entrypoints.openai.protocol import ChatCompletionRequest
+from vllm.entrypoints.openai.protocol import (
+    ChatCompletionRequest, ChatCompletionResponse, ChatCompletionStreamResponse,
+    DeltaMessage, ChatMessage, UsageInfo
+)
 from vllm.entrypoints.openai.protocol import CompletionRequest, TokenizeRequest, DetokenizeRequest
 from vllm.entrypoints.openai.serving_models import OpenAIServingModels, BaseModelPath
 from vllm.entrypoints.openai.serving_completion import OpenAIServingCompletion
@@ -23,7 +26,9 @@ from neo4j_service import Neo4jService # 导入Neo4j服务类
 import pydantic
 from pydantic import BaseModel, Field
 from transformers import AutoTokenizer # 用于计算token长度
-import datetime
+import uuid # 用于生成默认的 request_id
+from datetime import datetime
+import time
 
 # --- 1. 配置与日志 ---
 # 日志已在 log_service.py 中配置
@@ -248,16 +253,70 @@ async def create_app():
     )
 
     # --- 7. 自定义 RAG 端点 (核心) ---
-    @app.post("/v1/medical_rag_stream", response_class=StreamingResponse)
-    async def medical_rag_stream(request: RAGRequest):
-        question = request.question
-        session_id = request.session_id # 当前流程未使用，但可预留
+    # 修改后的 medical_rag_stream，符合 OpenAI API 格式
+    @app.post("/v1/medical_rag_stream", response_model=ChatCompletionResponse) # 使用标准响应模型
+    async def medical_rag_stream(
+        request: Request, # 用于读取 headers
+        chat_request: ChatCompletionRequest # 使用标准的 ChatCompletionRequest
+    ):
+        """
+        符合 OpenAI API 格式的医疗 RAG 流式聊天补全端点。
+        从 HTTP Headers 读取会话ID和时间戳。
+        """
+        # --- 从 Headers 读取信息 ---
+        # 使用 .get() 方法并提供默认值，以防 Header 不存在
+        session_id = request.headers.get("X-Session-ID")
+        timestamp_str = request.headers.get("X-Timestamp") # 通常为 Unix 时间戳字符串
 
-        logger.info(f"Received RAG request for session {session_id}, question: {question}")
-        log_rag_request_start(question, session_id)
+        # --- 处理时间戳 ---
+        request_timestamp = None
+        if timestamp_str:
+            try:
+                # 假设前端发送的是 Unix 时间戳（秒）
+                request_timestamp = float(timestamp_str)
+            except ValueError:
+                logger.warning(f"Invalid timestamp format in header X-Timestamp: {timestamp_str}")
+                # 可以选择忽略无效时间戳或使用当前时间
+                request_timestamp = time.time()
+        else:
+            # 如果没有提供时间戳，使用当前时间
+            request_timestamp = time.time()
+
+        # --- 从 ChatCompletionRequest 提取信息 ---
+        # 检查是否有消息
+        if not chat_request.messages:
+            logger.error("No messages provided in the request.")
+            raise HTTPException(status_code=400, detail="Messages are required.")
+
+        # 获取最后一个用户消息作为当前问题
+        # 注意：标准 OpenAI API 允许 roles 为 "system", "user", "assistant"
+        # 我们通常处理最后一个 "user" 消息
+        latest_user_message = None
+        for message in reversed(chat_request.messages):
+            if message["role"] == "user":
+                latest_user_message = message
+                break
+
+        if not latest_user_message:
+            logger.error("No 'user' message found in the request.")
+            raise HTTPException(status_code=400, detail="No user message found.")
+
+        question = latest_user_message["content"]
+        # model_name = chat_request.model # 可以用来验证请求的模型是否匹配
+
+        # --- 生成或使用请求ID ---
+        # OpenAI API 响应中通常包含一个 id 字段
+        # 如果请求中没有提供 (vLLM 的 ChatCompletionRequest 可能没有 id 字段，或者我们想用自己的),
+        # 我们可以生成一个
+        request_id = f"chatcmpl-{uuid.uuid4().hex}" # 例如: chatcmpl-a1b2c3d4e5f6
+
+        logger.info(f"[Session: {session_id}] [TS: {request_timestamp}] Received RAG request (ID: {request_id}) for model '{chat_request.model}', question: {question}")
+        # 使用 log_service 记录到文件 (如果需要区分来源，可以添加标记)
+        log_rag_request_start(question, session_id) # 假设 log_service 支持 session_id
 
         try:
             # --- Step 1: Entity/Intent Parsing (LLM) ---
+            # 这里复用您原有的 RAG 逻辑，将 `question` 传递进去
             # 构建解析Prompt，包含实体表、关系表、意图列表
             entities_str = json.dumps(entity_data, ensure_ascii=False, indent=2)
             relationships_str = json.dumps(relationship_data, ensure_ascii=False, indent=2)
@@ -277,31 +336,30 @@ async def create_app():
 {intents_str}
 
 你的任务是：
-1.  分析用户提出的问题。
-2.  从问题中识别出属于标准实体列表中的实体，或生成专业医学术语。
-3.  从标准关系列表中选择最匹配的关系。
-4.  从标准意图列表中选择最匹配的意图。（用户一句话可能有多个意图，如“我可能有点感冒怎么办？”，这里用户的意图是“查找症状”和“查找治疗方法”）
-5.  将识别出的实体、关系与意图进行逻辑分组。
-6.  识别整体意图和独立实体。
+1.  分析用户的问题，提取出关键的实体。对于每个识别出的实体，请在提供的标准实体列表中寻找最匹配的名称。如果列表中没有合适的名称，生成一个准确的专业医学术语。
+2.  从提供的标准关系列表中，选择最能描述问题中实体间联系的关系名称。
+3.  从提供的标准意图列表中，选择最能概括用户查询目的的意图名称。
+4.  将提取出的实体、关系与意图进行关联，形成一个或多个意图-实体-关系组。允许一个实体被多个意图组使用。
+5.  识别整体查询意图。
+6.  将未被明确分组到任何意图中的实体放入独立实体列表。
 
-请严格按照以下JSON格式输出，不要输出其他内容：
+请严格按照以下JSON格式输出，不输出其他内容：
 
 输出格式为:
 {{
   "entity_relationship_groups": [
     {{
       "entities": [{{"name": "标准实体名或生成的专业术语", "type": "疾病/症状/药物/部门/食物/检查/厂商" # 使用entity.json中的中文类型名}}, ...],
-      "relationships": ["标准关系名"], # 必须从关系表中选择，可以为空列表 []
-      "intent": "标准意图名" # 必须从意图列表中选择，不可为空
+      "relationships": ["标准关系名"], # 只能从关系表中选择，可以为空列表 []
+      "intent": "标准意图名" # 只能从意图列表中选择，不可为空
     }}
   ],
   "standalone_entities": [{{"name": "实体名", "type": "中文类型名"}}],
-  "overall_intent": "整体意图"
+  "overall_intent": "整体意图" # 只能从意图列表中选择，可以为空
 }}
 </|system|>
 <|user|>
 请分析以下用户问题：
-
 用户问题: {question}
 </|user|>
 <|assistant|>
@@ -309,8 +367,7 @@ async def create_app():
             parse_messages = [{"role": "user", "content": parse_prompt}]
 
             # 记录第一次调用的完整输入
-            # log_to_file(f"First LLM Call - Input Prompt:\n{parse_prompt}") # 移除旧的日志调用
-            logger.debug(f"First LLM Call - Input Prompt (truncated): {parse_prompt[:200]}...") # 控制台记录简略信息
+            logger.debug(f"First LLM Call - Input Prompt:\n{parse_prompt}")
 
             parse_response = await vllm_service.chat_completion(
                 parse_messages,
@@ -322,11 +379,12 @@ async def create_app():
 
             # 记录第一次调用的完整输出
             first_llm_output = parse_response.choices[0].message.content
-            log_first_llm_call(parse_prompt, first_llm_output) # 使用辅助函数记录到文件
+            logger.debug(f"First LLM Call - Output:\n{first_llm_output}")
 
             # 假设模型返回的是JSON格式的字符串
+            parse_text = parse_response.choices[0].message.content
             try:
-                parse_data = json.loads(first_llm_output)
+                parse_data = json.loads(parse_text)
                 parse_result = RAGParseResult(
                     entity_relationship_groups=parse_data.get("entity_relationship_groups", []),
                     standalone_entities=parse_data.get("standalone_entities", []),
@@ -334,77 +392,55 @@ async def create_app():
                 )
             except json.JSONDecodeError as e:
                 logger.error(f"Failed to parse LLM response as JSON: {e}")
-                # log_to_file(f"Error: Failed to parse first LLM output as JSON: {e}") # 移除旧的日志调用
+                logger.debug(f"Error: Failed to parse first LLM output as JSON: {e}")
                 raise HTTPException(status_code=500, detail="解析模型响应失败")
 
             logger.info(f"Parsed result: {parse_result.dict()}")
-            # log_to_file(f"Parsed Result:\n{json.dumps(parse_result.dict(), ensure_ascii=False, indent=2)}") # 移除旧的日志调用
+            logger.debug(f"Parsed Result:\n{json.dumps(parse_result.dict(), ensure_ascii=False, indent=2)}")
 
             # --- Step 2: Map Chinese Entity Types to English & Map Relationships & Query Neo4j (Service-side) ---
             # 遍历 entity_relationship_groups 并调用相应接口
             neo4j_results = []
             for i, group in enumerate(parse_result.entity_relationship_groups):
-                logger.info(f"Processing group {i}: {group.dict()}")
-                # log_to_file(f"Processing group {i} (before mapping): {group.dict()}") # 移除旧的日志调用
-                log_entity_relationship_group_processing(i, group.dict(), None, None) # 记录处理开始
-
                 # 将中文实体类型映射为英文类型
                 mapped_entities = []
                 for entity in group.entities:
                     english_type = entity_type_mapping.get(entity.type, entity.type) # 如果找不到映射，保留原名
-                    mapped_entity = Entity(name=entity.name, type=english_type)
-                    mapped_entities.append(mapped_entity)
-                # 更新group中的实体列表
-                group.entities = mapped_entities
-
-                # 将中文关系名映射为英文关系类型
-                english_relationships = [rel_mapping.get(rel, rel) for rel in group.relationships] # 如果找不到映射，保留原名
-
-                # 记录映射结果到日志文件
-                # logger.info(f"Group {i} - Mapped Entities: {[e.dict() for e in group.entities]}") # 控制台记录
-                # logger.info(f"Group {i} - Mapped Relationships: {english_relationships}") # 控制台记录
-                # log_to_file(f"Group {i} - Mapped Entities: {[e.dict() for e in group.entities]}") # 移除旧的日志调用
-                # log_to_file(f"Group {i} - Mapped Relationships: {english_relationships}") # 移除旧的日志调用
-                log_entity_relationship_group_processing(i, group.dict(), [e.dict() for e in group.entities], english_relationships) # 使用辅助函数记录到文件
+                    mapped_entities.append(Entity(name=entity.name, type=english_type))
+                group.entities = mapped_entities # 更新group中的实体列表
 
                 # 检查关系和意图是否为空
                 if not group.relationships:
                     logger.warning(f"Group {i} has no relationships: {group.dict()}")
-                    # log_to_file(f"Warning: Group {i} has no relationships.") # 移除旧的日志调用
+                    logger.debug(f"Warning: Group {i} has no relationships.")
                     # 可以选择跳过此组，或根据意图使用默认关系
                     # 这里选择跳过
                     continue
                 if not group.intent:
                     logger.warning(f"Group {i} has no intent: {group.dict()}")
-                    # log_to_file(f"Warning: Group {i} has no intent.") # 移除旧的日志调用
+                    logger.debug(f"Warning: Group {i} has no intent.")
                     # 可以选择跳过此组，或尝试推断意图
                     # 这里选择跳过
                     continue
+
+                # 将中文关系名映射为英文关系类型
+                english_relationships = [rel_mapping.get(rel, rel) for rel in group.relationships] # 如果找不到映射，保留原名
 
                 # 根据意图查找映射的接口
                 intent = group.intent
                 if intent not in intent_mapping_data:
                     logger.warning(f"未知意图: {intent}")
-                    # log_to_file(f"Warning: Unknown intent '{intent}' in group {i}.") # 移除旧的日志调用
+                    logger.debug(f"Warning: Unknown intent '{intent}' in group {i}.")
                     continue
 
                 interface_info = intent_mapping_data[intent]
                 interface_name = interface_info["neo4j_interface"]
-                required_params = interface_info.get("requires", []) # 获取接口需要的参数
-
-                # 检查接口所需的参数是否提供
-                missing_params = []
-                if "entities" in required_params and not group.entities:
-                    missing_params.append("entities")
-                if "relationships" in required_params and not english_relationships:
-                    missing_params.append("relationships")
-
-                if missing_params:
-                    logger.warning(f"接口 {interface_name} 需要参数 {missing_params}，但在组 {i} 中未提供。跳过。")
-                    # log_to_file(f"Warning: Interface '{interface_name}' requires {missing_params} but they are missing in group {i}. Skipping.") # 移除旧的日志调用
-                    continue
 
                 # 调用Neo4j服务 - 使用 if/elif 映射
+                # 注意：这里需要根据接口定义的参数来传递
+                # 通常需要 entities 和 relationships
+                # 某些接口可能还需要 direction 等其他参数
+                # 这里假设所有接口都接受 entities 和 relationships (映射后)
                 entities_for_query = [{"name": e.name, "type": e.type} for e in group.entities]
 
                 if interface_name == "find_connections_between_entities":
@@ -415,29 +451,19 @@ async def create_app():
                             relationships=english_relationships
                         )
                         neo4j_results.extend(result)
-                        logger.info(f"Neo4j query for intent '{intent}' (interface '{interface_name}') returned {len(result)} records.")
-                        # log_to_file(f"Neo4j Query - Intent: '{intent}', Interface: '{interface_name}', Entities: {entities_for_query}, Relationships: {english_relationships}, Results Count: {len(result)}") # 移除旧的日志调用
-                        log_neo4j_query(intent, interface_name, entities_for_query, english_relationships, len(result)) # 使用辅助函数记录到文件
                     else:
                         logger.warning(f"接口 {interface_name} 需要至少两个实体，但只有 {len(entities_for_query)} 个。")
-                        # log_to_file(f"Warning: Interface '{interface_name}' requires at least 2 entities, but only {len(entities_for_query)} provided in group {i}.") # 移除旧的日志调用
                 elif interface_name == "find_properties_of_entity":
                     result = neo4j_service.find_properties_of_entity(
                         entities=entities_for_query
                     )
                     neo4j_results.extend(result)
-                    logger.info(f"Neo4j query for intent '{intent}' (interface '{interface_name}') returned {len(result)} records.")
-                    # log_to_file(f"Neo4j Query - Intent: '{intent}', Interface: '{interface_name}', Entities: {entities_for_query}, Results Count: {len(result)}") # 移除旧的日志调用
-                    log_neo4j_query(intent, interface_name, entities_for_query, [], len(result)) # 使用辅助函数记录到文件
                 elif interface_name == "find_related_entities_by_relationship":
                     result = neo4j_service.find_related_entities_by_relationship(
                         entities=entities_for_query,
                         relationships=english_relationships
                     )
                     neo4j_results.extend(result)
-                    logger.info(f"Neo4j query for intent '{intent}' (interface '{interface_name}') returned {len(result)} records.")
-                    # log_to_file(f"Neo4j Query - Intent: '{intent}', Interface: '{interface_name}', Entities: {entities_for_query}, Relationships: {english_relationships}, Results Count: {len(result)}") # 移除旧的日志调用
-                    log_neo4j_query(intent, interface_name, entities_for_query, english_relationships, len(result)) # 使用辅助函数记录到文件
                 elif interface_name == "find_common_connections":
                     # 需要至少两个实体
                     if len(entities_for_query) >= 2:
@@ -446,12 +472,8 @@ async def create_app():
                              relationships=english_relationships
                          )
                          neo4j_results.extend(result)
-                         logger.info(f"Neo4j query for intent '{intent}' (interface '{interface_name}') returned {len(result)} records.")
-                         # log_to_file(f"Neo4j Query - Intent: '{intent}', Interface: '{interface_name}', Entities: {entities_for_query}, Relationships: {english_relationships}, Results Count: {len(result)}") # 移除旧的日志调用
-                         log_neo4j_query(intent, interface_name, entities_for_query, english_relationships, len(result)) # 使用辅助函数记录到文件
                     else:
                         logger.warning(f"接口 {interface_name} 需要至少两个实体，但只有 {len(entities_for_query)} 个。")
-                        # log_to_file(f"Warning: Interface '{interface_name}' requires at least 2 entities, but only {len(entities_for_query)} provided in group {i}.") # 移除旧的日志调用
                 elif interface_name == "query_entity_relationships":
                     # 这个接口只需要实体
                     for entity in entities_for_query:
@@ -459,19 +481,17 @@ async def create_app():
                              entities=[entity]
                          )
                          neo4j_results.extend(result)
-                         logger.info(f"Neo4j query for intent '{intent}' (interface '{interface_name}') on entity '{entity['name']}' returned {len(result)} records.")
-                         # log_to_file(f"Neo4j Query - Intent: '{intent}', Interface: '{interface_name}', Entity: {entity}, Results Count: {len(result)}") # 移除旧的日志调用
-                         log_neo4j_query(intent, interface_name, [entity], [], len(result)) # 使用辅助函数记录到文件
                 elif interface_name == "query_entity_connections":
                     for entity in entities_for_query:
                          result = neo4j_service.query_entity_connections(
                              entities=[entity]
                          )
                          neo4j_results.extend(result)
-                         logger.info(f"Neo4j query for intent '{intent}' (interface '{interface_name}') on entity '{entity['name']}' returned {len(result)} records.")
-                         # log_to_file(f"Neo4j Query - Intent: '{intent}', Interface: '{interface_name}', Entity: {entity}, Results Count: {len(result)}") # 移除旧的日志调用
-                         log_neo4j_query(intent, interface_name, [entity], [], len(result)) # 使用辅助函数记录到文件
                 # find_entities_by_property 被排除
+                # elif interface_name == "find_entities_by_property":
+                #     # 需要 property_name 和 property_value，无法从当前解析结果直接获得
+                #     logger.warning(f"接口 {interface_name} 需要特殊参数处理，暂时跳过。")
+                #     continue
                 elif interface_name == "query_relationship_properties":
                     # 需要至少两个实体来定位关系
                     if len(entities_for_query) >= 2:
@@ -480,100 +500,65 @@ async def create_app():
                             relationships=english_relationships
                         )
                         neo4j_results.extend(result)
-                        logger.info(f"Neo4j query for intent '{intent}' (interface '{interface_name}') returned {len(result)} records.")
-                        # log_to_file(f"Neo4j Query - Intent: '{intent}', Interface: '{interface_name}', Entities: {entities_for_query}, Relationships: {english_relationships}, Results Count: {len(result)}") # 移除旧的日志调用
-                        log_neo4j_query(intent, interface_name, entities_for_query, english_relationships, len(result)) # 使用辅助函数记录到文件
                     else:
                         logger.warning(f"接口 {interface_name} 需要至少两个实体，但只有 {len(entities_for_query)} 个。")
-                        # log_to_file(f"Warning: Interface '{interface_name}' requires at least 2 entities, but only {len(entities_for_query)} provided in group {i}.") # 移除旧的日志调用
                 else:
                     logger.error(f"Neo4j服务中未找到接口: {interface_name}")
-                    # log_to_file(f"Error: Interface '{interface_name}' not found in Neo4j service.") # 移除旧的日志调用
+                    logger.debug(f"Error: Interface '{interface_name}' not found in Neo4j service.")
+                    continue
+
+                logger.info(f"Neo4j query for intent '{intent}' (interface '{interface_name}') returned {len(result)} records.")
+                logger.debug(f"Neo4j Query - Intent: '{intent}', Interface: '{interface_name}', Entities: {entities_for_query}, Relationships: {english_relationships}, Results Count: {len(result)}")
 
             # 处理 standalone_entities (如果需要)
             standalone_results = []
             if parse_result.standalone_entities:
-                # 将standalone_entities的中文类型也映射为英文
-                mapped_standalone_entities = []
-                for entity in parse_result.standalone_entities:
-                    english_type = entity_type_mapping.get(entity.type, entity.type)
-                    mapped_standalone_entities.append(Entity(name=entity.name, type=english_type))
-                parse_result.standalone_entities = mapped_standalone_entities # 更新
-
                 standalone_entities_for_query = [{"name": e.name, "type": e.type} for e in parse_result.standalone_entities]
                 # 示例：查询 standalone_entities 的属性
                 for entity in standalone_entities_for_query:
                      rel_result = neo4j_service.find_properties_of_entity(entities=[entity])
                      standalone_results.extend(rel_result)
                 logger.info(f"Neo4j query for standalone_entities returned {len(standalone_results)} records.")
-                # log_to_file(f"Neo4j Query - Standalone Entities: {standalone_entities_for_query}, Results Count: {len(standalone_results)}") # 移除旧的日志调用
-                log_neo4j_query("standalone_properties", "find_properties_of_entity", standalone_entities_for_query, [], len(standalone_results)) # 使用辅助函数记录到文件
+                logger.debug(f"Neo4j Query - Standalone Entities: {standalone_entities_for_query}, Results Count: {len(standalone_results)}")
 
             # 合并所有Neo4j查询结果
             all_context_data = neo4j_results + standalone_results
-            # log_to_file(f"All Neo4j Results:\n{json.dumps(all_context_data, ensure_ascii=False, indent=2)}") # 移除旧的日志调用
-            logger.debug(f"All Neo4j Results count: {len(all_context_data)}") # 控制台记录简略信息
+            logger.debug(f"All Neo4j Results:\n{json.dumps(all_context_data, ensure_ascii=False, indent=2)}")
 
             # --- Step 3: Generate Final Answer (LLM, Streamed) ---
             # 构造生成Prompt，并管理长度
-            # --- 修改后的 Prompt 结构 ---
             context_str = json.dumps(all_context_data, ensure_ascii=False, indent=2)
-            
-            # 新的 Prompt 模板：将知识库信息放入 system prompt
-            initial_system_prompt_part = f"""<|system|>
+            initial_prompt_part = f"""<|system|>
 你是一个专业的医疗知识助手，基于提供的可能用上的知识库信息，能够详细地分析出用户的需求并回答用户的问题，态度认真亲切，十分关心用户健康，并且欢迎用户询问健康知识。
 知识库信息:
 {context_str}
 </|system|>
-"""
-            initial_user_prompt_part = f"""<|user|>
-请根据以上信息回答用户问题: {question}
+<|user|>
+根据以上信息回答用户问题: {question}
 </|user|>
 <|assistant|>
 """
-            
-            # 分别计算 system 和 user 部分的 token 数
-            initial_system_tokens = tokenizer.encode(initial_system_prompt_part, add_special_tokens=False)
-            initial_user_tokens = tokenizer.encode(initial_user_prompt_part, add_special_tokens=False)
-            initial_system_token_count = len(initial_system_tokens)
-            initial_user_token_count = len(initial_user_tokens)
-            initial_total_token_count = initial_system_token_count + initial_user_token_count
+            initial_tokens = tokenizer.encode(initial_prompt_part, add_special_tokens=False)
+            initial_token_count = len(initial_tokens)
 
-            # 检查总长度是否超过限制
-            if initial_total_token_count > Config.MAX_PROMPT_TOKENS:
-                logger.warning(f"Initial prompt tokens (System: {initial_system_token_count}, User: {initial_user_token_count}, Total: {initial_total_token_count}) exceed max allowed ({Config.MAX_PROMPT_TOKENS}). Truncating context.")
-                
-                # --- 修改后的截断逻辑 ---
-                # 我们需要保留完整的 initial_user_prompt_part 和 <|assistant|> 标记
-                # 因此，计算可用于 system prompt 中 context 部分的 token 数
-                
-                # 1. 计算固定的 system prompt 模板头和尾的 token 数
-                fixed_system_header = """<|system|>
+            # 检查是否超过限制
+            if initial_token_count > Config.MAX_PROMPT_TOKENS:
+                logger.warning(f"Initial prompt tokens ({initial_token_count}) exceed max allowed ({Config.MAX_PROMPT_TOKENS}). Truncating context.")
+                logger.debug(f"Warning: Initial prompt tokens ({initial_token_count}) exceed limit ({Config.MAX_PROMPT_TOKENS}). Truncating context.")
+                # 需要截断context部分
+                prompt_template_tokens = tokenizer.encode(f"""<|system|>
 你是一个专业的医疗知识助手，基于提供的可能用上的知识库信息，能够详细地分析出用户的需求并回答用户的问题，态度认真亲切，十分关心用户健康，并且欢迎用户询问健康知识。
 知识库信息:
-"""
-                fixed_system_footer = """
-</|system|>
-"""
-                header_tokens = tokenizer.encode(fixed_system_header, add_special_tokens=False)
-                footer_tokens = tokenizer.encode(fixed_system_footer, add_special_tokens=False)
-                
-                # 2. 计算 user prompt 和 assistant 标记的 token 数
-                user_and_assistant_tokens = tokenizer.encode(f"""<|user|>
-请根据以上信息回答用户问题: {question}
-</|user|>
-<|assistant|>
-""", add_special_tokens=False) # 这包含了 user prompt 和 <|assistant|>
-                
-                # 3. 计算可用于 context_str 的 token 数
-                available_context_tokens = Config.MAX_PROMPT_TOKENS - len(header_tokens) - len(footer_tokens) - len(user_and_assistant_tokens)
+""", add_special_tokens=False)
+                question_tokens = tokenizer.encode(f"</|system|>\n<|user|>\n根据以上信息回答用户问题: {question}\n</|user|>\n<|assistant|>\n", add_special_tokens=False)
+                available_context_tokens = Config.MAX_PROMPT_TOKENS - len(prompt_template_tokens) - len(question_tokens)
 
                 if available_context_tokens <= 0:
-                    logger.error("Available tokens for context is 0 or negative, cannot proceed after accounting for fixed parts.")
-                    raise HTTPException(status_code=500, detail="上下文过长，无法处理，即使截断也无法容纳固定提示词。")
+                    logger.error("Available tokens for context is 0 or negative, cannot proceed.")
+                    logger.debug(f"Error: Available tokens for context is 0 or negative.")
+                    raise HTTPException(status_code=500, detail="上下文过长，无法处理")
 
-                # 4. 简单截断 context_str (可以优化为按句子或段落截断)
-                # 这里使用 json 字符串进行截断，可能不够精确，更好的方式是先处理 all_context_data 列表
+                # 简单截断context (可以优化为按句子或段落截断)
                 context_lines = context_str.split('\n')
                 current_context_tokens = 0
                 final_context = []
@@ -583,134 +568,233 @@ async def create_app():
                         final_context.append(line)
                         current_context_tokens += len(line_tokens)
                     else:
-                        # 添加截断标记或直接停止 (这里选择停止)
+                        # 添加截断标记或直接停止
                         break
 
                 final_context_str = '\n'.join(final_context)
-                
-                # 5. 构造最终的截断后的 Prompt
-                final_system_prompt_part = f"""<|system|>
-你是一个专业的医疗知识助手，基于提供的可能用上的知识库信息，能够详细地分析出用户的需求并回答用户的问题，态度认真亲切，十分关心用户健康，并且欢迎用户询问健康知识。知识库作为你知识的补充，不能让用户知道知识库的存在。
+                final_prompt = f"""<|system|>
+你是一个专业的医疗知识助手，基于提供的可能用上的知识库信息，能够详细地分析出用户的需求并回答用户的问题，态度认真亲切，十分关心用户健康，并且欢迎用户询问健康知识。
 知识库信息:
 {final_context_str}
 </|system|>
-"""
-                final_user_prompt_part = f"""<|user|>
-请根据以上信息回答用户问题: {question}
+<|user|>
+根据以上信息回答用户问题: {question}
 </|user|>
 <|assistant|>
 """
-                final_prompt = final_system_prompt_part + final_user_prompt_part
-                
-                # 记录截断后的Prompt（用于日志）
-                logger.debug(f"Second LLM Call - Prompt truncated. System part length: ~{len(tokenizer.encode(final_system_prompt_part, add_special_tokens=False))}, User part length: ~{len(tokenizer.encode(final_user_prompt_part, add_special_tokens=False))}")
-                # 使用 log_service 记录到文件
-                log_second_llm_call(final_prompt, "[Awaiting Output...]") # 在流开始前记录输入
-
             else:
                 # 不需要截断
-                final_prompt = initial_system_prompt_part + initial_user_prompt_part
-                # 使用 log_service 记录到文件
-                log_second_llm_call(final_prompt, "[Awaiting Output...]") # 在流开始前记录输入
-                logger.debug(f"Second LLM Call - Prompt not truncated. Total length: ~{initial_total_token_count}")
+                final_prompt = initial_prompt_part
 
+            # --- 构造传递给 vLLM 的消息 ---
+            # 使用最终的 Prompt 替换原始的 messages
+            # 注意：这里我们用最终构造的 Prompt 作为唯一的 user 消息传递给 vLLM
+            # 如果需要保留原始对话历史用于上下文（非 RAG 检索到的信息），逻辑会更复杂
+            # 这里简化为只使用 RAG 检索到的信息和当前问题
             generate_messages = [{"role": "user", "content": final_prompt}]
 
-            # 获取流式生成器
+            logger.debug("第二次调用模型的输入："+json.dumps(generate_messages))
+
+            # --- 调用 vLLM 生成 ---
+            # 使用 chat_request 中的参数（如 temperature, max_tokens, stream）
             stream_generator = await vllm_service.chat_completion(
-                generate_messages,
-                stream=True,
-                temperature=Config.LLM_TEMPERATURE_GENERATE,
-                max_tokens=Config.LLM_MAX_TOKENS_GENERATE
+                generate_messages, # 使用我们构造的消息
+                stream=chat_request.stream, # 使用请求中的 stream 参数
+                temperature=chat_request.temperature if chat_request.temperature is not None else 0.1,
+                max_tokens=chat_request.max_tokens if chat_request.max_tokens is not None else Config.LLM_MAX_TOKENS_GENERATE
             )
 
-            # 定义一个异步生成器来处理流式输出
-            async def generate_stream():
-                second_llm_output = "" # 用于累积并最终记录第二次调用的完整输出
-                async for chunk in stream_generator: # chunk 可能是 str 或 ServerSentEvent 对象
-                    # 检查 chunk 的类型
-                    chunk_data_str = None # 初始化，用于存储待处理的 JSON 字符串
-                    if hasattr(chunk, 'data'):
-                        # 假设 chunk 是 ServerSentEvent 对象 (旧版 vLLM 可能)
-                        chunk_data_str = chunk.data
-                    elif isinstance(chunk, str):
-                        # 假设 chunk 是字符串 (SSE 格式, 新版 vLLM 默认)
-                        chunk_str = chunk
-                        # --- 修改点 1: 正确识别 SSE data 前缀 ---
-                        # SSE 消息通常以 "data: " 开头 (注意冒号后有空格)
-                        DATA_PREFIX = "data: "
-                        if chunk_str.startswith(DATA_PREFIX):
-                            # --- 修改点 2: 正确提取 JSON 数据 ---
-                            # 去掉 "data: " 前缀并去除首尾可能的空白字符
-                            chunk_data_str = chunk_str[len(DATA_PREFIX):].strip()
-                        else:
-                            # 如果不是以 "data: " 开头，可能是其他SSE字段（如 event:, id:, retry:）或格式错误
-                            # 这些是非数据块，记录为 DEBUG 级别更合适，避免刷屏 WARNING
-                            logger.debug(f"Ignoring non-data SSE field or malformed chunk: {chunk_str[:100]}...")
-                            # 跳过非数据块的处理
-                            continue
-                    else:
-                        logger.error(f"Unexpected chunk type received from vLLM stream: {type(chunk)}")
-                        # 对于未知类型，也选择跳过
-                        continue
+            # --- 构造 OpenAI 格式的响应 ---
+            if chat_request.stream:
+                # --- 流式响应 ---
+                logger.info(f"[Session: {session_id}] Starting to stream response for question (ID: {request_id}): {question}")
+                
+                # --- 修改点：定义一个新的内部函数来处理流式逻辑 ---
+                async def generate_openai_stream():
+                    """生成符合 OpenAI SSE 格式的流式响应"""
+                    created_time = int(time.time())
+                    choice_index = 0
+    
+                    try:
+                        # --- 修改点：健壮地处理来自 vLLM 的流式响应块 (chunk) ---
+                        async for chunk in stream_generator: # chunk 来自 await vllm_service.chat_completion(..., stream=True)
+                            
+                            # 1. 首先，明确检查 chunk 是否为字符串 (这是 vLLM 0.10.1+ 常见的流式输出格式)
+                            if isinstance(chunk, str):
+                                # 2. 检查字符串是否以 "data: " 开头 (标准 SSE 格式)
+                                if chunk.startswith("data: "):
+                                    # 3. 提取 JSON 数据部分 (移除 "data: " 前缀和末尾的 \n\n)
+                                    json_data_str = chunk[6:].strip() # chunk[6:] removes "data: "
+                        
+                                    # 4. 检查是否为 [DONE] 信号
+                                    if json_data_str == "[DONE]":
+                                        
+                                        logger.debug(f"[Session: {session_id}] [Req ID: {request_id}] Sending [DONE] signal.")
+                                        yield " [DONE]\n\n"
+                                        break # 退出循环
+                                    
+                                    # 5. 处理包含实际内容的 JSON 数据块
+                                    else:
+                                        try:
+                                            # 6. 解析 JSON 字符串
+                                            chunk_data = json.loads(json_data_str)
+                    
+                                            # 7. 提取 delta 内容和 finish_reason (与之前逻辑一致)
+                                            choices = chunk_data.get("choices", [])
+                                            if choices:
+                                                delta = choices[0].get("delta", {})
+                                                content = delta.get("content", "")
+                                                finish_reason = choices[0].get("finish_reason", None)
+                    
+                                                # 8. 构造并发送符合 OpenAI 格式的 SSE 响应块
+                                                if content or finish_reason: # 只有有内容或结束原因时才发送
+                                                    delta_message_dict = {
+                                                        "content": content,
+                                                        "role": "assistant"
+                                                    }
+                                                    choice_dict = {
+                                                        "index": 0, # 通常流式响应 index 为 0
+                                                        "delta": delta_message_dict,
+                                                        "finish_reason": finish_reason # 通常为 None 直到最后
+                                                    }
+                                                    # 使用请求中传入的 model 名称 或 vLLM 返回的
+                                                    stream_response_dict = {
+                                                        "id": chunk_data.get("id", request_id), # 优先使用 vLLM 的 ID，备选 request_id
+                                                        "object": "chat.completion.chunk",
+                                                        "created": chunk_data.get("created", created_time), # 优先使用 vLLM 的 created 时间
+                                                        "model": chunk_data.get("model", chat_request.model), # 优先使用 vLLM 的 model 名
+                                                        "choices": [choice_dict],
+                                                        # "usage": None # 流式响应通常不包含 usage
+                                                    }
+                    
+                                                    # 9. 通过 yield 发送格式化的 SSE 响应
+                                                    yield f" {json.dumps(stream_response_dict, separators=(',', ':'))}\n\n"
+                                                # else:
+                                                #     # 可选：处理空内容块（例如 keep-alive）
+                                                #     pass
+                    
+                                        except json.JSONDecodeError as e:
+                                            # 10. 如果 JSON 解析失败，记录警告并跳过该块
+                                            logger.warning(f"[Session: {session_id}] [Req ID: {request_id}] Failed to decode JSON chunk: {e}. Raw chunk: {chunk[:200]}...")
+                                            continue # 跳过有问题的块
+                                        
+                                else:
+                                    # 11. 如果字符串不以 "data: " 开头，可能是其他 SSE 字段 (如 event:, id:, retry:) 或格式错误
+                                    # 记录为 DEBUG 级别，因为这很常见且通常可以安全忽略
+                                    logger.debug(f"[Session: {session_id}] [Req ID: {request_id}] Ignoring non-data SSE line or malformed chunk: {chunk[:100]}...")
+                                    continue # 跳过非 data 行
+                                
+                            else:
+                                # 12. 如果 chunk 不是字符串 (理论上 stream_generator 应该只产生 str，但这作为兜底检查)
+                                logger.warning(f"[Session: {session_id}] [Req ID: {request_id}] Received unexpected chunk type (not str): {type(chunk)}. Value preview: {repr(chunk)[:100]}...")
+                                continue # 跳过未知类型
+                            
+                    except Exception as e: # 捕获生成器内部的任何未处理异常
+                        logger.error(f"[Session: {session_id}] [Req ID: {request_id}] Error inside stream generator: {e}", exc_info=True)
+                        # 可以选择在这里 yield 一个错误信息给客户端，但这比较复杂且非标准
+                        # 通常让异常传播出去，由 FastAPI 的错误处理机制处理
+                        # 注意：一旦开始发送流，再抛出 HTTPException 可能导致客户端收到不完整的响应
+                        raise # 重新抛出异常，让外层捕获
+                    
+                    finally:
+                        # --- 在这里记录流式响应结束的日志 ---
+                        # 这是确保即使在循环中 break 或发生异常也能执行的地方
+                        logger.debug(f"[Session: {session_id}] [Req ID: {request_id}] Streaming response ended.")
+                        log_second_llm_call("[Input was logged previously]", "[Streamed output - see client logs]")
+                        log_rag_request_end() # 记录请求结束 via log_service
+    
+                # --- 修改点：在 if block 末尾调用 generate_openai_stream 并返回 StreamingResponse ---
+                # 注意：这里调用函数名 `generate_openai_stream`，它返回一个异步生成器对象
+                # StreamingResponse 会消费这个生成器
+                return StreamingResponse(generate_openai_stream(), media_type="text/event-stream")
+                # --- 修改点结束 ---
 
-                    # --- 修改点 3: 确保只有在 chunk_data_str 被成功提取后才进行处理 ---
-                    # 如果 chunk_data_str 仍未被赋值，则跳过
-                    if not chunk_data_str:
-                         logger.warning("chunk_data_str is empty or None after processing. Skipping.")
-                         continue
+            else:
+                # --- 非流式响应 ---
+                # 注意：当前 RAG 流程设计为流式，非流式可能需要调整
+                # 这里假设 stream_generator 在非流式下返回完整响应（虽然通常不是）
+                # 更常见的是，vLLM 的非流式调用直接返回 ChatCompletionResponse
+                # 但我们为了复用现有逻辑，假设它返回一个包含完整内容的 "chunk"
+                logger.warning("Non-streaming mode requested for RAG endpoint, which is primarily designed for streaming. Attempting to adapt...")
+                full_response_text = ""
+                created_time = int(time.time())
+                finish_reason = "stop" # Assume normal stop
+                choice_index = 0
 
-                    # --- 修改点 4: 处理 "[DONE]" 和 JSON 数据 ---
-                    if chunk_data_str.strip() == "[DONE]":
-                        # [DONE] 标志，结束循环
-                        logger.debug("Received [DONE] signal from vLLM stream.")
-                        break
-                    else:
-                        try:
-                            # 尝试解析 chunk_data_str 为 JSON
-                            chunk_data = json.loads(chunk_data_str)
-                            # 提取 delta content
-                            choices = chunk_data.get("choices", [])
-                            if choices:
-                                delta = choices[0].get("delta", {})
-                                content = delta.get("content", "")
-                                if content: # 只发送有内容的部分
-                                    second_llm_output += content # 累积输出内容
-                                    logger.debug(f"Yielding content chunk: {content}")
-                                    yield content.encode("utf-8") # FastAPI StreamingResponse 需要 bytes
-                            # else:
-                            #     # 可能是 keep-alive 或其他没有 content 的块，可以忽略或记录为 debug
-                            #     logger.debug(f"Received SSE chunk with no 'content': {chunk_data}")
-                        except json.JSONDecodeError as e:
-                            # 如果不是JSON，可能是格式错误或其他问题，记录警告
-                            logger.warning(f"Failed to parse chunk data as JSON: {chunk_data_str[:100]}... Error: {e}")
-                            # 可以选择继续处理下一个块或中断
-                            continue # 选择继续
-                        except Exception as e:
-                            # 捕获其他可能的意外错误
-                            logger.error(f"Unexpected error while processing SSE chunk: {chunk_data_str[:100]}... Error: {e}", exc_info=True)
-                            continue # 选择继续
 
-                # 记录第二次调用的完整输出（在流结束时）
-                # 使用 log_service 记录到文件
-                # 注意：这里只记录输出，输入已在上面记录
-                log_second_llm_call("[Input was logged previously]", second_llm_output)
-                logger.info("Finished streaming response from second LLM call.")
+                # --- 修改点：正确收集非流式响应内容 ---
+                collected_content = []
+                async for chunk in stream_generator: # Iterate through the stream even if not streaming to client
+                     if hasattr(chunk, 'data') and chunk.data != "[DONE]":
+                         try:
+                             chunk_data_str = chunk.data
+                             chunk_data = json.loads(chunk_data_str)
+                             choices = chunk_data.get("choices", [])
+                             if choices:
+                                 delta = choices[0].get("delta", {})
+                                 content = delta.get("content", "")
+                                 if content:
+                                     collected_content.append(content)
+                                 # Check for finish reason in non-streaming context (less common here, but possible)
+                                 fr = choices[0].get("finish_reason")
+                                 if fr:
+                                     finish_reason = fr
+                         except (json.JSONDecodeError, KeyError, TypeError, AttributeError) as e:
+                             logger.error(f"[Session: {session_id}] [Req ID: {request_id}] Error processing non-stream chunk for collection: {e}")
+                             continue
+                     elif hasattr(chunk, 'data') and chunk.data == "[DONE]":
+                         # End of internal stream
+                         break
+                     else:
+                         logger.warning(f"[Session: {session_id}] [Req ID: {request_id}] Unexpected chunk in non-stream collection: {type(chunk)}")
 
-            logger.info(f"Starting to stream response for question: {question}")
-            return StreamingResponse(generate_stream(), media_type="text/plain")
+                full_response_text = "".join(collected_content)
+
+
+                # --- 修改点：使用 vLLM 协议中的 ChatCompletionResponse ---
+                # 构造标准的 ChatCompletionResponse
+                # message = ChatMessage(role="assistant", content=full_response_text) # Use dict instead
+                message_dict = {
+                     "role": "assistant",
+                     "content": full_response_text
+                     # "tool_calls": None, "function_call": None etc. if applicable
+                }
+                # choice = CompletionChoice(index=choice_index, message=message, finish_reason=finish_reason) # Use dict
+                choice_dict = {
+                    "index": choice_index,
+                    "message": message_dict,
+                    "finish_reason": finish_reason
+                }
+
+                # Note: Accurate token usage requires vLLM to provide it. vLLM's non-streaming API usually includes this.
+                # We attempt to extract it if present in the last chunk or assume it's handled internally by vLLM
+                # For now, we leave usage as None or attempt basic estimation (not recommended)
+                # A better approach is to let vLLM calculate it if it can and include it if present in stream chunks
+
+                # Create the response dictionary manually to match ChatCompletionResponse structure
+                response_dict = {
+                    "id": request_id, # Use our generated ID
+                    "object": "chat.completion",
+                    "created": created_time,
+                    "model": chat_request.model, # Use model from request
+                    "choices": [choice_dict],
+                    # "usage": usage_dict_or_none # Add if you can reliably get it
+                    "usage": None # Placeholder, vLLM might populate this differently or require specific config
+                }
+
+                logger.info(f"[Session: {session_id}] Generated non-streaming response (ID: {request_id}) for question: {question[:50]}...")
+                # Log full output via log_service
+                log_second_llm_call("[Input was logged previously]", full_response_text)
+                log_rag_request_end() # 记录请求结束 via log_service
+                # Return the constructed dictionary. FastAPI will serialize it based on the response_model (ChatCompletionResponse)
+                # Returning a dict is generally fine if it matches the Pydantic model structure
+                return response_dict # Let FastAPI handle serialization
 
         except Exception as e:
-            logger.error(f"Error in RAG process: {str(e)}", exc_info=True)
-            # 使用 log_service 记录错误到文件
-            # 注意：这里记录的是整个 RAG 过程的错误，可能与第二次调用的具体输入输出不同
-            # 如果需要更精确的错误日志，可以在更具体的 catch 块中记录
-            from log_service import log_error_to_file
-            log_error_to_file(f"RAG process error for question '{question}': {str(e)}", "RAG_Request")
+            logger.error(f"[Session: {session_id}] Error in RAG process (ID: {request_id}): {str(e)}", exc_info=True)
+            logger.debug(f"Error in RAG process (ID: {request_id}): {str(e)}")
+            log_rag_request_end() # 确保即使出错也记录结束
             raise HTTPException(status_code=500, detail=f"RAG处理过程出错: {str(e)}")
-        finally:
-            # 确保在请求结束时记录日志
-            log_rag_request_end() # 使用辅助函数记录到文件
 
     # --- 8. (可选) 原有的 OpenAI 兼容端点 ---
     openai_serving_completion = OpenAIServingCompletion(
