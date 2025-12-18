@@ -18,10 +18,13 @@ if __name__ == "__main__":
         # 直接传递导入的 app 实例
         uvicorn.run(
             app, # 直接传递 app 对象
-            host="0.0.0.0",
+            host=["0.0.0.0", "::"],
+            # host="::",
             port=8001,
             log_level="info",
-            timeout_keep_alive=60
+            timeout_keep_alive=60,
+            proxy_headers=True,
+            forwarded_allow_ips='*'
         )
 
 

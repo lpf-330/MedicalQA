@@ -114,8 +114,8 @@ def log_neo4j_query(intent: str, interface: str, entities: list, relationships: 
 def log_second_llm_call(input_prompt: str, output: str):
     """记录第二次LLM调用的输入和输出"""
     logger = get_logger("RAG_Request")
-    logger.debug(f"Second LLM Call - Input Prompt:\n{input_prompt}")
-    logger.debug(f"Second LLM Call - Output:\n{output}")
+    logger.info(f"Second LLM Call - Input Prompt:\n{input_prompt}")
+    logger.info(f"Second LLM Call - Output:\n{output}")
 
 def log_entity_relationship_group_processing(index: int, original_group: dict, mapped_entities: list, mapped_relationships: list):
     """记录实体关系组的处理和映射过程"""

@@ -7,7 +7,7 @@
 硬件条件：2080ti 22g显存+32g内存
 
 主要技术栈：
-1、springboot：Spring Web + HTTP Client (WebClient) +Redis+LangChain4j
+1、springboot：Spring Web + HTTP Client (WebClient) +Redis
 2、python：Qwen3-4B-Instruct-2507+neo4j+vLLM+Transformers+FastAPI
 
 服务部署与通信：
