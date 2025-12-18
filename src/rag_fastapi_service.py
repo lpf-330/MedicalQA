@@ -66,8 +66,8 @@ class Config:
         kv_cache_dtype="auto",
         enable_prefix_caching=False,
         gpu_memory_utilization=0.4,
-        max_model_len=4096, # 这是关键限制
-        max_num_batched_tokens=4096,
+        max_model_len=6144, # 这是关键限制
+        max_num_batched_tokens=6144,
         max_num_seqs=16,
         enforce_eager=False,
         tensor_parallel_size=1,
@@ -357,7 +357,7 @@ async def parse_user_query_with_context(messages: List[Dict[str, str]]) -> Dict[
 6.识别整体意图：概括整个对话历史的主要查询意图。
 7.识别独立实体：将未被明确分组到任何意图中的实体放入独立实体列表。
 
-请严格按照以下JSON格式输出，不要输出其他内容：
+请严格按照以下JSON格式输出，不要输出其他内容（包括注释）：
 
 输出格式为:
 {{
@@ -419,7 +419,8 @@ async def parse_user_query_with_context(messages: List[Dict[str, str]]) -> Dict[
     except json.JSONDecodeError as e:
         logger.error(f"Failed to parse LLM response as JSON: {e}")
         log_error_to_file(f"解析模型响应失败: {e}", "RAG_Request")
-        raise HTTPException(status_code=500, detail="解析模型响应失败")
+        return ""
+        # raise HTTPException(status_code=500, detail="解析模型响应失败")
     except Exception as e:
         logger.error(f"Error during parsing LLM call: {e}")
         log_error_to_file(f"第一次LLM调用错误: {e}", "RAG_Request")
@@ -749,6 +750,7 @@ async def generate_final_response(
                             
                             # 1. 首先，明确检查 chunk 是否为字符串 (这是 vLLM 0.10.1+ 常见的流式输出格式)
                             if isinstance(chunk, str):
+                                logger.debug(chunk)
                                 # 2. 检查字符串是否以 "data: " 开头 (标准 SSE 格式)
                                 if chunk.startswith("data: "):
                                     # 3. 提取 JSON 数据部分 (移除 "data: " 前缀和末尾的 \n\n)
@@ -942,7 +944,36 @@ async def generate_final_response(
 
 
 # --- 7. 自定义 RAG 端点 (核心) ---
-@app.post("/v1/medical_rag_stream", response_model=None) # response_model=None 允许动态返回
+@app.post("/v1/medical_rag_stream", 
+        response_model=None,
+        openapi_extra={
+        "requestBody": {
+            "content": {
+                "application/json": {
+                    
+                    # 补充多组测试示例（可选，方便文档调试）
+                    "examples": {
+                        "流式请求（带历史）": {
+                            "summary": "测试中带对话历史的流式请求",
+                            "value": {
+                                "model": "Qwen3-4B-Instruct-2507",
+                                "messages": [
+                                    {"role": "user", "content": "帮我查一下高血压的相关信息。"},
+                                    {"role": "assistant", "content": "好的，我可以帮您查询高血压的定义、症状、治疗方法等信息。请问您具体想了解哪方面？"},
+                                    {"role": "user", "content": "我想知道它有哪些具体表现。"}
+                                ],
+                                "stream": True,
+                                "temperature": 0.1,
+                                "max_tokens": 1024
+                            }
+                        }
+                    }
+                }
+            },
+            "required": True  # 明确请求体为必填
+        }
+    }
+        ) # response_model=None 允许动态返回
 async def medical_rag_stream(request: Request, chat_request: ChatCompletionRequest):
     """
     严格的 OpenAI API 兼容 RAG 流式/非流式聊天补全端点。
@@ -988,7 +1019,9 @@ async def medical_rag_stream(request: Request, chat_request: ChatCompletionReque
         parse_result = await parse_user_query_with_context(messages_dicts)
 
         # --- Step 2: Map Chinese Entity Types to English & Map Relationships & Query Neo4j (Service-side) ---
-        neo4j_context_data = await query_knowledge_graph(parse_result)
+        neo4j_context_data=""
+        if(parse_result):
+            neo4j_context_data = await query_knowledge_graph(parse_result)
 
         # --- Step 3: Generate Final Answer (LLM, Streamed or Non-Streamed) ---
         response = await generate_final_response(
@@ -1003,7 +1036,11 @@ async def medical_rag_stream(request: Request, chat_request: ChatCompletionReque
 
         if chat_request.stream:
             logger.info(f"[Session: {session_id}] Starting to stream response (ID: {request_id}) for question: {latest_user_message_content[:50]}...")
-            return StreamingResponse(response(), media_type="text/event-stream")
+            logger.debug("-----------------------------------------------------")
+            sr=StreamingResponse(response(), media_type="text/event-stream")
+            logger.debug(sr.charset)
+            logger.debug("-----------------------------------------------------")
+            return sr
         else:
             logger.info(f"[Session: {session_id}] Generated non-streaming response (ID: {request_id}) for question: {latest_user_message_content[:50]}...")
             # vLLM 返回的已经是 ChatCompletionResponse，直接返回即可
