@@ -10,7 +10,7 @@
             "常用药品": "common_drug"
         },
         {
-            "治疗方法": "name"
+            "治疗方法": "cure_way"
         },
         {
             "宜吃": "do_eat"

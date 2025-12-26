@@ -11,7 +11,7 @@ from typing import AsyncGenerator, Dict, Any, List, Optional, Tuple
 from contextlib import asynccontextmanager
 
 import uvicorn
-from fastapi import FastAPI, HTTPException, Request, BackgroundTasks
+from fastapi import FastAPI, HTTPException, Request, BackgroundTasks,Body
 from fastapi.responses import StreamingResponse, JSONResponse
 import pydantic
 from pydantic import BaseModel, Field
@@ -347,7 +347,7 @@ async def parse_user_query_with_context(messages: List[Dict[str, str]]) -> Dict[
     # history_context_str = "\n".join([f"{msg['role']}: {msg['content']}" for msg in truncated_messages])
 
     # 使用标准的 messages 格式构建解析请求
-    parse_system_prompt = f"""你是一个专业的医疗助手。你的任务是分析用户提供的一段对话历史，并执行以下步骤：
+    parse_system_prompt = f"""你是一个专业的医疗助手。你的任务是分析用户提供的信息，并执行以下步骤：
 
 1.理解上下文：仔细阅读对话历史，理解用户当前问题的背景和之前的交流内容。
 2.提取实体：识别用户当前问题（对话历史的最后一部分）中属于以下类型的实体（如疾病、症状、药物等）。对于每个识别出的实体，请在提供的标准实体列表中寻找最匹配的名称。如果列表中没有完全匹配的名称，请生成一个准确的专业医学术语。
@@ -425,6 +425,112 @@ async def parse_user_query_with_context(messages: List[Dict[str, str]]) -> Dict[
         logger.error(f"Error during parsing LLM call: {e}")
         log_error_to_file(f"第一次LLM调用错误: {e}", "RAG_Request")
         raise HTTPException(status_code=500, detail="第一次LLM调用失败")
+
+
+
+
+
+async def parse_user_health_message(messages: List[Dict[str, str]]) -> Dict[str, Any]:
+    """
+    解析用户健康信息，为后续查阅知识库提供分析基础。
+    """
+    logger = get_logger(__name__)
+    
+    # --- Step 1: 构建解析Prompt (使用标准 messages 数组) ---
+    # 构建解析Prompt，包含实体表、关系表、意图列表
+    entities_str = json.dumps(entity_data, ensure_ascii=False, indent=2)
+    relationships_str = json.dumps(relationship_data, ensure_ascii=False, indent=2)
+    intents_str = json.dumps(list(intent_mapping_data.keys()), ensure_ascii=False, indent=2) # 提取意图名称列表
+
+    # 截断 messages 以适应解析模型的 token 限制
+    # 为解析留出一些空间
+    parse_max_tokens = Config.MAX_PROMPT_TOKENS - 1024 # 预留1024 tokens给Prompt模板和输出
+    truncated_messages = truncate_messages_for_parse(messages, tokenizer, parse_max_tokens)
+    
+    # 将截断后的对话历史序列化为字符串，作为解析的一部分上下文
+    # history_context_str = "\n".join([f"{msg['role']}: {msg['content']}" for msg in truncated_messages])
+
+    # 使用标准的 messages 格式构建解析请求
+    parse_system_prompt = f"""你是一名专业的健康评估专家。你的任务是分析用户提供的健康档案，并执行以下步骤：
+
+1.提取实体：识别用户健康档案中涉及以下哪些类型的实体（如疾病、症状、药物等）。对于每个识别出的实体，请在提供的标准实体列表中寻找最匹配的名称。如果列表中没有完全匹配的名称，请生成一个准确的专业医学术语。
+2.提取关系：从提供的标准关系列表中，选择健康档案中实体可能会涉及的关系名称。
+3.提取意图：从提供的标准意图列表中，选择健康档案内容中可能会涉及的意图名称。
+4.分组：将提取出的实体、关系与意图进行关联，形成一个或多个意图-实体-关系组。允许一个实体被多个意图组使用。如果某个意图不需要特定关系（例如，仅查询实体属性），则其关系列表可为空。
+5.识别整体意图：概括整个健康档案中可能需要查询的主要意图。
+6.识别独立实体：将未被明确分组到任何意图中的实体放入独立实体列表。
+
+请严格按照以下JSON格式输出，不要输出其他内容（包括注释）：
+
+输出格式为:
+{{
+  "entity_relationship_groups": [
+    {{
+      "entities": [{{"name": "标准实体名或生成的专业术语", "type": "疾病/症状/药物/部门/食物/检查/厂商" # 使用entity.json中的中文类型名}}, ...],
+      "relationships": ["标准关系名"], # 只能从关系表中选择，可以为空列表 []
+      "intent": "标准意图名" # 只能从意图列表中选择，不可为空
+    }}
+  ],
+  "standalone_entities": [{{"name": "实体名", "type": "中文类型名"}}],
+  "overall_intent": "整体意图"
+}}
+---
+标准实体列表:
+{entities_str}
+
+标准关系列表:
+{relationships_str}
+
+标准意图列表:
+{intents_str}
+"""
+
+    # 构造传递给解析模型的 messages
+    parse_messages = [
+        {"role": "system", "content": parse_system_prompt},
+        # 可以添加一个空的 user 消息来触发模型生成，或者直接在 system prompt 中包含所有信息
+        # {"role": "user", "content": ""} 
+    ]+truncated_messages
+
+    # --- Step 2: 调用LLM进行解析 ---
+    # 记录第一次调用的完整输入
+    log_first_llm_call(json.dumps(parse_messages,ensure_ascii=False,indent=2), "[第一次调用的完整massage输入...]") # 记录到文件
+
+    try:
+        # 注意：这里我们直接调用 vLLM 的底层服务方法
+        # 需要构造一个 ChatCompletionRequest 对象
+        parse_request = ChatCompletionRequest(
+            model=Config.SERVED_MODEL_NAME,
+            messages=parse_messages,
+            stream=False,
+            temperature=Config.LLM_TEMPERATURE_PARSE,
+            max_tokens=Config.LLM_MAX_TOKENS_PARSE
+        )
+        
+        # 调用 vLLM 服务
+        parse_response = await vllm_service.create_chat_completion(parse_request)
+        logger.debug(f"Parse response: {parse_response}")
+
+        # 记录第一次调用的完整输出
+        first_llm_output = parse_response.choices[0].message.content
+        log_first_llm_call(parse_system_prompt, first_llm_output) # 记录到文件
+
+        # 假设模型返回的是JSON格式的字符串
+        parse_data = json.loads(first_llm_output)
+        return parse_data
+
+    except json.JSONDecodeError as e:
+        logger.error(f"Failed to parse LLM response as JSON: {e}")
+        log_error_to_file(f"解析模型响应失败: {e}", "RAG_Request")
+        return ""
+        # raise HTTPException(status_code=500, detail="解析模型响应失败")
+    except Exception as e:
+        logger.error(f"Error during parsing LLM call: {e}")
+        log_error_to_file(f"第一次LLM调用错误: {e}", "RAG_Request")
+        raise HTTPException(status_code=500, detail="第一次LLM调用失败")
+
+
+
 
 
 async def query_knowledge_graph(parse_result: Dict[str, Any]) -> List[Dict[str, Any]]:
@@ -943,6 +1049,333 @@ async def generate_final_response(
         raise HTTPException(status_code=500, detail=f"RAG处理过程出错: {str(e)}")
 
 
+
+
+
+
+
+
+
+async def generate_health_report(
+    messages: List[Dict[str, str]], # 完整的原始对话历史
+    neo4j_context: List[Dict[str, Any]], # 从Neo4j检索到的上下文信息
+    request_id: str,
+    model_name: str,
+    stream: bool,
+    temperature: float,
+    max_tokens: int,
+) -> Any:
+    """
+    流式生成健康报告
+    """
+    logger = get_logger(__name__)
+    
+    # --- Step 1: 准备上下文信息 ---
+    context_str = json.dumps(neo4j_context, ensure_ascii=False, indent=2) if neo4j_context else "无相关信息。"
+
+    # --- Step 2: 构造符合 OpenAI 标准的 messages 数组 ---
+    # 策略：
+    # 1. 复制原始对话历史 (user/assistant messages)。
+    # 2. 在历史末尾插入一条 system message，包含数据库上下文。
+    # 3. (可选) 如果需要，可以在最后添加一条 user message 来明确指令。
+    #    但通常最后一条 user message 已经是当前问题了。
+
+    final_messages = [{
+            "role": "system", 
+            "content": f"你是一名专业的健康评估专家。这些是补充的相关知识:\n{context_str}"
+        }]
+    
+    final_messages.extend(messages)
+
+    final_messages.append({"role":"user","content":"根据所给的健康档案内容编写详细、专业的健康评估报告。"})
+
+    # --- Step 3: 处理 token 截断 ---
+    # 计算最终消息的总 token 数
+    # 注意：需要计算整个 final_messages 列表的 token 总和
+    total_tokens = 0
+    for msg in final_messages:
+        # 使用 tokenizer 计算每个消息内容的 token 数
+        tokens = tokenizer.encode(msg["content"], add_special_tokens=False)
+        total_tokens += len(tokens)
+    
+    if total_tokens > Config.MAX_PROMPT_TOKENS:
+        logger.warning(f"Final prompt tokens ({total_tokens}) exceed max allowed ({Config.MAX_PROMPT_TOKENS}). Truncating context.")
+        logger.debug(f"Warning: Final prompt tokens ({total_tokens}) exceed limit ({Config.MAX_PROMPT_TOKENS}). Truncating context.") # 记录到文件
+        
+        # 策略：优先保留 system 消息的开头和结尾，以及 user/assistant 消息
+        # 最简单的策略是截断 system message 的内容
+        # 找到 system message
+        system_msg_indices = [i for i, msg in enumerate(final_messages) if msg["role"] == "system"]
+        if system_msg_indices:
+            # 假设只有一个 system message 用于上下文
+            system_msg_index = system_msg_indices[0]
+            original_system_content = final_messages[system_msg_index]["content"]
+            
+            # 计算除 system message 外其他消息的 token 数
+            other_messages_tokens = total_tokens - len(tokenizer.encode(original_system_content, add_special_tokens=False))
+            
+            # 计算可用于 system message 的 token 数
+            available_system_tokens = Config.MAX_PROMPT_TOKENS - other_messages_tokens - Config.SAFETY_MARGIN # 预留安全边际
+            
+            if available_system_tokens > 0:
+                # 简单截断 system message 内容
+                # 可以优化为按句子或段落截断
+                system_lines = original_system_content.split('\n')
+                current_system_tokens = 0
+                truncated_system_lines = []
+                for line in system_lines:
+                    line_tokens = tokenizer.encode(line, add_special_tokens=False)
+                    if current_system_tokens + len(line_tokens) <= available_system_tokens:
+                        truncated_system_lines.append(line)
+                        current_system_tokens += len(line_tokens)
+                    else:
+                        # 添加截断标记
+                        truncated_system_lines.append("...[上下文已截断]")
+                        break
+                
+                truncated_system_content = '\n'.join(truncated_system_lines)
+                final_messages[system_msg_index]["content"] = truncated_system_content
+                logger.info(f"System message truncated to {current_system_tokens} tokens.")
+                logger.debug(f"System message truncated to {current_system_tokens} tokens.") # 记录到文件
+            else:
+                # 可用 token 非常少，移除 system message
+                logger.warning("Available tokens for system message is 0 or negative, removing system message.")
+                logger.debug("Warning: Available tokens for system message is 0 or negative, removing system message.") # 记录到文件
+                del final_messages[system_msg_index]
+        else:
+            logger.warning("No system message found for truncation.")
+            logger.debug("Warning: No system message found for truncation.") # 记录到文件
+
+    # --- Step 4: 调用LLM生成 ---
+    generate_messages = final_messages
+    log_second_llm_call(f"Final Messages with Context:\n{json.dumps(generate_messages, ensure_ascii=False, indent=2)}", "[Awaiting Output...]") # 记录到文件
+
+    try:
+        # 构造 ChatCompletionRequest
+        generate_request = ChatCompletionRequest(
+            model=model_name,
+            messages=generate_messages, # 使用构造好的 final_messages
+            stream=stream,
+            temperature=temperature,
+            max_tokens=max_tokens
+            # 可以添加其他参数，如 top_p, frequency_penalty 等
+        )
+
+        if stream:
+            # --- 流式响应 ---
+            logger.info("[开始处理流式输出]")
+            stream_generator = await vllm_service.create_chat_completion(generate_request)
+            
+            async def generate_openai_stream():
+                    """生成符合 OpenAI SSE 格式的流式响应"""
+                    created_time = int(time.time())
+                    choice_index = 0
+    
+                    try:
+                        # --- 修改点：健壮地处理来自 vLLM 的流式响应块 (chunk) ---
+                        async for chunk in stream_generator: # chunk 来自 await vllm_service.chat_completion(..., stream=True)
+                            
+                            # 1. 首先，明确检查 chunk 是否为字符串 (这是 vLLM 0.10.1+ 常见的流式输出格式)
+                            if isinstance(chunk, str):
+                                logger.debug(chunk)
+                                # 2. 检查字符串是否以 "data: " 开头 (标准 SSE 格式)
+                                if chunk.startswith("data: "):
+                                    # 3. 提取 JSON 数据部分 (移除 "data: " 前缀和末尾的 \n\n)
+                                    json_data_str = chunk[6:].strip() # chunk[6:] removes "data: "
+                        
+                                    # 4. 检查是否为 [DONE] 信号
+                                    if json_data_str == "[DONE]":
+                                        
+                                        logger.debug(f"[Req ID: {request_id}] Sending [DONE] signal.")
+                                        yield " [DONE]\n\n"
+                                        break # 退出循环
+                                    
+                                    # 5. 处理包含实际内容的 JSON 数据块
+                                    else:
+                                        try:
+                                            # 6. 解析 JSON 字符串
+                                            chunk_data = json.loads(json_data_str)
+                    
+                                            # 7. 提取 delta 内容和 finish_reason (与之前逻辑一致)
+                                            choices = chunk_data.get("choices", [])
+                                            if choices:
+                                                delta = choices[0].get("delta", {})
+                                                content = delta.get("content", "")
+                                                finish_reason = choices[0].get("finish_reason", None)
+                    
+                                                # 8. 构造并发送符合 OpenAI 格式的 SSE 响应块
+                                                if content or finish_reason: # 只有有内容或结束原因时才发送
+                                                    delta_message_dict = {
+                                                        "content": content,
+                                                        "role": "assistant"
+                                                    }
+                                                    choice_dict = {
+                                                        "index": 0, # 通常流式响应 index 为 0
+                                                        "delta": delta_message_dict,
+                                                        "finish_reason": finish_reason # 通常为 None 直到最后
+                                                    }
+                                                    # 使用请求中传入的 model 名称 或 vLLM 返回的
+                                                    stream_response_dict = {
+                                                        "id": chunk_data.get("id", request_id), # 优先使用 vLLM 的 ID，备选 request_id
+                                                        "object": "chat.completion.chunk",
+                                                        "created": chunk_data.get("created", created_time), # 优先使用 vLLM 的 created 时间
+                                                        "model": chunk_data.get("model", model_name), # 优先使用 vLLM 的 model 名
+                                                        "choices": [choice_dict],
+                                                        # "usage": None # 流式响应通常不包含 usage
+                                                    }
+                    
+                                                    # 9. 通过 yield 发送格式化的 SSE 响应
+                                                    yield f" {json.dumps(stream_response_dict, separators=(',', ':'))}\n\n"
+                                                # else:
+                                                #     # 可选：处理空内容块（例如 keep-alive）
+                                                #     pass
+                    
+                                        except json.JSONDecodeError as e:
+                                            # 10. 如果 JSON 解析失败，记录警告并跳过该块
+                                            logger.warning(f"[Req ID: {request_id}] Failed to decode JSON chunk: {e}. Raw chunk: {chunk[:200]}...")
+                                            continue # 跳过有问题的块
+                                        
+                                else:
+                                    # 11. 如果字符串不以 "data: " 开头，可能是其他 SSE 字段 (如 event:, id:, retry:) 或格式错误
+                                    # 记录为 DEBUG 级别，因为这很常见且通常可以安全忽略
+                                    logger.debug(f"[Req ID: {request_id}] Ignoring non-data SSE line or malformed chunk: {chunk[:100]}...")
+                                    continue # 跳过非 data 行
+                                
+                            else:
+                                # 12. 如果 chunk 不是字符串 (理论上 stream_generator 应该只产生 str，但这作为兜底检查)
+                                logger.warning(f"[Req ID: {request_id}] Received unexpected chunk type (not str): {type(chunk)}. Value preview: {repr(chunk)[:100]}...")
+                                continue # 跳过未知类型
+                            
+                    except Exception as e: # 捕获生成器内部的任何未处理异常
+                        logger.error(f"[Req ID: {request_id}] Error inside stream generator: {e}", exc_info=True)
+                        # 可以选择在这里 yield 一个错误信息给客户端，但这比较复杂且非标准
+                        # 通常让异常传播出去，由 FastAPI 的错误处理机制处理
+                        # 注意：一旦开始发送流，再抛出 HTTPException 可能导致客户端收到不完整的响应
+                        raise # 重新抛出异常，让外层捕获
+                    
+                    finally:
+                        # --- 在这里记录流式响应结束的日志 ---
+                        # 这是确保即使在循环中 break 或发生异常也能执行的地方
+                        logger.debug(f"[Req ID: {request_id}] Streaming response ended.")
+                        log_second_llm_call("[Input was logged previously]", "[Streamed output - see client logs]")
+                        log_rag_request_end() # 记录请求结束 via log_service
+            
+
+            # return StreamingResponse(generate_openai_stream(), media_type="text/event-stream")
+            return generate_openai_stream
+
+        else:
+            # # --- 非流式响应 ---
+            # non_stream_response = await vllm_service.create_chat_completion(generate_request) # 假设 vllm_service.chat_completion 支持非流式
+            
+            # # 记录第二次调用的完整输出
+            # full_response_text = non_stream_response.choices[0].message.content
+            # log_second_llm_call(f"Final Messages with Context:\n{json.dumps(generate_messages, ensure_ascii=False, indent=2)}", full_response_text) # 记录到文件
+            # log_rag_request_end() # 记录请求结束
+
+            # # 返回标准的 ChatCompletionResponse
+            # # 注意：vLLM 的非流式响应通常是 ChatCompletionResponse 格式，可以直接返回
+            # # 但为了确保 ID 和 model 等字段是我们期望的，可以稍微调整
+            # response_dict = non_stream_response.model_dump()
+            # response_dict["id"] = request_id
+            # # response_dict["model"] = model_name # vLLM 通常会正确设置
+            # # response_dict["created"] = int(datetime.now().timestamp()) # 可以更新时间戳
+            
+            # return JSONResponse(content=response_dict)
+
+
+            # --- 非流式响应 ---
+            # 注意：当前 RAG 流程设计为流式，非流式可能需要调整
+            # 这里假设 stream_generator 在非流式下返回完整响应（虽然通常不是）
+            # 更常见的是，vLLM 的非流式调用直接返回 ChatCompletionResponse
+            # 但我们为了复用现有逻辑，假设它返回一个包含完整内容的 "chunk"
+            logger.warning("Non-streaming mode requested for RAG endpoint, which is primarily designed for streaming. Attempting to adapt...")
+            full_response_text = ""
+            created_time = int(time.time())
+            finish_reason = "stop" # Assume normal stop
+            choice_index = 0
+            
+            # --- 修改点：正确收集非流式响应内容 ---
+            collected_content = []
+            async for chunk in stream_generator: # Iterate through the stream even if not streaming to client
+                 if hasattr(chunk, 'data') and chunk.data != "[DONE]":
+                     try:
+                         chunk_data_str = chunk.data
+                         chunk_data = json.loads(chunk_data_str)
+                         choices = chunk_data.get("choices", [])
+                         if choices:
+                             delta = choices[0].get("delta", {})
+                             content = delta.get("content", "")
+                             if content:
+                                 collected_content.append(content)
+                             # Check for finish reason in non-streaming context (less common here, but possible)
+                             fr = choices[0].get("finish_reason")
+                             if fr:
+                                 finish_reason = fr
+                     except (json.JSONDecodeError, KeyError, TypeError, AttributeError) as e:
+                         logger.error(f"[Req ID: {request_id}] Error processing non-stream chunk for collection: {e}")
+                         continue
+                 elif hasattr(chunk, 'data') and chunk.data == "[DONE]":
+                     # End of internal stream
+                     break
+                 else:
+                     logger.warning(f"[Req ID: {request_id}] Unexpected chunk in non-stream collection: {type(chunk)}")
+            full_response_text = "".join(collected_content)
+            
+            # --- 修改点：使用 vLLM 协议中的 ChatCompletionResponse ---
+            # 构造标准的 ChatCompletionResponse
+            # message = ChatMessage(role="assistant", content=full_response_text) # Use dict instead
+            message_dict = {
+                 "role": "assistant",
+                 "content": full_response_text
+                 # "tool_calls": None, "function_call": None etc. if applicable
+            }
+            
+            # choice = CompletionChoice(index=choice_index, message=message, finish_reason=finish_reason) # Use dict
+            choice_dict = {
+                "index": choice_index,
+                "message": message_dict,
+                "finish_reason": finish_reason
+            }
+            
+            # Note: Accurate token usage requires vLLM to provide it. vLLM's non-streaming API usually includes this.
+            # We attempt to extract it if present in the last chunk or assume it's handled internally by vLLM
+            # For now, we leave usage as None or attempt basic estimation (not recommended)
+            # A better approach is to let vLLM calculate it if it can and include it if present in stream chunks
+            # Create the response dictionary manually to match ChatCompletionResponse structure
+            response_dict = {
+                "id": request_id, # Use our generated ID
+                "object": "chat.completion",
+                "created": created_time,
+                "model": model_name, # Use model from request
+                "choices": [choice_dict],
+                # "usage": usage_dict_or_none # Add if you can reliably get it
+                "usage": None # Placeholder, vLLM might populate this differently or require specific config
+            }
+            
+            logger.info(f"Generated non-streaming response (ID: {request_id})")
+            
+            # Log full output via log_service
+            log_second_llm_call("[Input was logged previously]", full_response_text)
+            log_rag_request_end() # 记录请求结束 via log_service
+            
+            # Return the constructed dictionary. FastAPI will serialize it based on the response_model (ChatCompletionResponse)
+            # Returning a dict is generally fine if it matches the Pydantic model structure
+            return response_dict # Let FastAPI handle serialization
+
+    except Exception as e:
+        logger.error(f"Error in RAG process: {str(e)}", exc_info=True)
+        log_error_to_file(f"RAG process error: {str(e)}", "RAG_Request") # 记录到文件
+        log_rag_request_end() # 确保即使出错也记录结束
+        raise HTTPException(status_code=500, detail=f"RAG处理过程出错: {str(e)}")
+
+
+
+
+
+
+
+
 # --- 7. 自定义 RAG 端点 (核心) ---
 @app.post("/v1/medical_rag_stream", 
         response_model=None,
@@ -1054,6 +1487,98 @@ async def medical_rag_stream(request: Request, chat_request: ChatCompletionReque
         log_error_to_file(f"RAG process error for question '{latest_user_message_content[:50]}...': {str(e)}", "RAG_Request") # 记录到文件
         log_rag_request_end() # 确保即使出错也记录结束
         raise HTTPException(status_code=500, detail=f"RAG处理过程出错: {str(e)}")
+
+
+
+
+@app.post("/v1/health_report", response_model=None) # response_model=None 允许动态返回
+async def health_report_stream(request: Request, chat_request: ChatCompletionRequest):
+    """
+    生成健康报告接口。
+    """
+    # --- 从 Headers 读取信息 ---
+    session_id = request.headers.get("X-Session-ID", "unknown_session")
+    timestamp_str = request.headers.get("X-Timestamp", "unknown_timestamp")
+    request_id = f"chatcmpl-{session_id}"
+
+    # --- 从 ChatCompletionRequest 提取信息 ---
+    if not chat_request.messages:
+        logger = get_logger(__name__)
+        logger.error("No messages provided in the request.")
+        raise HTTPException(status_code=400, detail="Messages are required.")
+
+    # 获取消息作为当前问题（用于日志）
+    latest_user_message_content = ""
+    for msg in chat_request.messages:
+        if msg["role"] == "user":
+            latest_user_message_content = msg["content"]
+            break
+
+    logger = get_logger(__name__)
+    logger.info(f"[Session: {session_id}] Received RAG request (ID: {request_id}) for model '{chat_request.model}', question: {latest_user_message_content[:50]}...")
+    log_rag_request_start(latest_user_message_content, session_id) # 记录到文件
+
+    try:
+        messages_dicts = []
+        for msg in chat_request.messages:
+            if isinstance(msg, dict):
+                # 如果 msg 已经是 dict，则直接添加
+                messages_dicts.append(msg)
+            elif hasattr(msg, 'dict'):
+                # 如果 msg 是 Pydantic 模型实例（如 ChatMessage），则调用 .dict()
+                # Pydantic v2 推荐使用 .model_dump()
+                messages_dicts.append(msg.model_dump() if hasattr(msg, 'model_dump') else msg.dict())
+            else:
+                # 如果既不是 dict 也没有 .dict() 方法，则记录警告并跳过
+                logger.warning(f"[Session: {session_id}] [Req ID: {request_id}] Skipping message of unexpected type: {type(msg)}")
+                continue
+
+        messages_dicts[0]["content"]="健康档案内容：\n"+messages_dicts[0]["content"]
+
+        # --- Step 1: Entity/Intent Parsing with Context (LLM) ---
+        parse_result = await parse_user_health_message(messages_dicts)
+
+        # --- Step 2: Map Chinese Entity Types to English & Map Relationships & Query Neo4j (Service-side) ---
+        neo4j_context_data=""
+        if(parse_result):
+            neo4j_context_data = await query_knowledge_graph(parse_result)
+
+        # --- Step 3: Generate Final Answer (LLM, Streamed or Non-Streamed) ---
+        response = await generate_health_report(
+            messages=messages_dicts, # 传递完整的原始消息历史
+            neo4j_context=neo4j_context_data,
+            request_id=request_id,
+            model_name=chat_request.model,
+            stream=chat_request.stream,
+            temperature=chat_request.temperature if chat_request.temperature is not None else Config.LLM_TEMPERATURE_GENERATE,
+            max_tokens=chat_request.max_tokens if chat_request.max_tokens is not None else Config.LLM_MAX_TOKENS_GENERATE,
+        )
+
+        if chat_request.stream:
+            logger.info(f"[Session: {session_id}] Starting to stream response (ID: {request_id}) for question: {latest_user_message_content[:50]}...")
+            logger.debug("-----------------------------------------------------")
+            sr=StreamingResponse(response(), media_type="text/event-stream")
+            logger.debug(sr.charset)
+            logger.debug("-----------------------------------------------------")
+            return sr
+        else:
+            logger.info(f"[Session: {session_id}] Generated non-streaming response (ID: {request_id}) for question: {latest_user_message_content[:50]}...")
+            # vLLM 返回的已经是 ChatCompletionResponse，直接返回即可
+            # 如果需要修改 ID 等字段，可以在这里处理
+            response_dict = response.model_dump()
+            response_dict["id"] = request_id
+            return JSONResponse(content=response_dict)
+
+    except Exception as e:
+        logger.error(f"[Session: {session_id}] Error in RAG process (ID: {request_id}): {str(e)}", exc_info=True)
+        log_error_to_file(f"RAG process error for question '{latest_user_message_content[:50]}...': {str(e)}", "RAG_Request") # 记录到文件
+        log_rag_request_end() # 确保即使出错也记录结束
+        raise HTTPException(status_code=500, detail=f"RAG处理过程出错: {str(e)}")
+
+
+
+
+
 
 
 # --- 8. (可选) 原有的 OpenAI 兼容端点 ---
