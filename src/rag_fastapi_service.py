@@ -543,40 +543,32 @@ async def query_knowledge_graph(parse_result: Dict[str, Any]) -> List[Dict[str, 
     # 遍历 entity_relationship_groups 并调用相应接口
     for i, group in enumerate(parse_result.get("entity_relationship_groups", [])):
         logger.info(f"Processing group {i}: {group}")
-        logger.debug(f"Processing group {i} (before mapping): {group}") # 记录到文件
+        logger.debug(f"Processing group {i} (before mapping): {group}")
 
         # 将中文实体类型映射为英文类型
         mapped_entities = []
         for entity in group.get("entities", []):
-            english_type = entity_type_mapping.get(entity["type"], entity["type"]) # 如果找不到映射，保留原名
+            english_type = entity_type_mapping.get(entity["type"], entity["type"])
             mapped_entities.append({"name": entity["name"], "type": english_type})
-        group["entities"] = mapped_entities # 更新group中的实体列表
+        group["entities"] = mapped_entities
 
         # 将中文关系名映射为英文关系类型
-        english_relationships = [rel_mapping.get(rel, rel) for rel in group.get("relationships", [])] # 如果找不到映射，保留原名
+        english_relationships = [rel_mapping.get(rel, rel) for rel in group.get("relationships", [])]
 
-        # 记录映射结果到日志文件
         logger.info(f"Group {i} - Mapped Entities: {mapped_entities}")
         logger.info(f"Group {i} - Mapped Relationships: {english_relationships}")
-        # 记录到文件
         logger.debug(f"Group {i} - Mapped Entities: {mapped_entities}")
         logger.debug(f"Group {i} - Mapped Relationships: {english_relationships}")
 
-        # 检查关系和意图是否为空
         if not group.get("relationships"):
             logger.warning(f"Group {i} has no relationships: {group}")
             logger.debug(f"Warning: Group {i} has no relationships.")
-            # 可以选择跳过此组，或根据意图使用默认关系
-            # 这里选择跳过
             continue
         if not group.get("intent"):
             logger.warning(f"Group {i} has no intent: {group}")
             logger.debug(f"Warning: Group {i} has no intent.")
-            # 可以选择跳过此组，或尝试推断意图
-            # 这里选择跳过
             continue
 
-        # 根据意图查找映射的接口
         intent = group["intent"]
         if intent not in intent_mapping_data:
             logger.warning(f"未知意图: {intent}")
@@ -585,9 +577,8 @@ async def query_knowledge_graph(parse_result: Dict[str, Any]) -> List[Dict[str, 
 
         interface_info = intent_mapping_data[intent]
         interface_name = interface_info["neo4j_interface"]
-        required_params = interface_info.get("requires", []) # 获取接口需要的参数
+        required_params = interface_info.get("requires", [])
 
-        # 检查接口所需的参数是否提供
         missing_params = []
         if "entities" in required_params and not group.get("entities"):
             missing_params.append("entities")
@@ -599,108 +590,127 @@ async def query_knowledge_graph(parse_result: Dict[str, Any]) -> List[Dict[str, 
             logger.debug(f"Warning: Interface '{interface_name}' requires {missing_params} but they are missing in group {i}. Skipping.")
             continue
 
-        # 调用Neo4j服务 - 使用 if/elif 映射
         entities_for_query = group["entities"]
 
+        # 封装查询执行逻辑，避免重复代码（可选，这里保持清晰）
+        def safe_query(query_func, *args, **kwargs):
+            try:
+                return query_func(*args, **kwargs)
+            except Exception as e:
+                logger.error(f"Neo4j 查询接口 '{interface_name}' 执行出错: {e}", exc_info=True)
+                return []
+
         if interface_name == "find_connections_between_entities":
-            # 需要至少两个实体
             if len(entities_for_query) >= 2:
-                result = neo4j_service.find_connections_between_entities(
+                result = safe_query(
+                    neo4j_service.find_connections_between_entities,
                     entities=entities_for_query,
                     relationships=english_relationships
                 )
                 neo4j_results.extend(result)
                 logger.info(f"Neo4j query for intent '{intent}' (interface '{interface_name}') returned {len(result)} records.")
-                log_neo4j_query(intent, interface_name, entities_for_query, english_relationships, len(result)) # 记录到文件
+                log_neo4j_query(intent, interface_name, entities_for_query, english_relationships, len(result))
             else:
                 logger.warning(f"接口 {interface_name} 需要至少两个实体，但只有 {len(entities_for_query)} 个。")
                 logger.debug(f"Warning: Interface '{interface_name}' requires at least 2 entities, but only {len(entities_for_query)} provided in group {i}.")
+
         elif interface_name == "find_properties_of_entity":
-            result = neo4j_service.find_properties_of_entity(
+            result = safe_query(
+                neo4j_service.find_properties_of_entity,
                 entities=entities_for_query
             )
             neo4j_results.extend(result)
             logger.info(f"Neo4j query for intent '{intent}' (interface '{interface_name}') returned {len(result)} records.")
-            log_neo4j_query(intent, interface_name, entities_for_query, [], len(result)) # 记录到文件
+            log_neo4j_query(intent, interface_name, entities_for_query, [], len(result))
+
         elif interface_name == "find_related_entities_by_relationship":
-            result = neo4j_service.find_related_entities_by_relationship(
+            result = safe_query(
+                neo4j_service.find_related_entities_by_relationship,
                 entities=entities_for_query,
                 relationships=english_relationships
             )
             neo4j_results.extend(result)
             logger.info(f"Neo4j query for intent '{intent}' (interface '{interface_name}') returned {len(result)} records.")
-            log_neo4j_query(intent, interface_name, entities_for_query, english_relationships, len(result)) # 记录到文件
+            log_neo4j_query(intent, interface_name, entities_for_query, english_relationships, len(result))
+
         elif interface_name == "find_common_connections":
-            # 需要至少两个实体
             if len(entities_for_query) >= 2:
-                 result = neo4j_service.find_common_connections(
-                     entities=entities_for_query,
-                     relationships=english_relationships
-                 )
-                 neo4j_results.extend(result)
-                 logger.info(f"Neo4j query for intent '{intent}' (interface '{interface_name}') returned {len(result)} records.")
-                 log_neo4j_query(intent, interface_name, entities_for_query, english_relationships, len(result)) # 记录到文件
-            else:
-                logger.warning(f"接口 {interface_name} 需要至少两个实体，但只有 {len(entities_for_query)} 个。")
-                logger.debug(f"Warning: Interface '{interface_name}' requires at least 2 entities, but only {len(entities_for_query)} provided in group {i}.")
-        elif interface_name == "query_entity_relationships":
-            # 这个接口只需要实体
-            for entity in entities_for_query:
-                 result = neo4j_service.query_entity_relationships(
-                     entities=[entity]
-                 )
-                 neo4j_results.extend(result)
-                 logger.info(f"Neo4j query for intent '{intent}' (interface '{interface_name}') on entity '{entity['name']}' returned {len(result)} records.")
-                 log_neo4j_query(intent, interface_name, [entity], [], len(result)) # 记录到文件
-        elif interface_name == "query_entity_connections":
-            for entity in entities_for_query:
-                 result = neo4j_service.query_entity_connections(
-                     entities=[entity]
-                 )
-                 neo4j_results.extend(result)
-                 logger.info(f"Neo4j query for intent '{intent}' (interface '{interface_name}') on entity '{entity['name']}' returned {len(result)} records.")
-                 log_neo4j_query(intent, interface_name, [entity], [], len(result)) # 记录到文件
-        # find_entities_by_property 被排除
-        elif interface_name == "query_relationship_properties":
-            # 需要至少两个实体来定位关系
-            if len(entities_for_query) >= 2:
-                result = neo4j_service.query_relationship_properties(
+                result = safe_query(
+                    neo4j_service.find_common_connections,
                     entities=entities_for_query,
                     relationships=english_relationships
                 )
                 neo4j_results.extend(result)
                 logger.info(f"Neo4j query for intent '{intent}' (interface '{interface_name}') returned {len(result)} records.")
-                log_neo4j_query(intent, interface_name, entities_for_query, english_relationships, len(result)) # 记录到文件
+                log_neo4j_query(intent, interface_name, entities_for_query, english_relationships, len(result))
             else:
                 logger.warning(f"接口 {interface_name} 需要至少两个实体，但只有 {len(entities_for_query)} 个。")
                 logger.debug(f"Warning: Interface '{interface_name}' requires at least 2 entities, but only {len(entities_for_query)} provided in group {i}.")
+
+        elif interface_name == "query_entity_relationships":
+            for entity in entities_for_query:
+                result = safe_query(
+                    neo4j_service.query_entity_relationships,
+                    entities=[entity]
+                )
+                neo4j_results.extend(result)
+                logger.info(f"Neo4j query for intent '{intent}' (interface '{interface_name}') on entity '{entity['name']}' returned {len(result)} records.")
+                log_neo4j_query(intent, interface_name, [entity], [], len(result))
+
+        elif interface_name == "query_entity_connections":
+            for entity in entities_for_query:
+                result = safe_query(
+                    neo4j_service.query_entity_connections,
+                    entities=[entity]
+                )
+                neo4j_results.extend(result)
+                logger.info(f"Neo4j query for intent '{intent}' (interface '{interface_name}') on entity '{entity['name']}' returned {len(result)} records.")
+                log_neo4j_query(intent, interface_name, [entity], [], len(result))
+
+        elif interface_name == "query_relationship_properties":
+            if len(entities_for_query) >= 2:
+                result = safe_query(
+                    neo4j_service.query_relationship_properties,
+                    entities=entities_for_query,
+                    relationships=english_relationships
+                )
+                neo4j_results.extend(result)
+                logger.info(f"Neo4j query for intent '{intent}' (interface '{interface_name}') returned {len(result)} records.")
+                log_neo4j_query(intent, interface_name, entities_for_query, english_relationships, len(result))
+            else:
+                logger.warning(f"接口 {interface_name} 需要至少两个实体，但只有 {len(entities_for_query)} 个。")
+                logger.debug(f"Warning: Interface '{interface_name}' requires at least 2 entities, but only {len(entities_for_query)} provided in group {i}.")
+
         else:
             logger.error(f"Neo4j服务中未找到接口: {interface_name}")
             logger.debug(f"Error: Interface '{interface_name}' not found in Neo4j service.")
-            continue # 跳过未知接口
+            continue
 
-    # 处理 standalone_entities (如果需要)
+    # 处理 standalone_entities
     standalone_results = []
     standalone_entities = parse_result.get("standalone_entities", [])
     if standalone_entities:
-        # 将standalone_entities的中文类型也映射为英文
         mapped_standalone_entities = []
         for entity in standalone_entities:
             english_type = entity_type_mapping.get(entity["type"], entity["type"])
             mapped_standalone_entities.append({"name": entity["name"], "type": english_type})
-        parse_result["standalone_entities"] = mapped_standalone_entities # 更新
+        parse_result["standalone_entities"] = mapped_standalone_entities
 
         standalone_entities_for_query = [{"name": e["name"], "type": e["type"]} for e in parse_result["standalone_entities"]]
-        # 示例：查询 standalone_entities 的属性
         for entity in standalone_entities_for_query:
-             rel_result = neo4j_service.find_properties_of_entity(entities=[entity])
-             standalone_results.extend(rel_result)
-        logger.info(f"Neo4j query for standalone_entities returned {len(standalone_results)} records.")
-        log_neo4j_query("standalone_properties", "find_properties_of_entity", standalone_entities_for_query, [], len(standalone_results)) # 记录到文件
+            try:
+                rel_result = neo4j_service.find_properties_of_entity(entities=[entity])
+                standalone_results.extend(rel_result)
+            except Exception as e:
+                logger.error(f"查询 standalone_entities '{entity['name']}' 时出错: {e}", exc_info=True)
+                continue  # 跳过这个实体，继续处理下一个
 
-    # 合并所有Neo4j查询结果
+        logger.info(f"Neo4j query for standalone_entities returned {len(standalone_results)} records.")
+        log_neo4j_query("standalone_properties", "find_properties_of_entity", standalone_entities_for_query, [], len(standalone_results))
+
+    # 合并所有结果
     all_context_data = neo4j_results + standalone_results
-    logger.debug(f"All Neo4j Results:\n{json.dumps(all_context_data, ensure_ascii=False, indent=2)}") # 记录到文件
+    logger.debug(f"All Neo4j Results:\n{json.dumps(all_context_data, ensure_ascii=False, indent=2)}")
     return all_context_data
 
 
