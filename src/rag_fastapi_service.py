@@ -90,7 +90,7 @@ class Config:
     LLM_TEMPERATURE_PARSE = 0.0 # 解析阶段通常用较低温度
     LLM_TEMPERATURE_GENERATE = 0.1 # 生成阶段可稍高
     LLM_MAX_TOKENS_PARSE = 1024 # 预估解析结果的token数
-    LLM_MAX_TOKENS_GENERATE = 1024 # 生成回答的token数
+    LLM_MAX_TOKENS_GENERATE = 2048 # 生成回答的token数
 
 # --- 4. 加载映射表 ---
 def load_mapping_tables():
@@ -1097,7 +1097,7 @@ async def generate_health_report(
     
     final_messages.extend(messages)
 
-    final_messages.append({"role":"user","content":"根据所给的健康档案内容编写详细、专业的健康评估报告。"})
+    final_messages.append({"role":"user","content":"根据所给的健康档案内容编写详细、专业的健康评估报告。报告语气专业，不使用绘文字，不要有像“落款人”、“评估人”和“落款时间”、“评估时间”这样的内容。报告格式要求美观、正式。称呼使用“用户”。"})
 
     # --- Step 3: 处理 token 截断 ---
     # 计算最终消息的总 token 数
@@ -1182,7 +1182,7 @@ async def generate_health_report(
                     choice_index = 0
     
                     try:
-                        # --- 修改点：健壮地处理来自 vLLM 的流式响应块 (chunk) ---
+                        # --- 健壮地处理来自 vLLM 的流式响应块 (chunk) ---
                         async for chunk in stream_generator: # chunk 来自 await vllm_service.chat_completion(..., stream=True)
                             
                             # 1. 首先，明确检查 chunk 是否为字符串 (这是 vLLM 0.10.1+ 常见的流式输出格式)
@@ -1561,7 +1561,8 @@ async def health_report_stream(request: Request, chat_request: ChatCompletionReq
             model_name=chat_request.model,
             stream=chat_request.stream,
             temperature=chat_request.temperature if chat_request.temperature is not None else Config.LLM_TEMPERATURE_GENERATE,
-            max_tokens=chat_request.max_tokens if chat_request.max_tokens is not None else Config.LLM_MAX_TOKENS_GENERATE,
+            # max_tokens=chat_request.max_tokens if chat_request.max_tokens is not None else Config.LLM_MAX_TOKENS_GENERATE,
+            max_tokens=Config.LLM_MAX_TOKENS_GENERATE,
         )
 
         if chat_request.stream:
