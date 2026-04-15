@@ -1,3 +1,5 @@
 logs
-src/__pycache__
-base_model
+__pycache__
+base_models
+.vscode
+.trae

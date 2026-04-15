@@ -1,0 +1,142 @@
+[
+  {
+    "id": 1,
+    "query": "感冒有什么症状？",
+    "category": "疾病症状查询",
+    "expected_entities": ["感冒", "上呼吸道感染"],
+    "expected_types": ["Disease", "Symptom"]
+  },
+  {
+    "id": 2,
+    "query": "高血压应该吃什么药？",
+    "category": "疾病用药查询",
+    "expected_entities": ["高血压", "降压药"],
+    "expected_types": ["Disease", "Drug"]
+  },
+  {
+    "id": 3,
+    "query": "糖尿病的病因是什么？",
+    "category": "疾病病因查询",
+    "expected_entities": ["糖尿病"],
+    "expected_types": ["Disease"]
+  },
+  {
+    "id": 4,
+    "query": "发烧需要做什么检查？",
+    "category": "症状检查查询",
+    "expected_entities": ["发烧", "发热"],
+    "expected_types": ["Symptom", "Check"]
+  },
+  {
+    "id": 5,
+    "query": "胃溃疡不能吃什么？",
+    "category": "饮食禁忌查询",
+    "expected_entities": ["胃溃疡"],
+    "expected_types": ["Disease", "Food"]
+  },
+  {
+    "id": 6,
+    "query": "头痛可能是哪些疾病？",
+    "category": "症状诊断查询",
+    "expected_entities": ["头痛"],
+    "expected_types": ["Symptom", "Disease"]
+  },
+  {
+    "id": 7,
+    "query": "阿司匹林的适应症是什么？",
+    "category": "药物适应症查询",
+    "expected_entities": ["阿司匹林"],
+    "expected_types": ["Drug", "Disease"]
+  },
+  {
+    "id": 8,
+    "query": "心脏病如何预防？",
+    "category": "疾病预防查询",
+    "expected_entities": ["心脏病", "冠心病"],
+    "expected_types": ["Disease"]
+  },
+  {
+    "id": 9,
+    "query": "肺炎的治疗方法有哪些？",
+    "category": "疾病治疗查询",
+    "expected_entities": ["肺炎"],
+    "expected_types": ["Disease", "Cure"]
+  },
+  {
+    "id": 10,
+    "query": "乙肝会传染吗？",
+    "category": "疾病传染性查询",
+    "expected_entities": ["乙肝", "乙型肝炎"],
+    "expected_types": ["Disease"]
+  },
+  {
+    "id": 11,
+    "query": "过敏体质的人容易得什么病？",
+    "category": "易感人群查询",
+    "expected_entities": ["过敏"],
+    "expected_types": ["Disease", "Symptom"]
+  },
+  {
+    "id": 12,
+    "query": "阑尾炎手术需要多长时间恢复？",
+    "category": "疾病恢复查询",
+    "expected_entities": ["阑尾炎"],
+    "expected_types": ["Disease"]
+  },
+  {
+    "id": 13,
+    "query": "哪些科室治疗呼吸系统疾病？",
+    "category": "科室查询",
+    "expected_entities": ["呼吸内科", "呼吸科"],
+    "expected_types": ["Department"]
+  },
+  {
+    "id": 14,
+    "query": "维生素C有什么作用？",
+    "category": "营养成分查询",
+    "expected_entities": ["维生素C"],
+    "expected_types": ["Food", "Drug"]
+  },
+  {
+    "id": 15,
+    "query": "失眠怎么调理？",
+    "category": "症状调理查询",
+    "expected_entities": ["失眠"],
+    "expected_types": ["Symptom", "Disease"]
+  },
+  {
+    "id": 16,
+    "query": "高血压患者可以运动吗？",
+    "category": "疾病生活指导查询",
+    "expected_entities": ["高血压"],
+    "expected_types": ["Disease"]
+  },
+  {
+    "id": 17,
+    "query": "儿童发烧怎么处理？",
+    "category": "儿童健康查询",
+    "expected_entities": ["发烧", "发热"],
+    "expected_types": ["Symptom"]
+  },
+  {
+    "id": 18,
+    "query": "胃镜检查痛苦吗？",
+    "category": "检查项目查询",
+    "expected_entities": ["胃镜"],
+    "expected_types": ["Check"]
+  },
+  {
+    "id": 19,
+    "query": "糖尿病患者可以吃水果吗？",
+    "category": "疾病饮食查询",
+    "expected_entities": ["糖尿病"],
+    "expected_types": ["Disease", "Food"]
+  },
+  {
+    "id": 20,
+    "query": "颈椎病怎么治疗？",
+    "category": "疾病治疗查询",
+    "expected_entities": ["颈椎病"],
+    "expected_types": ["Disease", "Cure"]
+  }
+]

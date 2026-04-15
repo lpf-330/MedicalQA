@@ -1,0 +1,18 @@
+# MedicalEntityVector 向量数据库部署项目依赖包列表
+# Python 3.9+
+
+# 核心依赖
+pymilvus>=2.3.0
+neo4j>=5.0.0
+sentence-transformers>=2.2.0
+torch>=2.0.0
+numpy>=1.24.0
+
+# 可选依赖（用于性能优化）
+tqdm>=4.65.0
+transformers>=4.30.0
+
+# 开发依赖（可选）
+pytest>=7.0.0
+black>=23.0.0
+flake8>=6.0.0

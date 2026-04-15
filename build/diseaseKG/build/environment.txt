@@ -1,0 +1,30 @@
+# DiseaseKG 部署环境配置
+
+## Python 环境
+- Python 版本: 3.9
+- 环境管理: Conda
+
+## 依赖包
+neo4j==5.28.3
+
+## 安装命令
+```bash
+conda create -n diseasekg_final python=3.9 -y
+conda run -n diseasekg_final pip install neo4j
+```
+
+## 数据库连接信息
+- URI: neo4j+s://627658bb.databases.neo4j.io
+- User: 627658bb
+- Password: 35No69NaLaoasxQqW-JhcjbxgQjeY_WzUVGHYtKWeNo
+- Database: neo4j (默认数据库)
+
+## 部署时间
+- 开始时间: 2026-04-06 11:07:04
+- 结束时间: 2026-04-06 11:44:49
+- 总耗时: 2265.10 秒 (约 37.75 分钟)
+
+## 部署统计
+- 节点总数: 44,657
+- 关系总数: 312,226
+- 数据源: data/medical.json (8,808 条疾病记录)
