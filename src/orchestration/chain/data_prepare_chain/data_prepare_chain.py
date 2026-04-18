@@ -22,8 +22,8 @@ class DataPrepareContextBody:
     数据准备Chain策略专属输入数据类
 
     Attributes:
-        monitoring_data: 监测数据（血压、血糖、心率、血氧、BMI、睡眠等）
-        user_profile: 用户档案（基本信息、既往病史、家族病史、生活方式）
+        monitoring_data: 监测数据（心率、血糖、灌注指数、血氧、睡眠、血压），每项包含4个时间维度
+        user_profile: 用户档案（user_id, gender, birth_date, height, weight, past_medical_history, family_history, allergy_history, surgical_history, medical_compliance）
         task_id: 任务ID
     """
     monitoring_data: Dict[str, Any] = field(default_factory=dict)
@@ -86,17 +86,22 @@ class DataPrepareChain(Chain[ChainContext[DataPrepareContextBody], ChainResult[D
     4. 完整性判断（计算降级级别）
     """
 
-    # 核心字段定义
+    # 核心字段定义 - 6项监测指标
     CORE_MONITORING_FIELDS = [
-        "blood_pressure",  # 血压
-        "blood_glucose",   # 血糖
-        "heart_rate"       # 心率
+        "heart_rate",       # 心率
+        "blood_glucose",    # 血糖
+        "perfusion_index",  # 灌注指数
+        "blood_oxygen",     # 血氧
+        "sleep",            # 睡眠
+        "blood_pressure"    # 血压
     ]
 
+    # 核心用户档案字段
     CORE_PROFILE_FIELDS = [
-        "age",    # 年龄
-        "gender", # 性别
-        "medical_history"  # 既往病史
+        "gender",           # 性别
+        "birth_date",       # 出生日期
+        "height",           # 身高
+        "weight"            # 体重
     ]
 
     def __init__(self, resource: DataPrepareResource):
@@ -240,6 +245,12 @@ class DataPrepareChain(Chain[ChainContext[DataPrepareContextBody], ChainResult[D
         """
         标准化监测数据
 
+        处理6项监测指标，每项指标包含4个时间维度：
+        - latest: 当日最新3-5次数据
+        - daily_stats: 最近30天日统计
+        - weekly_stats: 最近12周周统计
+        - monthly_stats: 最近6个月月统计
+
         Args:
             monitoring_data: 原始监测数据
 
@@ -248,79 +259,93 @@ class DataPrepareChain(Chain[ChainContext[DataPrepareContextBody], ChainResult[D
         """
         standardized = {}
 
-        # 血压标准化（统一为mmHg）
-        if "blood_pressure" in monitoring_data:
-            bp_data = monitoring_data["blood_pressure"]
-            if isinstance(bp_data, dict):
-                # 收缩压
-                if "systolic" in bp_data:
-                    standardized["systolic_pressure"] = self._standardize_pressure(bp_data["systolic"])
-                # 舒张压
-                if "diastolic" in bp_data:
-                    standardized["diastolic_pressure"] = self._standardize_pressure(bp_data["diastolic"])
-            elif isinstance(bp_data, (int, float)):
-                # 如果是单个数值，视为收缩压
-                standardized["systolic_pressure"] = float(bp_data)
-
-        # 血糖标准化（统一为mmol/L）
-        if "blood_glucose" in monitoring_data:
-            glucose_data = monitoring_data["blood_glucose"]
-            if isinstance(glucose_data, dict):
-                # 空腹血糖
-                if "fasting" in glucose_data:
-                    standardized["fasting_glucose"] = self._standardize_glucose(glucose_data["fasting"])
-                # 餐后血糖
-                if "postprandial" in glucose_data:
-                    standardized["postprandial_glucose"] = self._standardize_glucose(glucose_data["postprandial"])
-            elif isinstance(glucose_data, (int, float)):
-                standardized["fasting_glucose"] = float(glucose_data)
+        # 时间维度列表
+        time_dimensions = ["latest", "daily_stats", "weekly_stats", "monthly_stats"]
 
         # 心率标准化（统一为bpm）
         if "heart_rate" in monitoring_data:
             hr_data = monitoring_data["heart_rate"]
             if isinstance(hr_data, dict):
-                if "value" in hr_data:
-                    standardized["heart_rate"] = float(hr_data["value"])
-            elif isinstance(hr_data, (int, float)):
-                standardized["heart_rate"] = float(hr_data)
+                standardized["heart_rate"] = self._standardize_time_dimension_data(hr_data, "heart_rate")
+
+        # 血糖标准化（统一为mmol/L）
+        if "blood_glucose" in monitoring_data:
+            glucose_data = monitoring_data["blood_glucose"]
+            if isinstance(glucose_data, dict):
+                standardized["blood_glucose"] = self._standardize_time_dimension_data(glucose_data, "blood_glucose")
+
+        # 灌注指数标准化
+        if "perfusion_index" in monitoring_data:
+            pi_data = monitoring_data["perfusion_index"]
+            if isinstance(pi_data, dict):
+                standardized["perfusion_index"] = self._standardize_time_dimension_data(pi_data, "perfusion_index")
 
         # 血氧饱和度标准化（统一为%）
         if "blood_oxygen" in monitoring_data:
             oxygen_data = monitoring_data["blood_oxygen"]
             if isinstance(oxygen_data, dict):
-                if "value" in oxygen_data:
-                    standardized["blood_oxygen"] = float(oxygen_data["value"])
-            elif isinstance(oxygen_data, (int, float)):
-                standardized["blood_oxygen"] = float(oxygen_data)
-
-        # BMI标准化
-        if "bmi" in monitoring_data:
-            bmi_data = monitoring_data["bmi"]
-            if isinstance(bmi_data, dict):
-                if "value" in bmi_data:
-                    standardized["bmi"] = float(bmi_data["value"])
-            elif isinstance(bmi_data, (int, float)):
-                standardized["bmi"] = float(bmi_data)
+                standardized["blood_oxygen"] = self._standardize_time_dimension_data(oxygen_data, "blood_oxygen")
 
         # 睡眠数据标准化
         if "sleep" in monitoring_data:
             sleep_data = monitoring_data["sleep"]
             if isinstance(sleep_data, dict):
-                if "duration" in sleep_data:
-                    standardized["sleep_duration"] = float(sleep_data["duration"])
-                if "quality" in sleep_data:
-                    standardized["sleep_quality"] = str(sleep_data["quality"])
+                standardized["sleep"] = self._standardize_time_dimension_data(sleep_data, "sleep")
+
+        # 血压标准化（统一为mmHg）
+        if "blood_pressure" in monitoring_data:
+            bp_data = monitoring_data["blood_pressure"]
+            if isinstance(bp_data, dict):
+                standardized["blood_pressure"] = self._standardize_time_dimension_data(bp_data, "blood_pressure")
 
         # 保留其他原始数据
         for key, value in monitoring_data.items():
-            if key not in ["blood_pressure", "blood_glucose", "heart_rate", "blood_oxygen", "bmi", "sleep"]:
+            if key not in ["heart_rate", "blood_glucose", "perfusion_index", "blood_oxygen", "sleep", "blood_pressure"]:
                 standardized[key] = value
+
+        return standardized
+
+    def _standardize_time_dimension_data(self, data: Dict[str, Any], indicator_type: str) -> Dict[str, Any]:
+        """
+        标准化单个指标的时间维度数据
+
+        Args:
+            data: 原始时间维度数据
+            indicator_type: 指标类型
+
+        Returns:
+            标准化后的时间维度数据
+        """
+        standardized = {}
+        time_dimensions = ["latest", "daily_stats", "weekly_stats", "monthly_stats"]
+
+        for dimension in time_dimensions:
+            if dimension in data:
+                dimension_data = data[dimension]
+                if dimension_data is not None:
+                    standardized[dimension] = dimension_data
+                else:
+                    standardized[dimension] = []
+            else:
+                standardized[dimension] = []
 
         return standardized
 
     def _standardize_user_profile(self, user_profile: Dict[str, Any]) -> Dict[str, Any]:
         """
         标准化用户档案
+
+        处理与SpringBoot后端users表对齐的字段：
+        - user_id: 用户ID
+        - gender: 性别
+        - birth_date: 出生日期
+        - height: 身高
+        - weight: 体重
+        - past_medical_history: 既往病史（字符串类型）
+        - family_history: 家族病史（字符串类型）
+        - allergy_history: 过敏史（字符串类型）
+        - surgical_history: 手术史（字符串类型）
+        - medical_compliance: 用药医嘱（字符串类型）
 
         Args:
             user_profile: 原始用户档案
@@ -330,10 +355,11 @@ class DataPrepareChain(Chain[ChainContext[DataPrepareContextBody], ChainResult[D
         """
         standardized = {}
 
-        # 基本信息
-        if "age" in user_profile:
-            standardized["age"] = int(user_profile["age"])
+        # 用户ID
+        if "user_id" in user_profile:
+            standardized["user_id"] = int(user_profile["user_id"]) if user_profile["user_id"] is not None else None
 
+        # 性别
         if "gender" in user_profile:
             gender = user_profile["gender"]
             # 统一性别格式
@@ -345,79 +371,72 @@ class DataPrepareChain(Chain[ChainContext[DataPrepareContextBody], ChainResult[D
                 else:
                     standardized["gender"] = gender.lower()
 
-        # 既往病史
-        if "medical_history" in user_profile:
-            medical_history = user_profile["medical_history"]
-            if isinstance(medical_history, list):
-                standardized["medical_history"] = medical_history
-            elif isinstance(medical_history, str):
-                standardized["medical_history"] = [medical_history]
-            else:
-                standardized["medical_history"] = []
+        # 出生日期
+        if "birth_date" in user_profile:
+            standardized["birth_date"] = str(user_profile["birth_date"]) if user_profile["birth_date"] else None
 
-        # 家族病史
+        # 身高
+        if "height" in user_profile:
+            try:
+                standardized["height"] = float(user_profile["height"])
+            except (ValueError, TypeError):
+                standardized["height"] = None
+
+        # 体重
+        if "weight" in user_profile:
+            try:
+                standardized["weight"] = float(user_profile["weight"])
+            except (ValueError, TypeError):
+                standardized["weight"] = None
+
+        # 既往病史（字符串类型）
+        if "past_medical_history" in user_profile:
+            medical_history = user_profile["past_medical_history"]
+            if medical_history is not None:
+                standardized["past_medical_history"] = str(medical_history)
+            else:
+                standardized["past_medical_history"] = ""
+
+        # 家族病史（字符串类型）
         if "family_history" in user_profile:
             family_history = user_profile["family_history"]
-            if isinstance(family_history, list):
-                standardized["family_history"] = family_history
-            elif isinstance(family_history, str):
-                standardized["family_history"] = [family_history]
+            if family_history is not None:
+                standardized["family_history"] = str(family_history)
             else:
-                standardized["family_history"] = []
+                standardized["family_history"] = ""
 
-        # 生活方式
-        if "lifestyle" in user_profile:
-            lifestyle = user_profile["lifestyle"]
-            if isinstance(lifestyle, dict):
-                standardized["lifestyle"] = lifestyle
+        # 过敏史（字符串类型）
+        if "allergy_history" in user_profile:
+            allergy_history = user_profile["allergy_history"]
+            if allergy_history is not None:
+                standardized["allergy_history"] = str(allergy_history)
+            else:
+                standardized["allergy_history"] = ""
+
+        # 手术史（字符串类型）
+        if "surgical_history" in user_profile:
+            surgical_history = user_profile["surgical_history"]
+            if surgical_history is not None:
+                standardized["surgical_history"] = str(surgical_history)
+            else:
+                standardized["surgical_history"] = ""
+
+        # 用药医嘱（字符串类型）
+        if "medical_compliance" in user_profile:
+            medical_compliance = user_profile["medical_compliance"]
+            if medical_compliance is not None:
+                standardized["medical_compliance"] = str(medical_compliance)
+            else:
+                standardized["medical_compliance"] = ""
 
         # 保留其他原始数据
         for key, value in user_profile.items():
-            if key not in ["age", "gender", "medical_history", "family_history", "lifestyle"]:
+            if key not in ["user_id", "gender", "birth_date", "height", "weight",
+                          "past_medical_history", "family_history", "allergy_history",
+                          "surgical_history", "medical_compliance"]:
                 standardized[key] = value
 
         return standardized
-
-    def _standardize_pressure(self, value: Any) -> float:
-        """
-        标准化血压值（统一为mmHg）
-
-        Args:
-            value: 原始血压值
-
-        Returns:
-            标准化后的血压值（mmHg）
-        """
-        if isinstance(value, (int, float)):
-            return float(value)
-        elif isinstance(value, dict):
-            if "value" in value:
-                return float(value["value"])
-            elif "mmHg" in value:
-                return float(value["mmHg"])
-        return 0.0
-
-    def _standardize_glucose(self, value: Any) -> float:
-        """
-        标准化血糖值（统一为mmol/L）
-
-        Args:
-            value: 原始血糖值
-
-        Returns:
-            标准化后的血糖值（mmol/L）
-        """
-        if isinstance(value, (int, float)):
-            return float(value)
-        elif isinstance(value, dict):
-            if "value" in value:
-                return float(value["value"])
-            elif "mmol_L" in value:
-                return float(value["mmol_L"])
-            elif "mg_dL" in value:
-                # mg/dL转mmol/L：除以18
-                return float(value["mg_dL"]) / 18.0
-        return 0.0
 
     def _handle_missing_fields(self, validated_data: Dict[str, Any], missing_fields: List[str]) -> tuple:
         """
@@ -430,23 +449,22 @@ class DataPrepareChain(Chain[ChainContext[DataPrepareContextBody], ChainResult[D
         Returns:
             处理后的数据和更新后的缺失字段列表
         """
-        # 检查监测数据中的核心字段（使用标准化后的字段名）
+        # 检查监测数据中的核心字段
         monitoring_data = validated_data.get("monitoring_data", {})
-        
-        # 血压：检查收缩压和舒张压
-        if "systolic_pressure" not in monitoring_data or monitoring_data["systolic_pressure"] is None:
-            missing_fields.append("monitoring_data.blood_pressure")
-        if "diastolic_pressure" not in monitoring_data or monitoring_data["diastolic_pressure"] is None:
-            # 舒张压缺失不单独标记，因为血压已经标记
-            pass
-        
-        # 血糖：检查空腹血糖
-        if "fasting_glucose" not in monitoring_data or monitoring_data["fasting_glucose"] is None:
-            missing_fields.append("monitoring_data.blood_glucose")
-        
-        # 心率
-        if "heart_rate" not in monitoring_data or monitoring_data["heart_rate"] is None:
-            missing_fields.append("monitoring_data.heart_rate")
+
+        # 检查6项监测指标
+        for field in self.CORE_MONITORING_FIELDS:
+            if field not in monitoring_data or not monitoring_data[field]:
+                missing_fields.append(f"monitoring_data.{field}")
+            elif isinstance(monitoring_data[field], dict):
+                # 检查是否有有效的时间维度数据
+                has_valid_data = False
+                for dimension in ["latest", "daily_stats", "weekly_stats", "monthly_stats"]:
+                    if dimension in monitoring_data[field] and monitoring_data[field][dimension]:
+                        has_valid_data = True
+                        break
+                if not has_valid_data:
+                    missing_fields.append(f"monitoring_data.{field}")
 
         # 检查用户档案中的核心字段
         user_profile = validated_data.get("user_profile", {})
@@ -455,21 +473,27 @@ class DataPrepareChain(Chain[ChainContext[DataPrepareContextBody], ChainResult[D
                 missing_fields.append(f"user_profile.{field}")
 
         # 为缺失的核心字段设置默认值
-        if "systolic_pressure" not in monitoring_data:
-            validated_data["monitoring_data"]["systolic_pressure"] = None
-        if "diastolic_pressure" not in monitoring_data:
-            validated_data["monitoring_data"]["diastolic_pressure"] = None
-        if "fasting_glucose" not in monitoring_data:
-            validated_data["monitoring_data"]["fasting_glucose"] = None
-        if "heart_rate" not in monitoring_data:
-            validated_data["monitoring_data"]["heart_rate"] = None
+        for field in self.CORE_MONITORING_FIELDS:
+            if field not in monitoring_data:
+                validated_data["monitoring_data"][field] = {
+                    "latest": [],
+                    "daily_stats": [],
+                    "weekly_stats": [],
+                    "monthly_stats": []
+                }
 
-        if "age" not in user_profile:
-            validated_data["user_profile"]["age"] = None
-        if "gender" not in user_profile:
-            validated_data["user_profile"]["gender"] = None
-        if "medical_history" not in user_profile:
-            validated_data["user_profile"]["medical_history"] = []
+        for field in self.CORE_PROFILE_FIELDS:
+            if field not in user_profile:
+                if field in ["height", "weight"]:
+                    validated_data["user_profile"][field] = None
+                else:
+                    validated_data["user_profile"][field] = ""
+
+        # 为病史字段设置默认值
+        history_fields = ["past_medical_history", "family_history", "allergy_history", "surgical_history", "medical_compliance"]
+        for field in history_fields:
+            if field not in user_profile:
+                validated_data["user_profile"][field] = ""
 
         return validated_data, missing_fields
 

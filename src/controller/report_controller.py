@@ -136,6 +136,7 @@ class ReportController:
         验证请求参数
 
         验证请求体、task_id、monitoring_data、user_profile等参数的有效性。
+        验证新的数据结构（6项监测指标，字符串类型的病史字段）。
 
         Args:
             request: 健康报告生成请求数据
@@ -171,25 +172,21 @@ class ReportController:
                 detail={"error_code": ErrorCode.PARAM_MISSING.value, "error_message": "user_profile不能为空"}
             )
 
-        # 验证监测数据字段（至少包含一项监测指标）
+        # 验证监测数据字段（至少包含一项监测指标 - 6项指标）
         monitoring_data = request.body.monitoring_data
         has_monitoring_data = (
-            monitoring_data.blood_pressure is not None or
-            monitoring_data.blood_sugar is not None or
             monitoring_data.heart_rate is not None or
+            monitoring_data.blood_glucose is not None or
+            monitoring_data.perfusion_index is not None or
             monitoring_data.blood_oxygen is not None or
-            monitoring_data.bmi is not None or
-            monitoring_data.sleep_data is not None or
-            monitoring_data.temperature is not None or
-            monitoring_data.weight is not None or
-            monitoring_data.height is not None or
-            monitoring_data.steps is not None
+            monitoring_data.sleep is not None or
+            monitoring_data.blood_pressure is not None
         )
 
         if not has_monitoring_data:
             raise HTTPException(
                 status_code=400,
-                detail={"error_code": ErrorCode.PARAM_INVALID.value, "error_message": "监测数据至少需要包含一项监测指标"}
+                detail={"error_code": ErrorCode.PARAM_INVALID.value, "error_message": "监测数据至少需要包含一项监测指标（心率、血糖、灌注指数、血氧、睡眠、血压）"}
             )
 
     def _format_sse_message(self, data: str) -> str:

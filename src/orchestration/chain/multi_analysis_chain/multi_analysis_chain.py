@@ -160,12 +160,13 @@ class MultiAnalysisChain(Chain[ChainContext[MultiAnalysisContextBody], ChainResu
         """
         异常指标提取
 
-        监测数据异常值识别：
+        监测数据异常值识别（处理4个时间维度的数据）：
         - 血压异常：收缩压≥140或舒张压≥90为高血压，收缩压<90或舒张压<60为低血压
         - 血糖异常：空腹血糖≥7.0或餐后血糖≥11.1为高血糖，空腹血糖<3.9为低血糖
         - 心率异常：心率>100为心动过速，心率<60为心动过缓
         - 血氧异常：血氧<95%为低氧
-        - BMI异常：BMI<18.5为偏瘦，BMI≥24为超重，BMI≥28为肥胖
+        - 灌注指数异常：灌注指数<1.0为低灌注
+        - 睡眠异常：睡眠时间<6小时为睡眠不足，>9小时为睡眠过多
 
         Args:
             validated_data: 校验后的数据
@@ -174,111 +175,147 @@ class MultiAnalysisChain(Chain[ChainContext[MultiAnalysisContextBody], ChainResu
             异常指标列表
         """
         anomalies = []
+        monitoring_data = validated_data.get("monitoring_data", {})
 
-        # 血压异常检测
-        blood_pressure = validated_data.get("blood_pressure", {})
-        systolic = blood_pressure.get("systolic")  # 收缩压
-        diastolic = blood_pressure.get("diastolic")  # 舒张压
+        # 血压异常检测（从latest维度获取最新数据）
+        blood_pressure = monitoring_data.get("blood_pressure", {})
+        if isinstance(blood_pressure, dict) and blood_pressure.get("latest"):
+            latest_bp_list = blood_pressure["latest"]
+            if isinstance(latest_bp_list, list) and latest_bp_list:
+                # 获取最新一条血压数据
+                latest_bp = latest_bp_list[-1] if isinstance(latest_bp_list[-1], dict) else {}
+                systolic = latest_bp.get("systolic")
+                diastolic = latest_bp.get("diastolic")
 
-        if systolic is not None and diastolic is not None:
-            if systolic >= 140 or diastolic >= 90:
-                anomalies.append({
-                    "indicator_name": "血压",
-                    "anomaly_type": "高血压",
-                    "anomaly_value": f"{systolic}/{diastolic} mmHg",
-                    "reference_range": "收缩压<140 mmHg 且 舒张压<90 mmHg"
-                })
-            elif systolic < 90 or diastolic < 60:
-                anomalies.append({
-                    "indicator_name": "血压",
-                    "anomaly_type": "低血压",
-                    "anomaly_value": f"{systolic}/{diastolic} mmHg",
-                    "reference_range": "收缩压≥90 mmHg 且 舒张压≥60 mmHg"
-                })
+                if systolic is not None and diastolic is not None:
+                    if systolic >= 140 or diastolic >= 90:
+                        anomalies.append({
+                            "indicator_name": "血压",
+                            "anomaly_type": "高血压",
+                            "anomaly_value": f"{systolic}/{diastolic} mmHg",
+                            "reference_range": "收缩压<140 mmHg 且 舒张压<90 mmHg"
+                        })
+                    elif systolic < 90 or diastolic < 60:
+                        anomalies.append({
+                            "indicator_name": "血压",
+                            "anomaly_type": "低血压",
+                            "anomaly_value": f"{systolic}/{diastolic} mmHg",
+                            "reference_range": "收缩压≥90 mmHg 且 舒张压≥60 mmHg"
+                        })
 
-        # 血糖异常检测
-        blood_glucose = validated_data.get("blood_glucose", {})
-        fasting_glucose = blood_glucose.get("fasting_glucose")  # 空腹血糖
-        postprandial_glucose = blood_glucose.get("postprandial_glucose")  # 餐后血糖
+        # 血糖异常检测（从latest维度获取最新数据）
+        blood_glucose = monitoring_data.get("blood_glucose", {})
+        if isinstance(blood_glucose, dict) and blood_glucose.get("latest"):
+            latest_glucose_list = blood_glucose["latest"]
+            if isinstance(latest_glucose_list, list) and latest_glucose_list:
+                latest_glucose = latest_glucose_list[-1] if isinstance(latest_glucose_list[-1], dict) else {}
+                glucose_value = latest_glucose.get("value")
+                glucose_type = latest_glucose.get("type", "fasting")
 
-        if fasting_glucose is not None:
-            if fasting_glucose >= 7.0:
-                anomalies.append({
-                    "indicator_name": "空腹血糖",
-                    "anomaly_type": "高血糖",
-                    "anomaly_value": f"{fasting_glucose} mmol/L",
-                    "reference_range": "<7.0 mmol/L"
-                })
-            elif fasting_glucose < 3.9:
-                anomalies.append({
-                    "indicator_name": "空腹血糖",
-                    "anomaly_type": "低血糖",
-                    "anomaly_value": f"{fasting_glucose} mmol/L",
-                    "reference_range": "≥3.9 mmol/L"
-                })
+                if glucose_value is not None:
+                    if glucose_type == "fasting" or glucose_type == "空腹":
+                        if glucose_value >= 7.0:
+                            anomalies.append({
+                                "indicator_name": "空腹血糖",
+                                "anomaly_type": "高血糖",
+                                "anomaly_value": f"{glucose_value} mmol/L",
+                                "reference_range": "<7.0 mmol/L"
+                            })
+                        elif glucose_value < 3.9:
+                            anomalies.append({
+                                "indicator_name": "空腹血糖",
+                                "anomaly_type": "低血糖",
+                                "anomaly_value": f"{glucose_value} mmol/L",
+                                "reference_range": "≥3.9 mmol/L"
+                            })
+                    else:
+                        if glucose_value >= 11.1:
+                            anomalies.append({
+                                "indicator_name": "餐后血糖",
+                                "anomaly_type": "高血糖",
+                                "anomaly_value": f"{glucose_value} mmol/L",
+                                "reference_range": "<11.1 mmol/L"
+                            })
 
-        if postprandial_glucose is not None:
-            if postprandial_glucose >= 11.1:
-                anomalies.append({
-                    "indicator_name": "餐后血糖",
-                    "anomaly_type": "高血糖",
-                    "anomaly_value": f"{postprandial_glucose} mmol/L",
-                    "reference_range": "<11.1 mmol/L"
-                })
+        # 心率异常检测（从latest维度获取最新数据）
+        heart_rate = monitoring_data.get("heart_rate", {})
+        if isinstance(heart_rate, dict) and heart_rate.get("latest"):
+            latest_hr_list = heart_rate["latest"]
+            if isinstance(latest_hr_list, list) and latest_hr_list:
+                latest_hr = latest_hr_list[-1] if isinstance(latest_hr_list[-1], dict) else {}
+                hr_value = latest_hr.get("value")
 
-        # 心率异常检测
-        heart_rate = validated_data.get("heart_rate")
-        if heart_rate is not None:
-            if heart_rate > 100:
-                anomalies.append({
-                    "indicator_name": "心率",
-                    "anomaly_type": "心动过速",
-                    "anomaly_value": f"{heart_rate} 次/分",
-                    "reference_range": "60-100 次/分"
-                })
-            elif heart_rate < 60:
-                anomalies.append({
-                    "indicator_name": "心率",
-                    "anomaly_type": "心动过缓",
-                    "anomaly_value": f"{heart_rate} 次/分",
-                    "reference_range": "60-100 次/分"
-                })
+                if hr_value is not None:
+                    if hr_value > 100:
+                        anomalies.append({
+                            "indicator_name": "心率",
+                            "anomaly_type": "心动过速",
+                            "anomaly_value": f"{hr_value} 次/分",
+                            "reference_range": "60-100 次/分"
+                        })
+                    elif hr_value < 60:
+                        anomalies.append({
+                            "indicator_name": "心率",
+                            "anomaly_type": "心动过缓",
+                            "anomaly_value": f"{hr_value} 次/分",
+                            "reference_range": "60-100 次/分"
+                        })
 
-        # 血氧异常检测
-        blood_oxygen = validated_data.get("blood_oxygen")
-        if blood_oxygen is not None:
-            if blood_oxygen < 95:
-                anomalies.append({
-                    "indicator_name": "血氧饱和度",
-                    "anomaly_type": "低氧",
-                    "anomaly_value": f"{blood_oxygen}%",
-                    "reference_range": "≥95%"
-                })
+        # 血氧异常检测（从latest维度获取最新数据）
+        blood_oxygen = monitoring_data.get("blood_oxygen", {})
+        if isinstance(blood_oxygen, dict) and blood_oxygen.get("latest"):
+            latest_oxygen_list = blood_oxygen["latest"]
+            if isinstance(latest_oxygen_list, list) and latest_oxygen_list:
+                latest_oxygen = latest_oxygen_list[-1] if isinstance(latest_oxygen_list[-1], dict) else {}
+                oxygen_value = latest_oxygen.get("value")
 
-        # BMI异常检测
-        bmi = validated_data.get("bmi")
-        if bmi is not None:
-            if bmi >= 28:
-                anomalies.append({
-                    "indicator_name": "BMI",
-                    "anomaly_type": "肥胖",
-                    "anomaly_value": f"{bmi:.1f}",
-                    "reference_range": "18.5-24"
-                })
-            elif bmi >= 24:
-                anomalies.append({
-                    "indicator_name": "BMI",
-                    "anomaly_type": "超重",
-                    "anomaly_value": f"{bmi:.1f}",
-                    "reference_range": "18.5-24"
-                })
-            elif bmi < 18.5:
-                anomalies.append({
-                    "indicator_name": "BMI",
-                    "anomaly_type": "偏瘦",
-                    "anomaly_value": f"{bmi:.1f}",
-                    "reference_range": "18.5-24"
-                })
+                if oxygen_value is not None and oxygen_value < 95:
+                    anomalies.append({
+                        "indicator_name": "血氧饱和度",
+                        "anomaly_type": "低氧",
+                        "anomaly_value": f"{oxygen_value}%",
+                        "reference_range": "≥95%"
+                    })
+
+        # 灌注指数异常检测（从latest维度获取最新数据）
+        perfusion_index = monitoring_data.get("perfusion_index", {})
+        if isinstance(perfusion_index, dict) and perfusion_index.get("latest"):
+            latest_pi_list = perfusion_index["latest"]
+            if isinstance(latest_pi_list, list) and latest_pi_list:
+                latest_pi = latest_pi_list[-1] if isinstance(latest_pi_list[-1], dict) else {}
+                pi_value = latest_pi.get("value")
+
+                if pi_value is not None and pi_value < 1.0:
+                    anomalies.append({
+                        "indicator_name": "灌注指数",
+                        "anomaly_type": "低灌注",
+                        "anomaly_value": f"{pi_value} PI",
+                        "reference_range": "≥1.0 PI"
+                    })
+
+        # 睡眠异常检测（从latest维度获取最新数据）
+        sleep = monitoring_data.get("sleep", {})
+        if isinstance(sleep, dict) and sleep.get("latest"):
+            latest_sleep_list = sleep["latest"]
+            if isinstance(latest_sleep_list, list) and latest_sleep_list:
+                latest_sleep = latest_sleep_list[-1] if isinstance(latest_sleep_list[-1], dict) else {}
+                sleep_value = latest_sleep.get("value")
+
+                if sleep_value is not None:
+                    if sleep_value < 6:
+                        anomalies.append({
+                            "indicator_name": "睡眠",
+                            "anomaly_type": "睡眠不足",
+                            "anomaly_value": f"{sleep_value} 小时",
+                            "reference_range": "6-9 小时"
+                        })
+                    elif sleep_value > 9:
+                        anomalies.append({
+                            "indicator_name": "睡眠",
+                            "anomaly_type": "睡眠过多",
+                            "anomaly_value": f"{sleep_value} 小时",
+                            "reference_range": "6-9 小时"
+                        })
 
         return anomalies
 
@@ -286,11 +323,12 @@ class MultiAnalysisChain(Chain[ChainContext[MultiAnalysisContextBody], ChainResu
         """
         风险因子提取
 
-        基于病史和生活方式：
-        - 高龄风险：年龄≥65岁
-        - 多病共存：既往病史≥3种
+        基于病史和用户档案（处理字符串类型的病史字段）：
+        - 高龄风险：年龄>=65岁
+        - 多病共存：既往病史包含多种疾病
         - 家族遗传风险：有家族病史
-        - 不良生活方式：吸烟、饮酒、缺乏运动
+        - 过敏史风险：有过敏史
+        - 手术史风险：有手术史
 
         Args:
             validated_data: 校验后的数据
@@ -299,62 +337,68 @@ class MultiAnalysisChain(Chain[ChainContext[MultiAnalysisContextBody], ChainResu
             风险因子列表
         """
         risk_factors = []
+        user_profile = validated_data.get("user_profile", {})
 
-        # 高龄风险
-        age = validated_data.get("age")
-        if age is not None and age >= 65:
-            risk_factors.append({
-                "factor_name": "高龄",
-                "risk_level": "中",
-                "basis": f"年龄{age}岁，属于老年人群"
-            })
+        # 高龄风险（根据出生日期计算年龄）
+        birth_date = user_profile.get("birth_date")
+        if birth_date:
+            try:
+                from datetime import datetime
+                birth = datetime.strptime(birth_date, "%Y-%m-%d")
+                today = datetime.now()
+                age = today.year - birth.year - ((today.month, today.day) < (birth.month, birth.day))
+                if age >= 65:
+                    risk_factors.append({
+                        "factor_name": "高龄",
+                        "risk_level": "中",
+                        "basis": f"年龄{age}岁，属于老年人群"
+                    })
+            except (ValueError, TypeError):
+                pass
 
-        # 多病共存风险
-        medical_history = validated_data.get("medical_history", [])
-        if isinstance(medical_history, list) and len(medical_history) >= 3:
-            risk_factors.append({
-                "factor_name": "多病共存",
-                "risk_level": "高",
-                "basis": f"既往病史{len(medical_history)}种：{', '.join(medical_history[:5])}"
-            })
+        # 既往病史风险（字符串类型）
+        past_medical_history = user_profile.get("past_medical_history", "")
+        if past_medical_history and past_medical_history.strip():
+            # 统计既往病史中的疾病数量（简单统计逗号分隔）
+            diseases = [d.strip() for d in past_medical_history.replace("、", ",").replace("，", ",").split(",") if d.strip()]
+            if len(diseases) >= 3:
+                risk_factors.append({
+                    "factor_name": "多病共存",
+                    "risk_level": "高",
+                    "basis": f"既往病史包含多种疾病：{past_medical_history}"
+                })
+            elif len(diseases) > 0:
+                risk_factors.append({
+                    "factor_name": "既往病史",
+                    "risk_level": "中",
+                    "basis": f"既往病史：{past_medical_history}"
+                })
 
-        # 家族遗传风险
-        family_history = validated_data.get("family_history", [])
-        if isinstance(family_history, list) and len(family_history) > 0:
+        # 家族遗传风险（字符串类型）
+        family_history = user_profile.get("family_history", "")
+        if family_history and family_history.strip():
             risk_factors.append({
                 "factor_name": "家族遗传",
                 "risk_level": "中",
-                "basis": f"有家族病史：{', '.join(family_history[:5])}"
+                "basis": f"有家族病史：{family_history}"
             })
 
-        # 不良生活方式风险
-        lifestyle = validated_data.get("lifestyle", {})
-
-        # 吸烟
-        smoking = lifestyle.get("smoking")
-        if smoking:
+        # 过敏史风险（字符串类型）
+        allergy_history = user_profile.get("allergy_history", "")
+        if allergy_history and allergy_history.strip():
             risk_factors.append({
-                "factor_name": "吸烟",
-                "risk_level": "高",
-                "basis": "有吸烟习惯"
-            })
-
-        # 饮酒
-        drinking = lifestyle.get("drinking")
-        if drinking:
-            risk_factors.append({
-                "factor_name": "饮酒",
-                "risk_level": "中",
-                "basis": "有饮酒习惯"
-            })
-
-        # 缺乏运动
-        exercise_frequency = lifestyle.get("exercise_frequency")
-        if exercise_frequency is not None and exercise_frequency < 2:  # 每周运动少于2次
-            risk_factors.append({
-                "factor_name": "缺乏运动",
+                "factor_name": "过敏史",
                 "risk_level": "低",
-                "basis": f"每周运动{exercise_frequency}次，运动不足"
+                "basis": f"有过敏史：{allergy_history}"
+            })
+
+        # 手术史风险（字符串类型）
+        surgical_history = user_profile.get("surgical_history", "")
+        if surgical_history and surgical_history.strip():
+            risk_factors.append({
+                "factor_name": "手术史",
+                "risk_level": "低",
+                "basis": f"有手术史：{surgical_history}"
             })
 
         return risk_factors
@@ -376,26 +420,27 @@ class MultiAnalysisChain(Chain[ChainContext[MultiAnalysisContextBody], ChainResu
 
         # 构建待提取的文本
         text_parts = []
+        user_profile = validated_data.get("user_profile", {})
 
-        # 添加症状描述
-        symptoms = validated_data.get("symptoms", [])
-        if isinstance(symptoms, list) and symptoms:
-            text_parts.append(f"症状：{', '.join(symptoms)}")
+        # 添加既往病史（字符串类型）
+        past_medical_history = user_profile.get("past_medical_history", "")
+        if past_medical_history and past_medical_history.strip():
+            text_parts.append(f"既往病史：{past_medical_history}")
 
-        # 添加既往病史
-        medical_history = validated_data.get("medical_history", [])
-        if isinstance(medical_history, list) and medical_history:
-            text_parts.append(f"既往病史：{', '.join(medical_history)}")
+        # 添加家族病史（字符串类型）
+        family_history = user_profile.get("family_history", "")
+        if family_history and family_history.strip():
+            text_parts.append(f"家族病史：{family_history}")
 
-        # 添加家族病史
-        family_history = validated_data.get("family_history", [])
-        if isinstance(family_history, list) and family_history:
-            text_parts.append(f"家族病史：{', '.join(family_history)}")
+        # 添加过敏史（字符串类型）
+        allergy_history = user_profile.get("allergy_history", "")
+        if allergy_history and allergy_history.strip():
+            text_parts.append(f"过敏史：{allergy_history}")
 
-        # 添加主诉
-        chief_complaint = validated_data.get("chief_complaint")
-        if chief_complaint:
-            text_parts.append(f"主诉：{chief_complaint}")
+        # 添加手术史（字符串类型）
+        surgical_history = user_profile.get("surgical_history", "")
+        if surgical_history and surgical_history.strip():
+            text_parts.append(f"手术史：{surgical_history}")
 
         if not text_parts:
             logger.info("[MultiAnalysisChain] 无需提取医疗实体的文本内容")
@@ -511,17 +556,13 @@ class MultiAnalysisChain(Chain[ChainContext[MultiAnalysisContextBody], ChainResu
                 "basis": "高龄合并高血压，心血管事件风险显著增加"
             })
 
-        # 检查是否存在糖尿病病史
-        medical_history = validated_data.get("medical_history", [])
-        has_diabetes = isinstance(medical_history, list) and any(
-            "糖尿病" in disease for disease in medical_history
-        )
+        # 检查是否存在糖尿病病史（字符串类型）
+        user_profile = validated_data.get("user_profile", {})
+        past_medical_history = user_profile.get("past_medical_history", "")
+        has_diabetes = past_medical_history and "糖尿病" in past_medical_history
 
-        # 检查是否存在肥胖
-        has_obesity = any(
-            a["indicator_name"] == "BMI" and a["anomaly_type"] == "肥胖"
-            for a in anomalies
-        )
+        # 检查是否存在肥胖（从血压数据推断或既往病史）
+        has_obesity = past_medical_history and ("肥胖" in past_medical_history or "超重" in past_medical_history)
 
         # 糖尿病+肥胖：代谢综合征风险
         if has_diabetes and has_obesity:

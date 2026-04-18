@@ -2,6 +2,7 @@
 健康报告生成请求数据类模块
 
 该模块定义了健康报告生成API请求的数据结构。
+数据结构与SpringBoot后端数据库表结构对齐，符合《项目需求设计v1.1》要求。
 """
 
 from typing import Optional, List, Dict, Any
@@ -13,87 +14,103 @@ class MonitoringData(BaseModel):
     """
     监测数据类
 
-    包含用户的各项健康监测指标数据。
+    包含用户的各项健康监测指标数据，支持6项监测指标，每项指标包含4个时间维度的数据。
 
     Attributes:
-        blood_pressure (Optional[Dict[str, float]]): 血压数据，包含systolic（收缩压）和diastolic（舒张压）
-        blood_sugar (Optional[Dict[str, float]]): 血糖数据，包含fasting（空腹血糖）和postprandial（餐后血糖）
-        heart_rate (Optional[int]): 心率，单位：次/分钟
-        blood_oxygen (Optional[float]): 血氧饱和度，百分比
-        bmi (Optional[float]): 体重指数
-        sleep_data (Optional[Dict[str, Any]]): 睡眠数据，包含duration（时长）、quality（质量）等
-        temperature (Optional[float]): 体温，单位：摄氏度
-        weight (Optional[float]): 体重，单位：千克
-        height (Optional[float]): 身高，单位：厘米
-        steps (Optional[int]): 步数
+        heart_rate (Optional[Dict[str, Any]]): 心率数据，包含latest、daily_stats、weekly_stats、monthly_stats四个时间维度
+        blood_glucose (Optional[Dict[str, Any]]): 血糖数据，包含latest、daily_stats、weekly_stats、monthly_stats四个时间维度
+        perfusion_index (Optional[Dict[str, Any]]): 灌注指数数据，包含latest、daily_stats、weekly_stats、monthly_stats四个时间维度
+        blood_oxygen (Optional[Dict[str, Any]]): 血氧数据，包含latest、daily_stats、weekly_stats、monthly_stats四个时间维度
+        sleep (Optional[Dict[str, Any]]): 睡眠数据，包含latest、daily_stats、weekly_stats、monthly_stats四个时间维度
+        blood_pressure (Optional[Dict[str, Any]]): 血压数据，包含latest、daily_stats、weekly_stats、monthly_stats四个时间维度
+
+    时间维度说明:
+        - latest: 当日最新3-5次数据（List[Dict]），用于识别当前异常状态、判断即时风险
+        - daily_stats: 最近30天日统计数据（List[Dict]），用于分析日内变异、发现周期性异常
+        - weekly_stats: 最近12周周统计数据（List[Dict]），用于判断改善/恶化方向、评估干预效果
+        - monthly_stats: 最近6个月月统计数据（List[Dict]），用于评估慢性病风险、计算长期平均值
 
     Example:
         >>> monitoring_data = MonitoringData(
-        ...     blood_pressure={"systolic": 120.0, "diastolic": 80.0},
-        ...     heart_rate=75,
-        ...     blood_oxygen=98.5,
-        ...     bmi=23.5
+        ...     heart_rate={
+        ...         "latest": [{"value": 72, "unit": "bpm", "time": "2024-01-01 08:00:00"}],
+        ...         "daily_stats": [{"date": "2024-01-01", "avg": 70, "max": 85, "min": 62}],
+        ...         "weekly_stats": [{"week": "2024-W1", "avg": 71, "trend": "stable"}],
+        ...         "monthly_stats": [{"month": "2024-01", "avg": 72, "trend": "stable"}]
+        ...     },
+        ...     blood_pressure={
+        ...         "latest": [{"systolic": 120, "diastolic": 80, "unit": "mmHg", "time": "2024-01-01 08:00:00"}],
+        ...         "daily_stats": [{"date": "2024-01-01", "avg_systolic": 118, "avg_diastolic": 79}],
+        ...         "weekly_stats": [{"week": "2024-W1", "avg_systolic": 119, "avg_diastolic": 78, "trend": "stable"}],
+        ...         "monthly_stats": [{"month": "2024-01", "avg_systolic": 120, "avg_diastolic": 80, "trend": "rising"}]
+        ...     }
         ... )
     """
 
-    blood_pressure: Optional[Dict[str, float]] = Field(
+    heart_rate: Optional[Dict[str, Any]] = Field(
         default=None,
-        description="血压数据，包含systolic（收缩压）和diastolic（舒张压）",
-        examples=[{"systolic": 120.0, "diastolic": 80.0}]
+        description="心率数据，包含latest（当日最新3-5次）、daily_stats（最近30天日统计）、weekly_stats（最近12周周统计）、monthly_stats（最近6个月月统计）四个时间维度",
+        examples=[{
+            "latest": [{"value": 72, "unit": "bpm", "time": "2024-01-01 08:00:00"}],
+            "daily_stats": [{"date": "2024-01-01", "avg": 70, "max": 85, "min": 62}],
+            "weekly_stats": [{"week": "2024-W1", "avg": 71, "trend": "stable"}],
+            "monthly_stats": [{"month": "2024-01", "avg": 72, "trend": "stable"}]
+        }]
     )
 
-    blood_sugar: Optional[Dict[str, float]] = Field(
+    blood_glucose: Optional[Dict[str, Any]] = Field(
         default=None,
-        description="血糖数据，包含fasting（空腹血糖）和postprandial（餐后血糖）",
-        examples=[{"fasting": 5.5, "postprandial": 7.2}]
+        description="血糖数据，包含latest（当日最新3-5次）、daily_stats（最近30天日统计）、weekly_stats（最近12周周统计）、monthly_stats（最近6个月月统计）四个时间维度",
+        examples=[{
+            "latest": [{"value": 5.5, "unit": "mmol/L", "type": "fasting", "time": "2024-01-01 08:00:00"}],
+            "daily_stats": [{"date": "2024-01-01", "avg": 5.8, "max": 7.2, "min": 5.0}],
+            "weekly_stats": [{"week": "2024-W1", "avg": 5.6, "trend": "stable"}],
+            "monthly_stats": [{"month": "2024-01", "avg": 5.7, "trend": "rising"}]
+        }]
     )
 
-    heart_rate: Optional[int] = Field(
+    perfusion_index: Optional[Dict[str, Any]] = Field(
         default=None,
-        description="心率，单位：次/分钟",
-        examples=[75, 80]
+        description="灌注指数数据，包含latest（当日最新3-5次）、daily_stats（最近30天日统计）、weekly_stats（最近12周周统计）、monthly_stats（最近6个月月统计）四个时间维度",
+        examples=[{
+            "latest": [{"value": 3.5, "unit": "PI", "time": "2024-01-01 08:00:00"}],
+            "daily_stats": [{"date": "2024-01-01", "avg": 3.2, "max": 4.0, "min": 2.8}],
+            "weekly_stats": [{"week": "2024-W1", "avg": 3.3, "trend": "stable"}],
+            "monthly_stats": [{"month": "2024-01", "avg": 3.4, "trend": "stable"}]
+        }]
     )
 
-    blood_oxygen: Optional[float] = Field(
+    blood_oxygen: Optional[Dict[str, Any]] = Field(
         default=None,
-        description="血氧饱和度，百分比",
-        examples=[98.5, 97.0]
+        description="血氧数据，包含latest（当日最新3-5次）、daily_stats（最近30天日统计）、weekly_stats（最近12周周统计）、monthly_stats（最近6个月月统计）四个时间维度",
+        examples=[{
+            "latest": [{"value": 98.5, "unit": "%", "time": "2024-01-01 08:00:00"}],
+            "daily_stats": [{"date": "2024-01-01", "avg": 98.0, "max": 99.0, "min": 97.0}],
+            "weekly_stats": [{"week": "2024-W1", "avg": 98.2, "trend": "stable"}],
+            "monthly_stats": [{"month": "2024-01", "avg": 98.1, "trend": "stable"}]
+        }]
     )
 
-    bmi: Optional[float] = Field(
+    sleep: Optional[Dict[str, Any]] = Field(
         default=None,
-        description="体重指数",
-        examples=[23.5, 25.0]
+        description="睡眠数据，包含latest（当日最新3-5次）、daily_stats（最近30天日统计）、weekly_stats（最近12周周统计）、monthly_stats（最近6个月月统计）四个时间维度",
+        examples=[{
+            "latest": [{"value": 7.5, "unit": "hours", "time": "2024-01-01 08:00:00"}],
+            "daily_stats": [{"date": "2024-01-01", "avg": 7.2, "max": 8.0, "min": 6.5}],
+            "weekly_stats": [{"week": "2024-W1", "avg": 7.3, "trend": "stable"}],
+            "monthly_stats": [{"month": "2024-01", "avg": 7.4, "trend": "stable"}]
+        }]
     )
 
-    sleep_data: Optional[Dict[str, Any]] = Field(
+    blood_pressure: Optional[Dict[str, Any]] = Field(
         default=None,
-        description="睡眠数据，包含duration（时长）、quality（质量）等",
-        examples=[{"duration": 7.5, "quality": "good"}]
-    )
-
-    temperature: Optional[float] = Field(
-        default=None,
-        description="体温，单位：摄氏度",
-        examples=[36.5, 37.2]
-    )
-
-    weight: Optional[float] = Field(
-        default=None,
-        description="体重，单位：千克",
-        examples=[65.0, 70.0]
-    )
-
-    height: Optional[float] = Field(
-        default=None,
-        description="身高，单位：厘米",
-        examples=[175.0, 160.0]
-    )
-
-    steps: Optional[int] = Field(
-        default=None,
-        description="步数",
-        examples=[8000, 10000]
+        description="血压数据，包含latest（当日最新3-5次）、daily_stats（最近30天日统计）、weekly_stats（最近12周周统计）、monthly_stats（最近6个月月统计）四个时间维度",
+        examples=[{
+            "latest": [{"systolic": 120, "diastolic": 80, "unit": "mmHg", "time": "2024-01-01 08:00:00"}],
+            "daily_stats": [{"date": "2024-01-01", "avg_systolic": 118, "avg_diastolic": 79}],
+            "weekly_stats": [{"week": "2024-W1", "avg_systolic": 119, "avg_diastolic": 78, "trend": "stable"}],
+            "monthly_stats": [{"month": "2024-01", "avg_systolic": 120, "avg_diastolic": 80, "trend": "rising"}]
+        }]
     )
 
 
@@ -101,58 +118,94 @@ class UserProfile(BaseModel):
     """
     用户档案数据类
 
-    包含用户的基本信息、病史、生活方式等档案数据。
+    包含用户的基本信息和健康档案，字段与SpringBoot后端users表对齐。
+    所有病史字段均为字符串文本类型（str），便于自然语言处理。
 
     Attributes:
-        basic_info (Optional[Dict[str, Any]]): 基本信息，包含age（年龄）、gender（性别）、name（姓名）等
-        past_medical_history (Optional[List[str]]): 既往病史列表
-        family_history (Optional[List[str]]): 家族病史列表
-        lifestyle (Optional[Dict[str, Any]]): 生活方式，包含smoking（吸烟）、drinking（饮酒）、exercise（运动）等
-        allergies (Optional[List[str]]): 过敏史列表
-        medications (Optional[List[str]]): 当前用药列表
+        user_id (Optional[int]): 用户ID，对应SpringBoot后端users表的id字段
+        gender (Optional[str]): 性别，对应SpringBoot后端users表的gender字段，值为"male"、"female"或"other"
+        birth_date (Optional[str]): 出生日期，对应SpringBoot后端users表的birth_date字段，格式为YYYY-MM-DD
+        height (Optional[float]): 身高(cm)，对应SpringBoot后端users表的height字段
+        weight (Optional[float]): 体重(kg)，对应SpringBoot后端users表的weight字段
+        past_medical_history (Optional[str]): 既往病史，对应SpringBoot后端users表的past_medical_history字段，字符串文本类型
+        family_history (Optional[str]): 家族遗传病史，对应SpringBoot后端users表的family_history字段，字符串文本类型
+        allergy_history (Optional[str]): 过敏史，对应SpringBoot后端users表的allergy_history字段，字符串文本类型
+        surgical_history (Optional[str]): 手术史，对应SpringBoot后端users表的surgical_history字段，字符串文本类型
+        medical_compliance (Optional[str]): 用药医嘱，对应SpringBoot后端users表的medical_compliance字段，字符串文本类型
 
     Example:
         >>> user_profile = UserProfile(
-        ...     basic_info={"age": 45, "gender": "male", "name": "张三"},
-        ...     past_medical_history=["高血压", "糖尿病"],
-        ...     lifestyle={"smoking": False, "drinking": "偶尔", "exercise": "每周3次"}
+        ...     user_id=1,
+        ...     gender="male",
+        ...     birth_date="1955-03-15",
+        ...     height=170.0,
+        ...     weight=75.0,
+        ...     past_medical_history="冠心病史5年、高血脂3年、2020年脑梗死",
+        ...     family_history="父亲有高血压、母亲有糖尿病",
+        ...     allergy_history="青霉素过敏、海鲜过敏",
+        ...     surgical_history="2020年胆囊切除术、2018年髋关节置换术",
+        ...     medical_compliance="好"
         ... )
     """
 
-    basic_info: Optional[Dict[str, Any]] = Field(
+    user_id: Optional[int] = Field(
         default=None,
-        description="基本信息，包含age（年龄）、gender（性别）、name（姓名）等",
-        examples=[{"age": 45, "gender": "male", "name": "张三"}]
+        description="用户ID，对应SpringBoot后端users表的id字段",
+        examples=[1, 2, 3]
     )
 
-    past_medical_history: Optional[List[str]] = Field(
+    gender: Optional[str] = Field(
         default=None,
-        description="既往病史列表",
-        examples=[["高血压", "糖尿病", "冠心病"]]
+        description="性别，对应SpringBoot后端users表的gender字段，值为male、female或other",
+        examples=["male", "female", "other"]
     )
 
-    family_history: Optional[List[str]] = Field(
+    birth_date: Optional[str] = Field(
         default=None,
-        description="家族病史列表",
-        examples=[["高血压", "糖尿病"]]
+        description="出生日期，对应SpringBoot后端users表的birth_date字段，格式为YYYY-MM-DD",
+        examples=["1955-03-15", "1960-08-20"]
     )
 
-    lifestyle: Optional[Dict[str, Any]] = Field(
+    height: Optional[float] = Field(
         default=None,
-        description="生活方式，包含smoking（吸烟）、drinking（饮酒）、exercise（运动）等",
-        examples=[{"smoking": False, "drinking": "偶尔", "exercise": "每周3次"}]
+        description="身高(cm)，对应SpringBoot后端users表的height字段",
+        examples=[170.0, 175.0, 160.0]
     )
 
-    allergies: Optional[List[str]] = Field(
+    weight: Optional[float] = Field(
         default=None,
-        description="过敏史列表",
-        examples=[["青霉素", "海鲜"]]
+        description="体重(kg)，对应SpringBoot后端users表的weight字段",
+        examples=[75.0, 65.0, 80.0]
     )
 
-    medications: Optional[List[str]] = Field(
+    past_medical_history: Optional[str] = Field(
         default=None,
-        description="当前用药列表",
-        examples=[["阿司匹林", "降压药"]]
+        description="既往病史，对应SpringBoot后端users表的past_medical_history字段，字符串文本类型",
+        examples=["冠心病史5年、高血脂3年、2020年脑梗死"]
+    )
+
+    family_history: Optional[str] = Field(
+        default=None,
+        description="家族遗传病史，对应SpringBoot后端users表的family_history字段，字符串文本类型",
+        examples=["父亲有高血压、母亲有糖尿病"]
+    )
+
+    allergy_history: Optional[str] = Field(
+        default=None,
+        description="过敏史，对应SpringBoot后端users表的allergy_history字段，字符串文本类型",
+        examples=["青霉素过敏、海鲜过敏"]
+    )
+
+    surgical_history: Optional[str] = Field(
+        default=None,
+        description="手术史，对应SpringBoot后端users表的surgical_history字段，字符串文本类型",
+        examples=["2020年胆囊切除术、2018年髋关节置换术"]
+    )
+
+    medical_compliance: Optional[str] = Field(
+        default=None,
+        description="用药医嘱，对应SpringBoot后端users表的medical_compliance字段，字符串文本类型",
+        examples=["好", "一般", "差"]
     )
 
 
@@ -171,8 +224,8 @@ class ReportRequestBody(BaseModel):
     Example:
         >>> body = ReportRequestBody(
         ...     task_id="task-001",
-        ...     monitoring_data=MonitoringData(heart_rate=75),
-        ...     user_profile=UserProfile(basic_info={"age": 45, "gender": "male"}),
+        ...     monitoring_data=MonitoringData(heart_rate={"latest": [{"value": 72, "unit": "bpm"}]}),
+        ...     user_profile=UserProfile(user_id=1, gender="male", birth_date="1955-03-15"),
         ...     session_id="session-001"
         ... )
     """
@@ -220,8 +273,8 @@ class ReportRequest(BaseRequest[ReportRequestBody]):
         ...     user_id="user-001",
         ...     body=ReportRequestBody(
         ...         task_id="task-001",
-        ...         monitoring_data=MonitoringData(heart_rate=75),
-        ...         user_profile=UserProfile(basic_info={"age": 45})
+        ...         monitoring_data=MonitoringData(heart_rate={"latest": [{"value": 72}]}),
+        ...         user_profile=UserProfile(user_id=1, gender="male")
         ...     )
         ... )
         >>> request.body.task_id
@@ -247,24 +300,54 @@ class ReportRequest(BaseRequest[ReportRequestBody]):
                 "body": {
                     "task_id": "task-001",
                     "monitoring_data": {
-                        "blood_pressure": {"systolic": 120.0, "diastolic": 80.0},
-                        "blood_sugar": {"fasting": 5.5, "postprandial": 7.2},
-                        "heart_rate": 75,
-                        "blood_oxygen": 98.5,
-                        "bmi": 23.5,
-                        "sleep_data": {"duration": 7.5, "quality": "good"},
-                        "temperature": 36.5,
-                        "weight": 65.0,
-                        "height": 175.0,
-                        "steps": 8000
+                        "heart_rate": {
+                            "latest": [{"value": 72, "unit": "bpm", "time": "2024-01-01 08:00:00"}],
+                            "daily_stats": [{"date": "2024-01-01", "avg": 70, "max": 85, "min": 62}],
+                            "weekly_stats": [{"week": "2024-W1", "avg": 71, "trend": "stable"}],
+                            "monthly_stats": [{"month": "2024-01", "avg": 72, "trend": "stable"}]
+                        },
+                        "blood_glucose": {
+                            "latest": [{"value": 5.5, "unit": "mmol/L", "type": "fasting", "time": "2024-01-01 08:00:00"}],
+                            "daily_stats": [{"date": "2024-01-01", "avg": 5.8, "max": 7.2, "min": 5.0}],
+                            "weekly_stats": [{"week": "2024-W1", "avg": 5.6, "trend": "stable"}],
+                            "monthly_stats": [{"month": "2024-01", "avg": 5.7, "trend": "rising"}]
+                        },
+                        "blood_oxygen": {
+                            "latest": [{"value": 98.5, "unit": "%", "time": "2024-01-01 08:00:00"}],
+                            "daily_stats": [{"date": "2024-01-01", "avg": 98.0, "max": 99.0, "min": 97.0}],
+                            "weekly_stats": [{"week": "2024-W1", "avg": 98.2, "trend": "stable"}],
+                            "monthly_stats": [{"month": "2024-01", "avg": 98.1, "trend": "stable"}]
+                        },
+                        "sleep": {
+                            "latest": [{"value": 7.5, "unit": "hours", "time": "2024-01-01 08:00:00"}],
+                            "daily_stats": [{"date": "2024-01-01", "avg": 7.2, "max": 8.0, "min": 6.5}],
+                            "weekly_stats": [{"week": "2024-W1", "avg": 7.3, "trend": "stable"}],
+                            "monthly_stats": [{"month": "2024-01", "avg": 7.4, "trend": "stable"}]
+                        },
+                        "blood_pressure": {
+                            "latest": [{"systolic": 120, "diastolic": 80, "unit": "mmHg", "time": "2024-01-01 08:00:00"}],
+                            "daily_stats": [{"date": "2024-01-01", "avg_systolic": 118, "avg_diastolic": 79}],
+                            "weekly_stats": [{"week": "2024-W1", "avg_systolic": 119, "avg_diastolic": 78, "trend": "stable"}],
+                            "monthly_stats": [{"month": "2024-01", "avg_systolic": 120, "avg_diastolic": 80, "trend": "rising"}]
+                        },
+                        "perfusion_index": {
+                            "latest": [{"value": 3.5, "unit": "PI", "time": "2024-01-01 08:00:00"}],
+                            "daily_stats": [{"date": "2024-01-01", "avg": 3.2, "max": 4.0, "min": 2.8}],
+                            "weekly_stats": [{"week": "2024-W1", "avg": 3.3, "trend": "stable"}],
+                            "monthly_stats": [{"month": "2024-01", "avg": 3.4, "trend": "stable"}]
+                        }
                     },
                     "user_profile": {
-                        "basic_info": {"age": 45, "gender": "male", "name": "张三"},
-                        "past_medical_history": ["高血压", "糖尿病"],
-                        "family_history": ["高血压"],
-                        "lifestyle": {"smoking": False, "drinking": "偶尔", "exercise": "每周3次"},
-                        "allergies": ["青霉素"],
-                        "medications": ["阿司匹林"]
+                        "user_id": 1,
+                        "gender": "male",
+                        "birth_date": "1955-03-15",
+                        "height": 170.0,
+                        "weight": 75.0,
+                        "past_medical_history": "冠心病史5年、高血脂3年、2020年脑梗死",
+                        "family_history": "父亲有高血压、母亲有糖尿病",
+                        "allergy_history": "青霉素过敏、海鲜过敏",
+                        "surgical_history": "2020年胆囊切除术",
+                        "medical_compliance": "好"
                     },
                     "session_id": "session-001"
                 }
@@ -293,10 +376,10 @@ class ReportRequest(BaseRequest[ReportRequestBody]):
             MonitoringData: 监测数据对象
 
         Example:
-            >>> monitoring_data = MonitoringData(heart_rate=75)
+            >>> monitoring_data = MonitoringData(heart_rate={"latest": [{"value": 72}]})
             >>> request = ReportRequest(body=ReportRequestBody(task_id="task-001", monitoring_data=monitoring_data))
             >>> request.get_monitoring_data()
-            MonitoringData(blood_pressure=None, blood_sugar=None, heart_rate=75, ...)
+            MonitoringData(heart_rate={'latest': [{'value': 72}]}, blood_glucose=None, ...)
         """
         return self.body.monitoring_data
 
@@ -308,10 +391,10 @@ class ReportRequest(BaseRequest[ReportRequestBody]):
             UserProfile: 用户档案对象
 
         Example:
-            >>> user_profile = UserProfile(basic_info={"age": 45})
+            >>> user_profile = UserProfile(user_id=1, gender="male")
             >>> request = ReportRequest(body=ReportRequestBody(task_id="task-001", user_profile=user_profile))
             >>> request.get_user_profile()
-            UserProfile(basic_info={'age': 45}, past_medical_history=None, ...)
+            UserProfile(user_id=1, gender='male', birth_date=None, ...)
         """
         return self.body.user_profile
 
@@ -337,14 +420,14 @@ class ReportRequest(BaseRequest[ReportRequestBody]):
             bool: 如果有血压数据返回True，否则返回False
 
         Example:
-            >>> monitoring_data = MonitoringData(blood_pressure={"systolic": 120.0, "diastolic": 80.0})
+            >>> monitoring_data = MonitoringData(blood_pressure={"latest": [{"systolic": 120, "diastolic": 80}]})
             >>> request = ReportRequest(body=ReportRequestBody(task_id="task-001", monitoring_data=monitoring_data))
             >>> request.has_blood_pressure()
             True
         """
         return self.body.monitoring_data.blood_pressure is not None
 
-    def has_blood_sugar(self) -> bool:
+    def has_blood_glucose(self) -> bool:
         """
         判断是否有血糖数据
 
@@ -352,12 +435,12 @@ class ReportRequest(BaseRequest[ReportRequestBody]):
             bool: 如果有血糖数据返回True，否则返回False
 
         Example:
-            >>> monitoring_data = MonitoringData(blood_sugar={"fasting": 5.5, "postprandial": 7.2})
+            >>> monitoring_data = MonitoringData(blood_glucose={"latest": [{"value": 5.5}]})
             >>> request = ReportRequest(body=ReportRequestBody(task_id="task-001", monitoring_data=monitoring_data))
-            >>> request.has_blood_sugar()
+            >>> request.has_blood_glucose()
             True
         """
-        return self.body.monitoring_data.blood_sugar is not None
+        return self.body.monitoring_data.blood_glucose is not None
 
     def has_heart_rate(self) -> bool:
         """
@@ -367,14 +450,29 @@ class ReportRequest(BaseRequest[ReportRequestBody]):
             bool: 如果有心率数据返回True，否则返回False
 
         Example:
-            >>> monitoring_data = MonitoringData(heart_rate=75)
+            >>> monitoring_data = MonitoringData(heart_rate={"latest": [{"value": 72}]})
             >>> request = ReportRequest(body=ReportRequestBody(task_id="task-001", monitoring_data=monitoring_data))
             >>> request.has_heart_rate()
             True
         """
         return self.body.monitoring_data.heart_rate is not None
 
-    def has_sleep_data(self) -> bool:
+    def has_blood_oxygen(self) -> bool:
+        """
+        判断是否有血氧数据
+
+        Returns:
+            bool: 如果有血氧数据返回True，否则返回False
+
+        Example:
+            >>> monitoring_data = MonitoringData(blood_oxygen={"latest": [{"value": 98.5}]})
+            >>> request = ReportRequest(body=ReportRequestBody(task_id="task-001", monitoring_data=monitoring_data))
+            >>> request.has_blood_oxygen()
+            True
+        """
+        return self.body.monitoring_data.blood_oxygen is not None
+
+    def has_sleep(self) -> bool:
         """
         判断是否有睡眠数据
 
@@ -382,12 +480,27 @@ class ReportRequest(BaseRequest[ReportRequestBody]):
             bool: 如果有睡眠数据返回True，否则返回False
 
         Example:
-            >>> monitoring_data = MonitoringData(sleep_data={"duration": 7.5, "quality": "good"})
+            >>> monitoring_data = MonitoringData(sleep={"latest": [{"value": 7.5}]})
             >>> request = ReportRequest(body=ReportRequestBody(task_id="task-001", monitoring_data=monitoring_data))
-            >>> request.has_sleep_data()
+            >>> request.has_sleep()
             True
         """
-        return self.body.monitoring_data.sleep_data is not None
+        return self.body.monitoring_data.sleep is not None
+
+    def has_perfusion_index(self) -> bool:
+        """
+        判断是否有灌注指数数据
+
+        Returns:
+            bool: 如果有灌注指数数据返回True，否则返回False
+
+        Example:
+            >>> monitoring_data = MonitoringData(perfusion_index={"latest": [{"value": 3.5}]})
+            >>> request = ReportRequest(body=ReportRequestBody(task_id="task-001", monitoring_data=monitoring_data))
+            >>> request.has_perfusion_index()
+            True
+        """
+        return self.body.monitoring_data.perfusion_index is not None
 
     def has_past_medical_history(self) -> bool:
         """
@@ -397,12 +510,12 @@ class ReportRequest(BaseRequest[ReportRequestBody]):
             bool: 如果有既往病史返回True，否则返回False
 
         Example:
-            >>> user_profile = UserProfile(past_medical_history=["高血压", "糖尿病"])
+            >>> user_profile = UserProfile(past_medical_history="冠心病史5年、高血脂3年")
             >>> request = ReportRequest(body=ReportRequestBody(task_id="task-001", user_profile=user_profile))
             >>> request.has_past_medical_history()
             True
         """
-        return self.body.user_profile.past_medical_history is not None and len(self.body.user_profile.past_medical_history) > 0
+        return self.body.user_profile.past_medical_history is not None and len(self.body.user_profile.past_medical_history.strip()) > 0
 
     def has_family_history(self) -> bool:
         """
@@ -412,14 +525,14 @@ class ReportRequest(BaseRequest[ReportRequestBody]):
             bool: 如果有家族病史返回True，否则返回False
 
         Example:
-            >>> user_profile = UserProfile(family_history=["高血压"])
+            >>> user_profile = UserProfile(family_history="父亲有高血压、母亲有糖尿病")
             >>> request = ReportRequest(body=ReportRequestBody(task_id="task-001", user_profile=user_profile))
             >>> request.has_family_history()
             True
         """
-        return self.body.user_profile.family_history is not None and len(self.body.user_profile.family_history) > 0
+        return self.body.user_profile.family_history is not None and len(self.body.user_profile.family_history.strip()) > 0
 
-    def has_allergies(self) -> bool:
+    def has_allergy_history(self) -> bool:
         """
         判断是否有过敏史
 
@@ -427,9 +540,39 @@ class ReportRequest(BaseRequest[ReportRequestBody]):
             bool: 如果有过敏史返回True，否则返回False
 
         Example:
-            >>> user_profile = UserProfile(allergies=["青霉素"])
+            >>> user_profile = UserProfile(allergy_history="青霉素过敏、海鲜过敏")
             >>> request = ReportRequest(body=ReportRequestBody(task_id="task-001", user_profile=user_profile))
-            >>> request.has_allergies()
+            >>> request.has_allergy_history()
             True
         """
-        return self.body.user_profile.allergies is not None and len(self.body.user_profile.allergies) > 0
+        return self.body.user_profile.allergy_history is not None and len(self.body.user_profile.allergy_history.strip()) > 0
+
+    def has_surgical_history(self) -> bool:
+        """
+        判断是否有手术史
+
+        Returns:
+            bool: 如果有手术史返回True，否则返回False
+
+        Example:
+            >>> user_profile = UserProfile(surgical_history="2020年胆囊切除术")
+            >>> request = ReportRequest(body=ReportRequestBody(task_id="task-001", user_profile=user_profile))
+            >>> request.has_surgical_history()
+            True
+        """
+        return self.body.user_profile.surgical_history is not None and len(self.body.user_profile.surgical_history.strip()) > 0
+
+    def has_medical_compliance(self) -> bool:
+        """
+        判断是否有用药医嘱
+
+        Returns:
+            bool: 如果有用药医嘱返回True，否则返回False
+
+        Example:
+            >>> user_profile = UserProfile(medical_compliance="好")
+            >>> request = ReportRequest(body=ReportRequestBody(task_id="task-001", user_profile=user_profile))
+            >>> request.has_medical_compliance()
+            True
+        """
+        return self.body.user_profile.medical_compliance is not None and len(self.body.user_profile.medical_compliance.strip()) > 0

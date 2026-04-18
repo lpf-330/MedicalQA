@@ -623,18 +623,6 @@ class ReportStrategy(AgentStrategy[ReportContextBody, ReportResultData]):
         """
         logger.info(f"[ReportStrategy] STREAMING: 流式输出状态")
 
-        # 如果有流式生成器，收集完整内容
-        if context.stream_generator is not None:
-            try:
-                full_content = []
-                for chunk in context.stream_generator:
-                    if isinstance(chunk, str):
-                        full_content.append(chunk)
-                context.report_content = "".join(full_content)
-                logger.info(f"[ReportStrategy] STREAMING: 流式内容收集完成, length={len(context.report_content)}")
-            except Exception as e:
-                logger.error(f"[ReportStrategy] 流式内容收集失败: {str(e)}")
-
         return "ASSEMBLY"
 
     def _handle_assembly(self, context: ReportContextBody, resource: AgentResource) -> str:
@@ -925,6 +913,10 @@ class ReportStrategy(AgentStrategy[ReportContextBody, ReportResultData]):
         """
         生成模板报告（LLM故障降级）
 
+        使用新的UserProfile字段：
+        - user_id, gender, birth_date, height, weight
+        - past_medical_history, family_history, allergy_history, surgical_history, medical_compliance
+
         Args:
             context: 上下文数据
 
@@ -936,10 +928,26 @@ class ReportStrategy(AgentStrategy[ReportContextBody, ReportResultData]):
         # 用户信息
         user_info = ""
         if context.user_profile:
+            # 计算年龄
+            age = "未知"
+            birth_date = context.user_profile.get('birth_date')
+            if birth_date:
+                try:
+                    from datetime import datetime
+                    birth = datetime.strptime(birth_date, "%Y-%m-%d")
+                    today = datetime.now()
+                    age = today.year - birth.year - ((today.month, today.day) < (birth.month, birth.day))
+                except (ValueError, TypeError):
+                    pass
+
             user_info = f"""
 **用户信息**
-- 年龄：{context.user_profile.get('age', '未知')}
+- 年龄：{age}
 - 性别：{context.user_profile.get('gender', '未知')}
+- 既往病史：{context.user_profile.get('past_medical_history', '无')}
+- 家族病史：{context.user_profile.get('family_history', '无')}
+- 过敏史：{context.user_profile.get('allergy_history', '无')}
+- 手术史：{context.user_profile.get('surgical_history', '无')}
 """
 
         # 异常指标

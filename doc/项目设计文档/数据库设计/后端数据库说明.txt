@@ -1,0 +1,140 @@
+create table blood_oxygen_data
+(
+    id          bigint auto_increment
+        primary key,
+    user_id     bigint        not null,
+    oxygen_data decimal(4, 2) null comment '血氧饱和度(%)',
+    record_time timestamp     not null,
+    constraint fk_1
+        foreign key (user_id) references users (id)
+);
+
+
+create table blood_pressure_data
+(
+    id           bigint auto_increment
+        primary key,
+    user_id      bigint    not null,
+    systolic_bp  int       null comment '收缩压',
+    diastolic_bp int       null comment '舒张压',
+    record_time  timestamp not null,
+    constraint fk_1
+        foreign key (user_id) references users (id)
+);
+
+
+create table blood_sugar_data
+(
+    id          bigint auto_increment
+        primary key,
+    user_id     bigint        not null,
+    blood_data  decimal(5, 2) null comment '血糖值',
+    record_time timestamp     not null,
+    constraint fk_1
+        foreign key (user_id) references users (id)
+);
+
+create table heart_rate_data
+(
+    id          bigint auto_increment
+        primary key,
+    user_id     bigint    not null,
+    heart_data  int       null comment '心率(bpm)',
+    record_time timestamp not null,
+    constraint fk_1
+        foreign key (user_id) references users (id)
+);
+
+create table perfusion_index_data
+(
+    id          bigint auto_increment
+        primary key,
+    user_id     bigint        not null,
+    pi_data     decimal(5, 2) null comment '血流灌注指数',
+    record_time timestamp     not null,
+    constraint fk_1
+        foreign key (user_id) references users (id)
+);
+
+create table sleep_data
+(
+    id          bigint auto_increment
+        primary key,
+    user_id     bigint        not null,
+    sleep_data  decimal(4, 2) null comment '睡眠时长(小时)',
+    record_time datetime      not null comment '检测时间',
+    constraint fk_1
+        foreign key (user_id) references users (id)
+);
+
+
+
+
+
+
+create table daily_average_data
+(
+    id            bigint auto_increment
+        primary key,
+    user_id       bigint                                                                                           not null,
+    data_type     enum ('blood_pressure', 'blood_sugar', 'blood_oxygen', 'heart_rate', 'perfusion_index', 'sleep') not null,
+    average_value decimal(8, 2)                                                                                    not null,
+    record_date   date                                                                                             not null,
+    constraint fk_1
+        foreign key (user_id) references users (id)
+);
+
+create table weekly_average_data
+(
+    id              bigint auto_increment
+        primary key,
+    user_id         bigint                                                                                      not null,
+    data_type       enum ('blood_pressure', 'blood_sugar', 'blood_oxygen', 'heart_rate', 'blood_flow', 'sleep') not null,
+    average_value   decimal(8, 2)                                                                               not null,
+    week_start_date date                                                                                        not null comment '周一日期',
+    year_value      smallint                                                                                    not null comment '年份',
+    constraint fk_1
+        foreign key (user_id) references users (id)
+);
+
+create table monthly_average_data
+(
+    id            bigint auto_increment
+        primary key,
+    user_id       bigint                                                                                      not null,
+    data_type     enum ('blood_pressure', 'blood_sugar', 'blood_oxygen', 'heart_rate', 'blood_flow', 'sleep') not null,
+    average_value decimal(8, 2)                                                                               not null,
+    month_date    date                                                                                        not null comment '格式：YYYY-MM-01',
+    constraint fk_1
+        foreign key (user_id) references users (id)
+);
+
+
+
+
+
+
+
+create table users
+(
+    id                   bigint auto_increment
+        primary key,
+    username             varchar(50)                      not null,
+    account              varchar(50)                      not null,
+    password             varchar(255)                     not null,
+    phone                varchar(20)                      null,
+    avatar               varchar(255)                     null,
+    gender               enum ('male', 'female', 'other') null,
+    birth_date           date                             null,
+    height               decimal(5, 2)                    null comment '身高(cm)',
+    weight               decimal(5, 2)                    null comment '体重(kg)',
+    past_medical_history text                             null comment '既往病史',
+    family_history       text                             null comment '家族遗传病史',
+    allergy_history      text                             null comment '过敏史',
+    surgical_history     text                             null comment '手术史',
+    medical_compliance   text                             null comment '用药医嘱',
+    constraint account
+        unique (account),
+    constraint username
+        unique (username)
+);

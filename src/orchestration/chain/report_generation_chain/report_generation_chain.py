@@ -414,17 +414,24 @@ class ReportGenerationChain(Chain[ChainContext[ReportGenerationContextBody], Cha
             context_parts.append("\n=== 风险因素 ===")
             for factor in risk_factors:
                 if isinstance(factor, dict):
-                    name = factor.get("name", factor.get("factor", "未知因素"))
-                    impact = factor.get("impact", "")
+                    name = factor.get("factor_name", factor.get("name", factor.get("factor", "未知因素")))
+                    risk_level = factor.get("risk_level", "")
+                    basis = factor.get("basis", "")
                     context_parts.append(f"- {name}")
-                    if impact:
-                        context_parts.append(f"  影响：{impact}")
+                    if risk_level:
+                        context_parts.append(f"  风险等级：{risk_level}")
+                    if basis:
+                        context_parts.append(f"  依据：{basis}")
 
         return "\n".join(context_parts)
 
     def _build_user_message(self, context_body: ReportGenerationContextBody) -> str:
         """
         构建用户消息（包含报告结构模板和用户数据）
+
+        使用新的UserProfile字段：
+        - user_id, gender, birth_date, height, weight
+        - past_medical_history, family_history, allergy_history, surgical_history, medical_compliance
 
         Args:
             context_body: 报告生成专属输入数据
@@ -433,24 +440,41 @@ class ReportGenerationChain(Chain[ChainContext[ReportGenerationContextBody], Cha
             用户消息文本
         """
         user_profile = context_body.user_profile
-        
-        basic_info = user_profile.get('basic_info', {}) if user_profile else {}
-        age = basic_info.get('age', user_profile.get('age', '未知')) if user_profile else '未知'
-        gender = basic_info.get('gender', user_profile.get('gender', '未知')) if user_profile else '未知'
-        height = basic_info.get('height', user_profile.get('height', '未知')) if user_profile else '未知'
-        weight = basic_info.get('weight', user_profile.get('weight', '未知')) if user_profile else '未知'
-        
-        medical_history = user_profile.get('past_medical_history', user_profile.get('medical_history', [])) if user_profile else []
-        family_history = user_profile.get('family_history', []) if user_profile else []
-        
+
+        # 计算年龄
+        age = "未知"
+        birth_date = user_profile.get('birth_date') if user_profile else None
+        if birth_date:
+            try:
+                from datetime import datetime
+                birth = datetime.strptime(birth_date, "%Y-%m-%d")
+                today = datetime.now()
+                age = today.year - birth.year - ((today.month, today.day) < (birth.month, birth.day))
+            except (ValueError, TypeError):
+                pass
+
+        gender = user_profile.get('gender', '未知') if user_profile else '未知'
+        height = user_profile.get('height', '未知') if user_profile else '未知'
+        weight = user_profile.get('weight', '未知') if user_profile else '未知'
+
+        # 病史字段（字符串类型）
+        past_medical_history = user_profile.get('past_medical_history', '') if user_profile else ''
+        family_history = user_profile.get('family_history', '') if user_profile else ''
+        allergy_history = user_profile.get('allergy_history', '') if user_profile else ''
+        surgical_history = user_profile.get('surgical_history', '') if user_profile else ''
+        medical_compliance = user_profile.get('medical_compliance', '') if user_profile else ''
+
         user_info = f"""
 用户基本信息：
 - 年龄：{age}岁
 - 性别：{gender}
 - 身高：{height} cm
 - 体重：{weight} kg
-- 既往病史：{', '.join(medical_history) if medical_history else '无'}
-- 家族病史：{', '.join(family_history) if family_history else '无'}
+- 既往病史：{past_medical_history if past_medical_history else '无'}
+- 家族病史：{family_history if family_history else '无'}
+- 过敏史：{allergy_history if allergy_history else '无'}
+- 手术史：{surgical_history if surgical_history else '无'}
+- 用药医嘱：{medical_compliance if medical_compliance else '无'}
 """
 
         monitoring_data_text = ""
@@ -458,34 +482,69 @@ class ReportGenerationChain(Chain[ChainContext[ReportGenerationContextBody], Cha
         monitoring_data = context_body.monitoring_data or report_materials.get("monitoring_data", {})
         if monitoring_data:
             monitoring_parts = ["\n监测数据："]
-            
+
+            # 心率数据
+            heart_rate = monitoring_data.get('heart_rate', {})
+            if isinstance(heart_rate, dict) and heart_rate.get('latest'):
+                latest_hr_list = heart_rate['latest']
+                if isinstance(latest_hr_list, list) and latest_hr_list:
+                    latest_hr = latest_hr_list[-1] if isinstance(latest_hr_list[-1], dict) else {}
+                    hr_value = latest_hr.get('value', '未知')
+                    monitoring_parts.append(f"- 心率：{hr_value} 次/分钟")
+
+            # 血压数据
             blood_pressure = monitoring_data.get('blood_pressure', {})
-            if blood_pressure:
-                monitoring_parts.append(f"- 血压：收缩压 {blood_pressure.get('systolic', '未知')} mmHg，舒张压 {blood_pressure.get('diastolic', '未知')} mmHg")
-            
-            blood_glucose = monitoring_data.get('blood_glucose', monitoring_data.get('blood_sugar', {}))
-            if blood_glucose:
-                fasting = blood_glucose.get('fasting', '未知')
-                monitoring_parts.append(f"- 血糖：空腹血糖 {fasting} mmol/L")
-            
-            heart_rate = monitoring_data.get('heart_rate')
-            if heart_rate:
-                monitoring_parts.append(f"- 心率：{heart_rate} 次/分钟")
-            
-            blood_oxygen = monitoring_data.get('blood_oxygen')
-            if blood_oxygen:
-                monitoring_parts.append(f"- 血氧：{blood_oxygen}%")
-            
-            temperature = monitoring_data.get('temperature')
-            if temperature:
-                monitoring_parts.append(f"- 体温：{temperature}°C")
-            
+            if isinstance(blood_pressure, dict) and blood_pressure.get('latest'):
+                latest_bp_list = blood_pressure['latest']
+                if isinstance(latest_bp_list, list) and latest_bp_list:
+                    latest_bp = latest_bp_list[-1] if isinstance(latest_bp_list[-1], dict) else {}
+                    systolic = latest_bp.get('systolic', '未知')
+                    diastolic = latest_bp.get('diastolic', '未知')
+                    monitoring_parts.append(f"- 血压：收缩压 {systolic} mmHg，舒张压 {diastolic} mmHg")
+
+            # 血糖数据
+            blood_glucose = monitoring_data.get('blood_glucose', {})
+            if isinstance(blood_glucose, dict) and blood_glucose.get('latest'):
+                latest_glucose_list = blood_glucose['latest']
+                if isinstance(latest_glucose_list, list) and latest_glucose_list:
+                    latest_glucose = latest_glucose_list[-1] if isinstance(latest_glucose_list[-1], dict) else {}
+                    glucose_value = latest_glucose.get('value', '未知')
+                    glucose_type = latest_glucose.get('type', '空腹')
+                    monitoring_parts.append(f"- 血糖：{glucose_type}血糖 {glucose_value} mmol/L")
+
+            # 血氧数据
+            blood_oxygen = monitoring_data.get('blood_oxygen', {})
+            if isinstance(blood_oxygen, dict) and blood_oxygen.get('latest'):
+                latest_oxygen_list = blood_oxygen['latest']
+                if isinstance(latest_oxygen_list, list) and latest_oxygen_list:
+                    latest_oxygen = latest_oxygen_list[-1] if isinstance(latest_oxygen_list[-1], dict) else {}
+                    oxygen_value = latest_oxygen.get('value', '未知')
+                    monitoring_parts.append(f"- 血氧：{oxygen_value}%")
+
+            # 睡眠数据
+            sleep = monitoring_data.get('sleep', {})
+            if isinstance(sleep, dict) and sleep.get('latest'):
+                latest_sleep_list = sleep['latest']
+                if isinstance(latest_sleep_list, list) and latest_sleep_list:
+                    latest_sleep = latest_sleep_list[-1] if isinstance(latest_sleep_list[-1], dict) else {}
+                    sleep_value = latest_sleep.get('value', '未知')
+                    monitoring_parts.append(f"- 睡眠：{sleep_value} 小时")
+
+            # 灌注指数数据
+            perfusion_index = monitoring_data.get('perfusion_index', {})
+            if isinstance(perfusion_index, dict) and perfusion_index.get('latest'):
+                latest_pi_list = perfusion_index['latest']
+                if isinstance(latest_pi_list, list) and latest_pi_list:
+                    latest_pi = latest_pi_list[-1] if isinstance(latest_pi_list[-1], dict) else {}
+                    pi_value = latest_pi.get('value', '未知')
+                    monitoring_parts.append(f"- 灌注指数：{pi_value} PI")
+
             if len(monitoring_parts) > 1:
                 monitoring_data_text = "\n".join(monitoring_parts)
 
         risk_diseases_text = ""
         if context_body.risk_diseases:
-            disease_names = [d.get("name", "") for d in context_body.risk_diseases if d.get("name")]
+            disease_names = [d.get("name", d.get("disease_name", "")) for d in context_body.risk_diseases if d.get("name") or d.get("disease_name")]
             if disease_names:
                 risk_diseases_text = "、".join(disease_names)
 
@@ -602,18 +661,35 @@ class ReportGenerationChain(Chain[ChainContext[ReportGenerationContextBody], Cha
 
         # 用户信息
         user_profile = context_body.user_profile
+
+        # 计算年龄
+        age = "未知"
+        birth_date = user_profile.get('birth_date') if user_profile else None
+        if birth_date:
+            try:
+                from datetime import datetime
+                birth = datetime.strptime(birth_date, "%Y-%m-%d")
+                today = datetime.now()
+                age = today.year - birth.year - ((today.month, today.day) < (birth.month, birth.day))
+            except (ValueError, TypeError):
+                pass
+
+        gender = user_profile.get('gender', '未知') if user_profile else '未知'
+
         user_info = ""
         if user_profile:
             user_info = f"""
 **用户信息**
-- 年龄：{user_profile.get('age', '未知')}
-- 性别：{user_profile.get('gender', '未知')}
+- 年龄：{age}
+- 性别：{gender}
+- 既往病史：{user_profile.get('past_medical_history', '无')}
+- 家族病史：{user_profile.get('family_history', '无')}
 """
 
         # 风险疾病
         risk_diseases_text = "暂无"
         if context_body.risk_diseases:
-            disease_names = [d.get("name", "") for d in context_body.risk_diseases if d.get("name")]
+            disease_names = [d.get("disease_name", d.get("name", "")) for d in context_body.risk_diseases if d.get("disease_name") or d.get("name")]
             if disease_names:
                 risk_diseases_text = "、".join(disease_names)
 
