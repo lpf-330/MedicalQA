@@ -56,16 +56,27 @@ class VLLMAdapterImpl(VLLMAdapter):
         logger.info(f"[VLLMAdapter] 开始加载模型: model_path={model_path}, tensor_parallel_size={tensor_parallel_size}, kwargs={kwargs}")
         start_time = time.time()
         
-        self._llm = LLM(
-            model=model_path,
-            tensor_parallel_size=tensor_parallel_size,
-            **kwargs
-        )
-        self._model_path = model_path
-        self._is_loaded = True
-        
-        elapsed = time.time() - start_time
-        logger.info(f"[VLLMAdapter] 模型加载完成: model_path={model_path}, elapsed={elapsed:.2f}s")
+        try:
+            self._llm = LLM(
+                model=model_path,
+                tensor_parallel_size=tensor_parallel_size,
+                enforce_eager=True,
+                **kwargs
+            )
+            self._model_path = model_path
+            self._is_loaded = True
+            
+            elapsed = time.time() - start_time
+            logger.info(f"[VLLMAdapter] 模型加载完成: model_path={model_path}, elapsed={elapsed:.2f}s")
+        except Exception as e:
+            elapsed = time.time() - start_time
+            logger.error(f"[VLLMAdapter] 模型加载失败: model_path={model_path}, elapsed={elapsed:.2f}s")
+            logger.error(f"[VLLMAdapter] 错误类型: {type(e).__name__}")
+            logger.error(f"[VLLMAdapter] 错误信息: {str(e)}")
+            logger.error(f"[VLLMAdapter] 配置参数: tensor_parallel_size={tensor_parallel_size}, kwargs={kwargs}")
+            logger.error(f"[VLLMAdapter] GPU内存利用率: {kwargs.get('gpu_memory_utilization', '未设置')}")
+            logger.error(f"[VLLMAdapter] 最大模型长度: {kwargs.get('max_model_len', '未设置')}")
+            raise
     
     def generate(
         self, 
@@ -92,7 +103,10 @@ class VLLMAdapterImpl(VLLMAdapter):
             logger.error("[VLLMAdapter] 生成失败，模型未加载")
             raise RuntimeError("Model not loaded")
         
-        logger.debug(f"[VLLMAdapter] 开始生成: prompt_len={len(prompt)}, max_tokens={max_tokens}, temperature={temperature}")
+        logger.debug(f"[VLLMAdapter] LLM输入 - prompt长度: {len(prompt)}字符")
+        logger.debug(f"[VLLMAdapter] LLM输入 - prompt内容:\n{prompt[:2000]}{'...' if len(prompt) > 2000 else ''}")
+        logger.debug(f"[VLLMAdapter] LLM参数 - max_tokens={max_tokens}, temperature={temperature}, top_p={top_p}, kwargs={kwargs}")
+        
         start_time = time.time()
         
         sampling_params = SamplingParams(
@@ -107,6 +121,7 @@ class VLLMAdapterImpl(VLLMAdapter):
         
         elapsed = time.time() - start_time
         logger.info(f"[VLLMAdapter] 生成完成: output_len={len(result)}, elapsed={elapsed:.2f}s")
+        logger.debug(f"[VLLMAdapter] LLM输出 - 内容:\n{result[:2000]}{'...' if len(result) > 2000 else ''}")
         return result
     
     def generate_batch(
@@ -159,24 +174,12 @@ class VLLMAdapterImpl(VLLMAdapter):
         top_p: float = 0.9,
         **kwargs
     ) -> Iterator[str]:
-        """
-        流式生成文本
-        
-        Args:
-            prompt: 输入提示
-            max_tokens: 最大生成token数
-            temperature: 温度参数
-            top_p: top_p参数
-            **kwargs: 其他生成参数
-            
-        Yields:
-            生成的文本片段
-        """
         if not self._is_loaded or self._llm is None:
-            logger.error("[VLLMAdapter] 流式生成失败，模型未加载")
             raise RuntimeError("Model not loaded")
         
-        logger.debug(f"[VLLMAdapter] 开始流式生成: prompt_len={len(prompt)}, max_tokens={max_tokens}")
+        logger.debug(f"[VLLMAdapter] LLM流式输入 - prompt长度: {len(prompt)}字符")
+        logger.debug(f"[VLLMAdapter] LLM流式输入 - prompt内容:\n{prompt[:2000]}{'...' if len(prompt) > 2000 else ''}")
+        logger.debug(f"[VLLMAdapter] LLM流式参数 - max_tokens={max_tokens}, temperature={temperature}, top_p={top_p}, kwargs={kwargs}")
         
         sampling_params = SamplingParams(
             max_tokens=max_tokens,
@@ -185,11 +188,16 @@ class VLLMAdapterImpl(VLLMAdapter):
             **kwargs
         )
         
-        for output in self._llm.generate([prompt], sampling_params, use_tqdm=False):
-            for token in output.outputs[0].token_ids:
-                yield self._llm.get_tokenizer().decode([token])
-        
-        logger.info("[VLLMAdapter] 流式生成完成")
+        outputs = self._llm.generate([prompt], sampling_params, use_tqdm=False)
+        if outputs:
+            generated_text = outputs[0].outputs[0].text
+            logger.debug(f"[VLLMAdapter] LLM流式输出 - 内容:\n{generated_text[:2000]}{'...' if len(generated_text) > 2000 else ''}")
+            tokenizer = self._llm.get_tokenizer()
+            token_ids = outputs[0].outputs[0].token_ids
+            for token_id in token_ids:
+                token_text = tokenizer.decode([token_id])
+                if token_text:
+                    yield token_text
     
     def unload_model(self) -> None:
         """卸载模型，释放资源"""

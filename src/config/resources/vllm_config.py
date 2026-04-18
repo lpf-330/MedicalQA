@@ -37,10 +37,10 @@ class VLLMResourceConfig(BaseResourceConfig):
     config_id: str = "vllm_config"
     resource_type: str = "vllm_model"
     model_path: str = field(default_factory=_get_default_model_path)
-    model_name: str = "Qwen3-4B-Instruct"
+    model_name: str = "Qwen3-4B-Instruct-2507"
     tensor_parallel_size: int = 1
     max_model_len: int = 8192
-    gpu_memory_utilization: float = 0.9
+    gpu_memory_utilization: float = 0.8
     
     def validate(self) -> bool:
         """

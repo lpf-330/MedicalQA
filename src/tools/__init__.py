@@ -11,6 +11,8 @@ Tool工具层是系统中tool功能的实现层，每个Tool封装一个独立�
 """
 
 from .tool import Tool
+from .vector_retrieval_tool import VectorEnhancedRetrievalTool
+from .intent_classification_tool import IntentClassificationTool
 
-__all__ = ['Tool']
+__all__ = ['Tool', 'VectorEnhancedRetrievalTool', 'IntentClassificationTool']
 

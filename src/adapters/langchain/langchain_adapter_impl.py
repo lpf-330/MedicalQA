@@ -4,11 +4,11 @@ Langchain适配器实现类
 
 转接适配Langchain框架，为项目各层级提供统一的框架操作接口。
 
-注意：Langchain 1.x版本中，部分组件已移至langchain_community包。
-本适配器使用延迟导入，在需要时才导入相关组件。
+注意：Langchain 1.x版本中，部分组件已移至langchain_core包。
+本适配器使用langchain_core和langgraph组件。
 """
 
-from typing import Any, Dict, Optional
+from typing import Any, Dict, List, Optional
 
 from .langchain_adapter import (
     LangchainAdapter, 
@@ -20,16 +20,26 @@ from .langchain_adapter import (
 
 
 class InternalChainImpl(InternalChain):
-    """内部链实现类"""
+    """内部链实现类 - 使用LCEL (LangChain Expression Language)"""
     
     def __init__(self, chain):
         self._chain = chain
     
     def run(self, **kwargs) -> str:
-        return self._chain.run(**kwargs)
+        result = self._chain.invoke(kwargs)
+        if isinstance(result, str):
+            return result
+        elif hasattr(result, 'content'):
+            return result.content
+        return str(result)
     
     async def arun(self, **kwargs) -> str:
-        return await self._chain.arun(**kwargs)
+        result = await self._chain.ainvoke(kwargs)
+        if isinstance(result, str):
+            return result
+        elif hasattr(result, 'content'):
+            return result.content
+        return str(result)
 
 
 class InternalToolImpl(InternalTool):
@@ -39,7 +49,10 @@ class InternalToolImpl(InternalTool):
         self._tool = tool
     
     def run(self, **kwargs) -> str:
-        return self._tool.run(**kwargs)
+        result = self._tool.invoke(kwargs)
+        if isinstance(result, str):
+            return result
+        return str(result)
     
     @property
     def name(self) -> str:
@@ -51,32 +64,66 @@ class InternalToolImpl(InternalTool):
 
 
 class InternalMemoryImpl(InternalMemory):
-    """内部记忆实现类"""
+    """内部记忆实现类 - 使用BaseChatMessageHistory"""
     
-    def __init__(self, memory):
-        self._memory = memory
+    def __init__(self, chat_history):
+        self._chat_history = chat_history
+        self._messages: List[Dict] = []
     
     def save_context(self, inputs: Dict, outputs: Dict) -> None:
-        self._memory.save_context(inputs, outputs)
+        from langchain_core.messages import HumanMessage, AIMessage
+        
+        for key, value in inputs.items():
+            self._messages.append({"role": "human", "content": value})
+        for key, value in outputs.items():
+            self._messages.append({"role": "ai", "content": value})
+        
+        if hasattr(self._chat_history, 'add_message'):
+            for key, value in inputs.items():
+                self._chat_history.add_message(HumanMessage(content=value))
+            for key, value in outputs.items():
+                self._chat_history.add_message(AIMessage(content=value))
     
     def load_memory_variables(self, inputs: Dict) -> Dict:
-        return self._memory.load_memory_variables(inputs)
+        return {"history": self._messages}
     
     def clear(self) -> None:
-        self._memory.clear()
+        self._messages = []
+        if hasattr(self._chat_history, 'clear'):
+            self._chat_history.clear()
 
 
 class InternalAgentImpl(InternalAgent):
-    """内部Agent实现类"""
+    """内部Agent实现类 - 使用langgraph"""
     
     def __init__(self, agent_executor):
         self._agent_executor = agent_executor
     
     def run(self, input_text: str) -> str:
-        return self._agent_executor.run(input_text)
+        result = self._agent_executor.invoke({"messages": [("user", input_text)]})
+        if isinstance(result, dict):
+            if "messages" in result:
+                messages = result["messages"]
+                if messages:
+                    last_message = messages[-1]
+                    if hasattr(last_message, 'content'):
+                        return last_message.content
+                    return str(last_message)
+            return str(result)
+        return str(result)
     
     async def arun(self, input_text: str) -> str:
-        return await self._agent_executor.arun(input_text)
+        result = await self._agent_executor.ainvoke({"messages": [("user", input_text)]})
+        if isinstance(result, dict):
+            if "messages" in result:
+                messages = result["messages"]
+                if messages:
+                    last_message = messages[-1]
+                    if hasattr(last_message, 'content'):
+                        return last_message.content
+                    return str(last_message)
+            return str(result)
+        return str(result)
 
 
 class LangchainAdapterImpl(LangchainAdapter):
@@ -84,7 +131,7 @@ class LangchainAdapterImpl(LangchainAdapter):
     Langchain适配器实现类
     
     封装langchain库，为项目提供统一的框架操作接口。
-    使用延迟导入，在需要时才导入langchain相关组件。
+    使用langchain_core和langgraph组件。
     
     属性：
         _llm: 语言模型实例
@@ -124,28 +171,17 @@ class LangchainAdapterImpl(LangchainAdapter):
             内部链对象
         """
         if chain_type == "llm_chain":
-            try:
-                from langchain.chains import LLMChain
-                from langchain_core.prompts import PromptTemplate
-            except ImportError:
-                try:
-                    from langchain_community.chains import LLMChain
-                    from langchain_core.prompts import PromptTemplate
-                except ImportError:
-                    raise ImportError(
-                        "Langchain components not found. "
-                        "Please install langchain-community: pip install langchain-community"
-                    )
+            from langchain_core.prompts import PromptTemplate
             
             prompt = PromptTemplate(
                 template=config.get("prompt_template", "{input}"),
                 input_variables=config.get("input_variables", ["input"])
             )
             
-            chain = LLMChain(
-                llm=self._llm,
-                prompt=prompt
-            )
+            if self._llm is None:
+                raise ValueError("LLM not set. Call set_llm() first.")
+            
+            chain = prompt | self._llm
             return InternalChainImpl(chain)
         
         raise ValueError(f"Unsupported chain type: {chain_type}")
@@ -165,16 +201,7 @@ class LangchainAdapterImpl(LangchainAdapter):
         Returns:
             内部工具对象
         """
-        try:
-            from langchain.tools import Tool
-        except ImportError:
-            try:
-                from langchain_community.tools import Tool
-            except ImportError:
-                raise ImportError(
-                    "Langchain Tool not found. "
-                    "Please install langchain-community: pip install langchain-community"
-                )
+        from langchain_core.tools import Tool
         
         tool = Tool(
             name=config.get("name", tool_type),
@@ -199,22 +226,24 @@ class LangchainAdapterImpl(LangchainAdapter):
             内部记忆对象
         """
         if memory_type == "buffer":
-            try:
-                from langchain.memory import ConversationBufferMemory
-            except ImportError:
-                try:
-                    from langchain_community.chat_message_histories import ConversationBufferMemory
-                except ImportError:
-                    raise ImportError(
-                        "Langchain ConversationBufferMemory not found. "
-                        "Please install langchain-community: pip install langchain-community"
-                    )
+            from langchain_core.chat_history import BaseChatMessageHistory
             
-            memory = ConversationBufferMemory(
-                memory_key=config.get("memory_key", "history"),
-                return_messages=config.get("return_messages", False)
-            )
-            return InternalMemoryImpl(memory)
+            class SimpleChatHistory(BaseChatMessageHistory):
+                def __init__(self):
+                    self._messages = []
+                
+                @property
+                def messages(self):
+                    return self._messages
+                
+                def add_message(self, message):
+                    self._messages.append(message)
+                
+                def clear(self):
+                    self._messages = []
+            
+            chat_history = SimpleChatHistory()
+            return InternalMemoryImpl(chat_history)
         
         raise ValueError(f"Unsupported memory type: {memory_type}")
     
@@ -228,28 +257,22 @@ class LangchainAdapterImpl(LangchainAdapter):
         
         Args:
             agent_type: Agent类型
-            config: Agent配置
+            config: Agent配置（包含tools、llm等）
             
         Returns:
             内部Agent对象
         """
-        try:
-            from langchain.agents import AgentExecutor, initialize_agent
-        except ImportError:
-            try:
-                from langchain_community.agents import AgentExecutor, initialize_agent
-            except ImportError:
-                raise ImportError(
-                    "Langchain Agent components not found. "
-                    "Please install langchain-community: pip install langchain-community"
-                )
+        from langgraph.prebuilt import create_react_agent
         
         tools = config.get("tools", [])
+        llm = config.get("llm", self._llm)
         
-        agent_executor = initialize_agent(
+        if llm is None:
+            raise ValueError("LLM not set. Call set_llm() or provide llm in config.")
+        
+        agent_executor = create_react_agent(
+            model=llm,
             tools=tools,
-            llm=self._llm,
-            agent=agent_type,
-            verbose=config.get("verbose", False)
+            state_modifier=config.get("system_prompt", None)
         )
         return InternalAgentImpl(agent_executor)

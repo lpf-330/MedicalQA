@@ -9,6 +9,21 @@ from pydantic import BaseModel, Field
 from .base_request import BaseRequest
 
 
+class ChatMessage(BaseModel):
+
+    role: str = Field(
+        ...,
+        description="消息角色",
+        examples=["user", "assistant"]
+    )
+
+    content: str = Field(
+        ...,
+        description="消息内容",
+        examples=["我最近总是头痛", "请问您的头痛持续多长时间了？"]
+    )
+
+
 class ConsultRequestBody(BaseModel):
     """
     健康咨询请求体数据类
@@ -16,6 +31,8 @@ class ConsultRequestBody(BaseModel):
     包含健康咨询特有的请求数据结构。
     
     Attributes:
+        task_id (str): 任务标识符
+        chat_history (List[ChatMessage]): 对话历史列表
         question (str): 用户提出的健康咨询问题
         session_id (Optional[str]): 会话ID，用于多轮对话的会话标识
         conversation_history (Optional[List[Dict[str, str]]]): 对话历史，包含之前的对话记录
@@ -24,11 +41,30 @@ class ConsultRequestBody(BaseModel):
     
     Example:
         >>> body = ConsultRequestBody(
+        ...     task_id="task-001",
+        ...     chat_history=[ChatMessage(role="user", content="我最近总是头痛")],
         ...     question="我最近总是头痛，应该怎么办？",
         ...     session_id="session-001",
         ...     user_profile={"age": 45, "gender": "male"}
         ... )
     """
+
+    task_id: str = Field(
+        ...,
+        description="任务标识符",
+        examples=["task-001", "task-abc123"]
+    )
+
+    chat_history: List[ChatMessage] = Field(
+        ...,
+        description="对话历史列表",
+        examples=[
+            [
+                {"role": "user", "content": "我最近总是头痛"},
+                {"role": "assistant", "content": "请问您的头痛持续多长时间了？"}
+            ]
+        ]
+    )
     
     question: str = Field(
         ...,
@@ -117,6 +153,11 @@ class ConsultRequest(BaseRequest[ConsultRequestBody]):
                     "version": "1.0.0"
                 },
                 "body": {
+                    "task_id": "task-001",
+                    "chat_history": [
+                        {"role": "user", "content": "我最近总是头痛"},
+                        {"role": "assistant", "content": "请问您的头痛持续多长时间了？"}
+                    ],
                     "question": "我最近总是头痛，应该怎么办？",
                     "session_id": "session-001",
                     "conversation_history": [

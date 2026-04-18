@@ -83,6 +83,7 @@ class ResourcePool:
             with self._lock:
                 if self._idle_resources:
                     resource_id, resource = self._idle_resources.popitem()
+                    resource.activate()
                     self._active_resources[resource_id] = resource
                     logger.info(f"[ResourcePool] 从空闲池获取资源: type={self._resource_type}, resource_id={resource_id[:8]}..., idle={len(self._idle_resources)}, active={len(self._active_resources)}")
                     return ResourceHandle(resource_id, resource, self)
@@ -91,6 +92,7 @@ class ResourcePool:
                     logger.info(f"[ResourcePool] 空闲池为空，创建新资源: type={self._resource_type}")
                     resource = self._factory.create(self._resource_config)
                     resource_id = str(uuid4())
+                    resource.activate()
                     self._active_resources[resource_id] = resource
                     logger.info(f"[ResourcePool] 新资源创建成功: type={self._resource_type}, resource_id={resource_id[:8]}..., active={len(self._active_resources)}")
                     return ResourceHandle(resource_id, resource, self)

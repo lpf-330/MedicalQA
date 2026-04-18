@@ -6,11 +6,15 @@
 
 import logging
 import time
-from typing import TYPE_CHECKING, TypeVar, TypeAlias, Any
+from typing import TYPE_CHECKING, TypeVar, TypeAlias, Any, Dict, List, Generator
 
 if TYPE_CHECKING:
     from src.orchestration.agent.agent import Agent
     from src.orchestration.agent.data_classes import AgentContext, AgentResult
+
+from src.orchestration.agent.data_classes import AgentContext
+from src.orchestration.agent.consult_strategy.consult_strategy import ConsultContextBody
+from src.schemas.consult_request import ConsultRequest
 
 logger = logging.getLogger(__name__)
 
@@ -21,42 +25,8 @@ ConsultResult: TypeAlias = 'AgentResult[Any]'
 
 
 class ConsultService:
-    """
-    ConsultService类 - 健康咨询服务类
-
-    健康咨询服务，组合agent策略和资源，调用agent入口方法。
-    被ConsultController依赖使用。
-
-    职责：
-        - 接收Controller传递的请求上下文
-        - 组合编排层的策略与资源
-        - 驱动完整的健康咨询业务流程
-        - 管理请求生命周期内的状态和资源
-
-    使用示例：
-        >>> # 创建agent实例（通常在应用启动时创建）
-        >>> agent = Agent(strategy=consult_strategy, resources=agent_resource)
-        >>> # 创建ConsultService实例
-        >>> service = ConsultService(agent=agent)
-        >>> # 处理健康咨询请求
-        >>> context = AgentContext(session_id="session_001", current_state="INIT", body=consult_context_body)
-        >>> result = service.process_consult(context)
-        >>> print(result.data)
-
-    Attributes:
-        _agent: Agent实例，用于执行健康咨询编排逻辑
-    """
 
     def __init__(self, agent: 'Agent[Any, Any]') -> None:
-        """
-        初始化ConsultService实例
-
-        Args:
-            agent: Agent实例，必须已配置好健康咨询策略和资源
-
-        Raises:
-            ValueError: agent为None时抛出
-        """
         if agent is None:
             raise ValueError("agent不能为None")
 
@@ -65,49 +35,11 @@ class ConsultService:
 
     @property
     def agent(self) -> 'Agent[Any, Any]':
-        """
-        获取Agent实例（只读属性）
-
-        Returns:
-            Agent[Any, Any]: Agent实例
-        """
         return self._agent
 
     def process_consult(self, context: ConsultContext) -> ConsultResult:
-        """
-        健康咨询服务方法
-
-        组合agent策略和资源，调用agent入口方法。
-        该方法接收健康咨询上下文，通过Agent执行编排逻辑，返回健康咨询结果。
-
-        Args:
-            context: 健康咨询上下文，包含session_id、current_state和body
-                     body应包含用户问题、对话历史、用户档案等信息
-
-        Returns:
-            ConsultResult: 健康咨询结果，包含session_id和data
-                          data应包含咨询结果、建议、置信度等信息
-
-        Raises:
-            ValueError: context为None或无效时抛出
-            ParamException: 参数错误时抛出
-            BusinessException: 业务逻辑错误时抛出
-            ResourceException: 资源访问错误时抛出
-
-        Example:
-            >>> # 创建上下文
-            >>> context = AgentContext(
-            ...     session_id="session_001",
-            ...     current_state="INIT",
-            ...     body=consult_context_body
-            ... )
-            >>> # 处理咨询
-            >>> result = service.process_consult(context)
-            >>> print(result.is_success())
-            True
-        """
         start_time = time.time()
-        
+
         if context is None:
             logger.error("[ConsultService] context为None")
             raise ValueError("context不能为None")
@@ -118,13 +50,110 @@ class ConsultService:
 
         logger.info(f"[ConsultService] 开始处理咨询: session_id={context.session_id}")
 
-        result = self._agent.run(context)
+        try:
+            result = self._agent.run(context)
+            return result
+        finally:
+            agent_resource = self._agent.resources
+            if agent_resource is not None:
+                for handler in agent_resource.tool_handlers.values():
+                    try:
+                        handler.release()
+                    except Exception as e:
+                        logger.error(f"[ConsultService] 释放tool handler失败: {e}")
+                if agent_resource.model_service is not None:
+                    try:
+                        agent_resource.model_service.release()
+                    except Exception as e:
+                        logger.error(f"[ConsultService] 释放model service失败: {e}")
+            elapsed = time.time() - start_time
+            logger.info(f"[ConsultService] 咨询处理完成: session_id={context.session_id}, elapsed={elapsed:.2f}s")
 
-        elapsed = time.time() - start_time
-        logger.info(f"[ConsultService] 咨询处理完成: session_id={context.session_id}, elapsed={elapsed:.2f}s")
+    def process_consult_stream(self, context: ConsultContext) -> Generator[str, None, None]:
+        import json
+        
+        if context is None:
+            yield f"event: error\ndata: {json.dumps({'error_code': 400, 'error_message': 'context不能为None'})}\n\n"
+            return
+        
+        if not hasattr(context, 'session_id') or not context.session_id:
+            yield f"event: error\ndata: {json.dumps({'error_code': 400, 'error_message': 'session_id不能为空'})}\n\n"
+            return
+        
+        logger.info(f"[ConsultService] 开始流式处理咨询: session_id={context.session_id}")
+        
+        try:
+            result = self._agent.run(context)
+            
+            if result is not None and result.data is not None:
+                body = context.body
+                if hasattr(body, 'stream_generator') and body.stream_generator is not None:
+                    for token in body.stream_generator:
+                        payload = json.dumps({"content": token}, ensure_ascii=False)
+                        yield f"event: message\ndata: {payload}\n\n"
+                    
+                    context.answer_text = getattr(body, 'answer_text', '')
+                    context.is_streaming = False
+                    
+                    end_data = {
+                        "session_id": result.session_id,
+                        "sources": getattr(body, 'sources', []),
+                        "is_health_consultation": getattr(body, 'is_health_consultation', True),
+                        "error_code": getattr(body, 'error_code', 0),
+                    }
+                    yield f"event: end\ndata: {json.dumps(end_data, ensure_ascii=False)}\n\n"
+                else:
+                    answer = result.data.answer if hasattr(result.data, 'answer') else str(result.data)
+                    payload = json.dumps({"content": answer}, ensure_ascii=False)
+                    yield f"event: message\ndata: {payload}\n\n"
+                    end_data = {"session_id": result.session_id}
+                    yield f"event: end\ndata: {json.dumps(end_data, ensure_ascii=False)}\n\n"
+            else:
+                yield f"event: error\ndata: {json.dumps({'error_code': 500, 'error_message': '处理结果为空'})}\n\n"
+        
+        except Exception as e:
+            logger.error(f"[ConsultService] 流式处理异常: {str(e)}")
+            yield f"event: error\ndata: {json.dumps({'error_code': 500, 'error_message': str(e)})}\n\n"
+        
+        finally:
+            agent_resource = self._agent.resources
+            if agent_resource is not None:
+                for handler in agent_resource.tool_handlers.values():
+                    try:
+                        handler.release()
+                    except Exception as e:
+                        logger.error(f"[ConsultService] 释放tool handler失败: {e}")
+                if agent_resource.model_service is not None:
+                    try:
+                        agent_resource.model_service.release()
+                    except Exception as e:
+                        logger.error(f"[ConsultService] 释放model service失败: {e}")
 
-        return result
+    def _build_agent_context(self, request: ConsultRequest) -> AgentContext:
+        session_id = request.get_session_id() or request.body.task_id
+
+        conversation_history = request.get_conversation_history() or []
+        if not conversation_history and request.body.chat_history:
+            conversation_history = [
+                {"role": msg.role, "content": msg.content}
+                for msg in request.body.chat_history
+            ]
+
+        context_body = ConsultContextBody(
+            question=request.get_question(),
+            session_id=session_id,
+            conversation_history=conversation_history,
+            user_profile=request.get_user_profile() or {},
+            current_state="INITIAL"
+        )
+
+        agent_context = AgentContext(
+            session_id=session_id,
+            current_state="INITIAL",
+            body=context_body
+        )
+
+        return agent_context
 
     def __repr__(self) -> str:
-        """返回ConsultService的字符串表示"""
         return f"ConsultService(agent={self._agent})"

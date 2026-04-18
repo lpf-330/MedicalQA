@@ -132,4 +132,45 @@
 
 | 日期 | 版本 | 更新内容 |
 |-----|------|---------|
+| 2026-04-18 | v1.1 | 修复medical_entity集合neo4j_node_id字段问题，重新部署集合 |
 | 2026-04-11 | v1.0 | 初始版本，完成数据完整性验证 |
+
+## 9. neo4j_node_id修复记录
+
+### 9.1 问题描述
+
+在2026-04-18的数据一致性测试中发现，medical_entity集合中的neo4j_node_id字段存储的是数据文件序号（0, 1, 2...），而非Neo4j数据库中的节点ID。
+
+**问题原因**：
+- extract_entities.py脚本使用了错误的查询语句
+- 原查询：`RETURN n.id as id`（节点属性id，不存在）
+- 正确查询：`RETURN id(n) as neo4j_id`（Neo4j内部函数id）
+
+### 9.2 修复过程
+
+1. **修复extract_entities.py脚本**：
+   - 将查询语句修改为使用`id(n)`获取Neo4j内部节点ID
+   - 将字段名从`id`改为`neo4j_id`
+
+2. **重新部署medical_entity集合**：
+   - 删除旧的medical_entity集合
+   - 从Neo4j重新提取实体数据
+   - 重新创建集合并导入向量数据
+   - 部署速度：约518条/秒（GPU加速）
+
+3. **验证修复结果**：
+   - 随机抽取10个实体验证neo4j_node_id匹配
+   - 验证之前有问题的实体（带绦虫孕节检查法、常规体检等）
+   - 所有验证通过
+
+### 9.3 修复后状态
+
+| 集合名称 | neo4j_node_id状态 | 验证结果 |
+|---------|------------------|---------|
+| medical_entity | ✅ 已修复 | 与Neo4j节点ID完全匹配 |
+| entity_attributes | ✅ 正常 | 无需修复 |
+| entity_relations | ✅ 正常 | 无需修复 |
+
+### 9.4 修复脚本
+
+修复脚本位于：`redeploy_medical_entity.py`

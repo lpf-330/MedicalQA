@@ -17,16 +17,23 @@ class ConsultResponseData(BaseModel):
     
     Attributes:
         result (str): 咨询的主要结果内容
+        event_type (str): SSE事件类型，"message"/"end"/"error"
+        sources (List[str]): 知识来源引用列表
+        word_count (int): 回答字数
+        error_code (int): 错误码，0表示无错误
+        error_message (str): 错误消息
         suggestions (Optional[List[str]]): 健康建议列表
         related_knowledge (Optional[List[Dict[str, str]]]): 相关的健康知识
         session_id (Optional[str]): 会话ID，用于多轮对话的会话标识
         follow_up_questions (Optional[List[str]]): 建议用户进一步咨询的问题
         confidence (Optional[float]): 咨询结果的置信度，范围0-1
-        sources (Optional[List[Dict[str, str]]]): 咨询结果的知识来源
     
     Example:
         >>> data = ConsultResponseData(
         ...     result="根据您的描述，头痛可能由多种原因引起...",
+        ...     event_type="message",
+        ...     sources=["医学知识库-高血压章节"],
+        ...     word_count=128,
         ...     suggestions=["保持充足睡眠", "适当运动", "定期检查血压"],
         ...     session_id="session-001"
         ... )
@@ -36,6 +43,38 @@ class ConsultResponseData(BaseModel):
         ...,
         description="咨询的主要结果内容",
         examples=["根据您的描述，头痛可能由多种原因引起，包括压力、睡眠不足、高血压等。"]
+    )
+
+    event_type: str = Field(
+        default="message",
+        description="SSE事件类型",
+        examples=["message", "end", "error"]
+    )
+
+    sources: List[str] = Field(
+        default_factory=list,
+        description="知识来源引用列表",
+        examples=[
+            ["医学知识库-高血压章节", "临床指南-头痛诊断"]
+        ]
+    )
+
+    word_count: int = Field(
+        default=0,
+        description="回答字数",
+        examples=[128, 256]
+    )
+
+    error_code: int = Field(
+        default=0,
+        description="错误码，0表示无错误",
+        examples=[0, 1001, 2001]
+    )
+
+    error_message: str = Field(
+        default="",
+        description="错误消息",
+        examples=["", "模型服务不可用", "请求参数错误"]
     )
     
     suggestions: Optional[List[str]] = Field(
@@ -79,20 +118,6 @@ class ConsultResponseData(BaseModel):
         ge=0.0,
         le=1.0,
         examples=[0.85]
-    )
-    
-    sources: Optional[List[Dict[str, str]]] = Field(
-        default=None,
-        description="咨询结果的知识来源",
-        examples=[
-            [
-                {
-                    "type": "medical_database",
-                    "name": "医学知识库",
-                    "url": "https://example.com/knowledge/123"
-                }
-            ]
-        ]
     )
 
 
@@ -139,6 +164,14 @@ class ConsultResponse(BaseResponse[ConsultResponseData]):
                 "message": "咨询成功",
                 "data": {
                     "result": "根据您的描述，头痛可能由多种原因引起，包括压力、睡眠不足、高血压等。",
+                    "event_type": "message",
+                    "sources": [
+                        "医学知识库-高血压章节",
+                        "临床指南-头痛诊断"
+                    ],
+                    "word_count": 128,
+                    "error_code": 0,
+                    "error_message": "",
                     "suggestions": [
                         "保持充足睡眠",
                         "适当运动",
@@ -157,14 +190,7 @@ class ConsultResponse(BaseResponse[ConsultResponseData]):
                         "您的头痛通常在什么时间发生？",
                         "您是否有高血压家族史？"
                     ],
-                    "confidence": 0.85,
-                    "sources": [
-                        {
-                            "type": "medical_database",
-                            "name": "医学知识库",
-                            "url": "https://example.com/knowledge/123"
-                        }
-                    ]
+                    "confidence": 0.85
                 },
                 "timestamp": "2024-01-01T12:00:00",
                 "request_id": "req-123456789abc"

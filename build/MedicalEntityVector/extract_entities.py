@@ -36,12 +36,12 @@ class Neo4jEntityExtractor:
         entities = []
         try:
             with self.driver.session() as session:
-                query = f"MATCH (n:{entity_type}) RETURN n.id as id, n.name as name"
+                query = f"MATCH (n:{entity_type}) RETURN id(n) as neo4j_id, n.name as name"
                 result = session.run(query)
                 
                 for record in result:
                     entity = {
-                        "id": record["id"],
+                        "neo4j_id": str(record["neo4j_id"]),
                         "name": record["name"],
                         "entity_type": entity_type
                     }

@@ -1,0 +1,362 @@
+============================= test session starts ==============================
+platform linux -- Python 3.11.9, pytest-9.0.3, pluggy-1.6.0 -- /home/ai_env/miniforge3/envs/MedicalQA/bin/python
+cachedir: .pytest_cache
+rootdir: /home/project/MedicalQA
+configfile: pytest.ini
+plugins: langsmith-0.7.23, anyio-4.13.0
+collecting ... collected 112 items
+
+test/unit/test_answer_generation_chain.py::TestAnswerGenerationChain::test_execute PASSED [  0%]
+test/unit/test_answer_generation_chain.py::TestAnswerGenerationChain::test_execute_stream PASSED [  1%]
+test/unit/test_answer_generation_chain.py::TestAnswerGenerationChain::test_build_prompt_contains_knowledge PASSED [  2%]
+test/unit/test_answer_generation_chain.py::TestAnswerGenerationChain::test_build_prompt_contains_disclaimer_rule PASSED [  3%]
+test/unit/test_answer_generation_chain.py::TestAnswerGenerationChain::test_format_answer_adds_disclaimer PASSED [  4%]
+test/unit/test_answer_generation_chain.py::TestAnswerGenerationChain::test_format_answer_no_duplicate_disclaimer PASSED [  5%]
+test/unit/test_answer_generation_chain.py::TestAnswerGenerationChain::test_check_quality_pass PASSED [  6%]
+test/unit/test_answer_generation_chain.py::TestAnswerGenerationChain::test_check_quality_fail_length PASSED [  7%]
+test/unit/test_answer_generation_chain.py::TestAnswerGenerationChain::test_check_quality_fail_no_disclaimer PASSED [  8%]
+test/unit/test_consult_controller.py::TestConsultController::test_consult_returns_streaming_response PASSED [  8%]
+test/unit/test_consult_controller.py::TestConsultController::test_validate_request_empty_question FAILED [  9%]
+test/unit/test_consult_controller.py::TestConsultController::test_consult_error_handling PASSED [ 10%]
+test/unit/test_consult_model_service.py::TestConsultModelService::test_init_model PASSED [ 11%]
+test/unit/test_consult_model_service.py::TestConsultModelService::test_call_model PASSED [ 12%]
+test/unit/test_consult_model_service.py::TestConsultModelService::test_generate_with_context PASSED [ 13%]
+test/unit/test_consult_model_service.py::TestConsultModelService::test_stream_generate_with_context PASSED [ 14%]
+test/unit/test_consult_model_service.py::TestConsultModelService::test_release PASSED [ 15%]
+test/unit/test_consult_model_service.py::TestConsultModelService::test_call_model_not_initialized PASSED [ 16%]
+test/unit/test_consult_service.py::TestConsultService::test_process_consult_stream PASSED [ 16%]
+test/unit/test_consult_service.py::TestConsultService::test_build_agent_context PASSED [ 17%]
+test/unit/test_consult_service.py::TestConsultService::test_assemble_agent_resource FAILED [ 18%]
+test/unit/test_consult_strategy.py::TestConsultStrategy::test_fsm_initial_state PASSED [ 19%]
+test/unit/test_consult_strategy.py::TestConsultStrategy::test_initial_to_query_parse PASSED [ 20%]
+test/unit/test_consult_strategy.py::TestConsultStrategy::test_query_parse_to_knowledge_retrieval PASSED [ 21%]
+test/unit/test_consult_strategy.py::TestConsultStrategy::test_query_parse_to_finished PASSED [ 22%]
+test/unit/test_consult_strategy.py::TestConsultStrategy::test_knowledge_retrieval_to_integration PASSED [ 23%]
+test/unit/test_consult_strategy.py::TestConsultStrategy::test_answer_generation_to_finished FAILED [ 24%]
+test/unit/test_consult_strategy.py::TestConsultStrategy::test_error_handling PASSED [ 25%]
+test/unit/test_consult_strategy.py::TestConsultStrategy::test_context_body_has_stream_generator PASSED [ 25%]
+test/unit/test_consult_strategy.py::TestConsultStrategy::test_build_result PASSED [ 26%]
+test/unit/test_consult_strategy.py::TestConsultStrategy::test_execute_full_flow PASSED [ 27%]
+test/unit/test_intent_classification_handler.py::TestIntentClassificationHandler::test_init_tool PASSED [ 28%]
+test/unit/test_intent_classification_handler.py::TestIntentClassificationHandler::test_call_tool_classify PASSED [ 29%]
+test/unit/test_intent_classification_handler.py::TestIntentClassificationHandler::test_call_tool_extract PASSED [ 30%]
+test/unit/test_intent_classification_handler.py::TestIntentClassificationHandler::test_call_tool_unknown PASSED [ 31%]
+test/unit/test_intent_classification_handler.py::TestIntentClassificationHandler::test_release PASSED [ 32%]
+test/unit/test_intent_classification_proxy.py::TestIntentClassificationProxy::test_init PASSED [ 33%]
+test/unit/test_intent_classification_proxy.py::TestIntentClassificationProxy::test_call_classify_intent PASSED [ 33%]
+test/unit/test_intent_classification_proxy.py::TestIntentClassificationProxy::test_call_extract_entities PASSED [ 34%]
+test/unit/test_intent_classification_proxy.py::TestIntentClassificationProxy::test_get_tool_info PASSED [ 35%]
+test/unit/test_intent_classification_tool.py::TestIntentClassificationTool::test_classify_intent FAILED [ 36%]
+test/unit/test_intent_classification_tool.py::TestIntentClassificationTool::test_extract_entities FAILED [ 37%]
+test/unit/test_intent_classification_tool.py::TestIntentClassificationTool::test_not_initialized PASSED [ 38%]
+test/unit/test_intent_model_resource.py::TestIntentModelResource::test_intent_model_resource_activate PASSED [ 39%]
+test/unit/test_intent_model_resource.py::TestIntentModelResource::test_intent_model_resource_get_type PASSED [ 40%]
+test/unit/test_intent_model_resource.py::TestIntentModelClient::test_intent_model_client_classify_intent PASSED [ 41%]
+test/unit/test_intent_model_resource.py::TestIntentModelClient::test_intent_model_client_extract_entities PASSED [ 41%]
+test/unit/test_intent_model_service.py::TestIntentModelService::test_init_model ERROR [ 42%]
+test/unit/test_intent_model_service.py::TestIntentModelService::test_call_model_classify ERROR [ 43%]
+test/unit/test_intent_model_service.py::TestIntentModelService::test_call_model_extract ERROR [ 44%]
+test/unit/test_intent_model_service.py::TestIntentModelService::test_call_model_unknown ERROR [ 45%]
+test/unit/test_intent_model_service.py::TestIntentModelService::test_release ERROR [ 46%]
+test/unit/test_intent_parse_chain.py::TestIntentParseChain::test_execute_health_consultation FAILED [ 47%]
+test/unit/test_intent_parse_chain.py::TestIntentParseChain::test_execute_non_health FAILED [ 48%]
+test/unit/test_intent_parse_chain.py::TestIntentParseChain::test_execute_low_confidence FAILED [ 49%]
+test/unit/test_intent_parse_chain.py::TestIntentParseChain::test_execute_error_handling FAILED [ 50%]
+test/unit/test_intent_parse_chain.py::TestIntentParseChain::test_execute_extracts_entities FAILED [ 50%]
+test/unit/test_intent_parse_chain.py::TestIntentParseChain::test_execute_rewrites_query FAILED [ 51%]
+test/unit/test_knowledge_retrieval_chain.py::TestKnowledgeRetrievalChain::test_execute_vector_and_graph FAILED [ 52%]
+test/unit/test_knowledge_retrieval_chain.py::TestKnowledgeRetrievalChain::test_execute_vector_only FAILED [ 53%]
+test/unit/test_knowledge_retrieval_chain.py::TestKnowledgeRetrievalChain::test_execute_graph_only FAILED [ 54%]
+test/unit/test_knowledge_retrieval_chain.py::TestKnowledgeRetrievalChain::test_integrate_knowledge_dedup FAILED [ 55%]
+test/unit/test_knowledge_retrieval_chain.py::TestKnowledgeRetrievalChain::test_integrate_knowledge_sort FAILED [ 56%]
+test/unit/test_knowledge_retrieval_chain.py::TestKnowledgeRetrievalChain::test_execute_empty_query FAILED [ 57%]
+test/unit/test_milvus_medical_proxy.py::TestMilvusMedicalProxy::test_init PASSED [ 58%]
+test/unit/test_milvus_medical_proxy.py::TestMilvusMedicalProxy::test_call_hybrid_search PASSED [ 58%]
+test/unit/test_milvus_medical_proxy.py::TestMilvusMedicalProxy::test_call_search_entities PASSED [ 59%]
+test/unit/test_milvus_medical_proxy.py::TestMilvusMedicalProxy::test_get_tool_info PASSED [ 60%]
+test/unit/test_milvus_medical_proxy.py::TestMilvusMedicalProxy::test_is_available_false PASSED [ 61%]
+test/unit/test_milvus_medical_proxy.py::TestMilvusMedicalProxy::test_call_unknown_method PASSED [ 62%]
+test/unit/test_milvus_resource.py::TestMilvusConnectionResource::test_milvus_connection_resource_activate PASSED [ 63%]
+test/unit/test_milvus_resource.py::TestMilvusConnectionResource::test_milvus_connection_resource_deactivate FAILED [ 64%]
+test/unit/test_milvus_resource.py::TestMilvusConnectionResource::test_milvus_connection_resource_destroy PASSED [ 65%]
+test/unit/test_milvus_resource.py::TestMilvusConnectionResource::test_milvus_connection_resource_get_type PASSED [ 66%]
+test/unit/test_milvus_resource.py::TestMilvusConnectionConfig::test_milvus_connection_config_validate PASSED [ 66%]
+test/unit/test_milvus_resource.py::TestMilvusConnectionFactory::test_milvus_connection_factory_create PASSED [ 67%]
+test/unit/test_milvus_resource.py::TestMilvusConnectionFactory::test_milvus_connection_factory_create_wrong_config PASSED [ 68%]
+test/unit/test_milvus_resource.py::TestMilvusConnectionClient::test_milvus_connection_client_search PASSED [ 69%]
+test/unit/test_milvus_resource.py::TestMilvusConnectionClient::test_milvus_connection_client_hybrid_search PASSED [ 70%]
+test/unit/test_schemas.py::TestChatMessage::test_chat_message PASSED     [ 71%]
+test/unit/test_schemas.py::TestConsultRequestBody::test_consult_request_body PASSED [ 72%]
+test/unit/test_schemas.py::TestConsultResponseData::test_consult_response_data PASSED [ 73%]
+test/unit/test_schemas.py::TestConsultRequestSerialization::test_consult_request_serialization PASSED [ 74%]
+test/unit/test_schemas.py::TestConsultResponseSerialization::test_consult_response_serialization PASSED [ 75%]
+test/unit/test_transformers_adapter.py::TestTransformersAdapter::test_transformers_adapter_is_abstract PASSED [ 75%]
+test/unit/test_transformers_adapter.py::TestTransformersAdapterImpl::test_load_classification_model PASSED [ 76%]
+test/unit/test_transformers_adapter.py::TestTransformersAdapterImpl::test_load_embedding_model PASSED [ 77%]
+test/unit/test_transformers_adapter.py::TestTransformersAdapterImpl::test_predict_classification PASSED [ 78%]
+test/unit/test_transformers_adapter.py::TestTransformersAdapterImpl::test_encode PASSED [ 79%]
+test/unit/test_transformers_adapter.py::TestTransformersAdapterImpl::test_encode_batch PASSED [ 80%]
+test/unit/test_transformers_adapter.py::TestTransformersAdapterImpl::test_unload_model PASSED [ 81%]
+test/unit/test_transformers_adapter.py::TestTransformersAdapterImpl::test_is_model_loaded PASSED [ 82%]
+test/unit/test_transformers_adapter.py::TestTransformersAdapterImpl::test_predict_not_loaded PASSED [ 83%]
+test/unit/test_transformers_adapter.py::TestTransformersAdapterImpl::test_encode_not_loaded PASSED [ 83%]
+test/unit/test_vector_encode_service.py::TestVectorEncodeService::test_init_model ERROR [ 84%]
+test/unit/test_vector_encode_service.py::TestVectorEncodeService::test_call_model ERROR [ 85%]
+test/unit/test_vector_encode_service.py::TestVectorEncodeService::test_call_model_not_initialized ERROR [ 86%]
+test/unit/test_vector_encode_service.py::TestVectorEncodeService::test_release ERROR [ 87%]
+test/unit/test_vector_model_resource.py::TestVectorModelResource::test_vector_model_resource_activate PASSED [ 88%]
+test/unit/test_vector_model_resource.py::TestVectorModelResource::test_vector_model_resource_get_type PASSED [ 89%]
+test/unit/test_vector_model_resource.py::TestVectorModelClient::test_vector_model_client_encode PASSED [ 90%]
+test/unit/test_vector_model_resource.py::TestVectorModelClient::test_vector_model_client_encode_batch PASSED [ 91%]
+test/unit/test_vector_retrieval_handler.py::TestVectorRetrievalHandler::test_init_tool PASSED [ 91%]
+test/unit/test_vector_retrieval_handler.py::TestVectorRetrievalHandler::test_call_tool PASSED [ 92%]
+test/unit/test_vector_retrieval_handler.py::TestVectorRetrievalHandler::test_call_tool_not_initialized PASSED [ 93%]
+test/unit/test_vector_retrieval_handler.py::TestVectorRetrievalHandler::test_release PASSED [ 94%]
+test/unit/test_vector_retrieval_tool.py::TestVectorEnhancedRetrievalTool::test_hybrid_search_default FAILED [ 95%]
+test/unit/test_vector_retrieval_tool.py::TestVectorEnhancedRetrievalTool::test_hybrid_search_custom FAILED [ 96%]
+test/unit/test_vector_retrieval_tool.py::TestVectorEnhancedRetrievalTool::test_search_entities FAILED [ 97%]
+test/unit/test_vector_retrieval_tool.py::TestVectorEnhancedRetrievalTool::test_search_attributes FAILED [ 98%]
+test/unit/test_vector_retrieval_tool.py::TestVectorEnhancedRetrievalTool::test_search_relations FAILED [ 99%]
+test/unit/test_vector_retrieval_tool.py::TestVectorEnhancedRetrievalTool::test_not_initialized PASSED [100%]
+
+==================================== ERRORS ====================================
+___________ ERROR at setup of TestIntentModelService.test_init_model ___________
+test/unit/test_intent_model_service.py:12: in setup_method
+    from src.orchestration.model_business_service.Impl.intent_model_service import IntentModelService
+E   ModuleNotFoundError: No module named 'src.orchestration.model_business_service.Impl.intent_model_service'
+______ ERROR at setup of TestIntentModelService.test_call_model_classify _______
+test/unit/test_intent_model_service.py:12: in setup_method
+    from src.orchestration.model_business_service.Impl.intent_model_service import IntentModelService
+E   ModuleNotFoundError: No module named 'src.orchestration.model_business_service.Impl.intent_model_service'
+_______ ERROR at setup of TestIntentModelService.test_call_model_extract _______
+test/unit/test_intent_model_service.py:12: in setup_method
+    from src.orchestration.model_business_service.Impl.intent_model_service import IntentModelService
+E   ModuleNotFoundError: No module named 'src.orchestration.model_business_service.Impl.intent_model_service'
+_______ ERROR at setup of TestIntentModelService.test_call_model_unknown _______
+test/unit/test_intent_model_service.py:12: in setup_method
+    from src.orchestration.model_business_service.Impl.intent_model_service import IntentModelService
+E   ModuleNotFoundError: No module named 'src.orchestration.model_business_service.Impl.intent_model_service'
+____________ ERROR at setup of TestIntentModelService.test_release _____________
+test/unit/test_intent_model_service.py:12: in setup_method
+    from src.orchestration.model_business_service.Impl.intent_model_service import IntentModelService
+E   ModuleNotFoundError: No module named 'src.orchestration.model_business_service.Impl.intent_model_service'
+__________ ERROR at setup of TestVectorEncodeService.test_init_model ___________
+test/unit/test_vector_encode_service.py:12: in setup_method
+    from src.orchestration.model_business_service.Impl.vector_encode_service import VectorEncodeService
+E   ModuleNotFoundError: No module named 'src.orchestration.model_business_service.Impl.vector_encode_service'
+__________ ERROR at setup of TestVectorEncodeService.test_call_model ___________
+test/unit/test_vector_encode_service.py:12: in setup_method
+    from src.orchestration.model_business_service.Impl.vector_encode_service import VectorEncodeService
+E   ModuleNotFoundError: No module named 'src.orchestration.model_business_service.Impl.vector_encode_service'
+__ ERROR at setup of TestVectorEncodeService.test_call_model_not_initialized ___
+test/unit/test_vector_encode_service.py:12: in setup_method
+    from src.orchestration.model_business_service.Impl.vector_encode_service import VectorEncodeService
+E   ModuleNotFoundError: No module named 'src.orchestration.model_business_service.Impl.vector_encode_service'
+____________ ERROR at setup of TestVectorEncodeService.test_release ____________
+test/unit/test_vector_encode_service.py:12: in setup_method
+    from src.orchestration.model_business_service.Impl.vector_encode_service import VectorEncodeService
+E   ModuleNotFoundError: No module named 'src.orchestration.model_business_service.Impl.vector_encode_service'
+=================================== FAILURES ===================================
+__________ TestConsultController.test_validate_request_empty_question __________
+test/unit/test_consult_controller.py:70: in test_validate_request_empty_question
+    controller._validate_request(request)
+src/controller/consult_controller.py:112: in _validate_request
+    raise HTTPException(
+E   fastapi.exceptions.HTTPException: 400: {'error_code': 2001, 'error_message': 'question不能为空'}
+----------------------------- Captured stdout call -----------------------------
+2026-04-17 17:00:36,028 - src.controller.consult_controller - INFO - ConsultController初始化完成
+------------------------------ Captured log call -------------------------------
+INFO     src.controller.consult_controller:logger.py:128 ConsultController初始化完成
+_______________ TestConsultService.test_assemble_agent_resource ________________
+test/unit/test_consult_service.py:73: in test_assemble_agent_resource
+    with patch.object(service, '_register_handlers'), \
+/home/ai_env/miniforge3/envs/MedicalQA/lib/python3.11/unittest/mock.py:1446: in __enter__
+    original, local = self.get_original()
+                      ^^^^^^^^^^^^^^^^^^^
+/home/ai_env/miniforge3/envs/MedicalQA/lib/python3.11/unittest/mock.py:1419: in get_original
+    raise AttributeError(
+E   AttributeError: ConsultService(agent=Agent(strategy=MagicMock, resources=AgentResource(has_state_machine=False, has_model_service=False, chain_count=0, tool_count=0))) does not have the attribute '_register_handlers'
+____________ TestConsultStrategy.test_answer_generation_to_finished ____________
+test/unit/test_consult_strategy.py:120: in test_answer_generation_to_finished
+    assert next_state == "FINISHED"
+E   AssertionError: assert 'STREAMING' == 'FINISHED'
+E     
+E     - FINISHED
+E     + STREAMING
+______________ TestIntentClassificationTool.test_classify_intent _______________
+test/unit/test_intent_classification_tool.py:28: in test_classify_intent
+    result = self.tool.classify_intent(text="糖尿病有什么症状")
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+src/tools/intent_classification_tool/intent_classification_tool.py:80: in classify_intent
+    raise RuntimeError("Tool not initialized, call _init_resource first")
+E   RuntimeError: Tool not initialized, call _init_resource first
+------------------------------ Captured log call -------------------------------
+ERROR    src.tools.intent_classification_tool.intent_classification_tool:intent_classification_tool.py:96 [IntentClassificationTool] classify_intent failed, elapsed=0.000s, error=Tool not initialized, call _init_resource first
+______________ TestIntentClassificationTool.test_extract_entities ______________
+test/unit/test_intent_classification_tool.py:42: in test_extract_entities
+    result = self.tool.extract_entities(text="糖尿病引起头痛怎么办")
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+src/tools/intent_classification_tool/intent_classification_tool.py:104: in extract_entities
+    raise RuntimeError("Tool not initialized, call _init_resource first")
+E   RuntimeError: Tool not initialized, call _init_resource first
+------------------------------ Captured log call -------------------------------
+ERROR    src.tools.intent_classification_tool.intent_classification_tool:intent_classification_tool.py:126 [IntentClassificationTool] extract_entities failed, elapsed=0.000s, error=Tool not initialized, call _init_resource first
+____________ TestIntentParseChain.test_execute_health_consultation _____________
+test/unit/test_intent_parse_chain.py:31: in test_execute_health_consultation
+    chain = self._create_chain(handler)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+test/unit/test_intent_parse_chain.py:22: in _create_chain
+    resource = IntentParseResource(intent_handler=handler, model_service=MagicMock())
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   TypeError: IntentParseResource.__init__() got an unexpected keyword argument 'model_service'
+_________________ TestIntentParseChain.test_execute_non_health _________________
+test/unit/test_intent_parse_chain.py:47: in test_execute_non_health
+    chain = self._create_chain(handler)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+test/unit/test_intent_parse_chain.py:22: in _create_chain
+    resource = IntentParseResource(intent_handler=handler, model_service=MagicMock())
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   TypeError: IntentParseResource.__init__() got an unexpected keyword argument 'model_service'
+_______________ TestIntentParseChain.test_execute_low_confidence _______________
+test/unit/test_intent_parse_chain.py:62: in test_execute_low_confidence
+    chain = self._create_chain(handler)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+test/unit/test_intent_parse_chain.py:22: in _create_chain
+    resource = IntentParseResource(intent_handler=handler, model_service=MagicMock())
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   TypeError: IntentParseResource.__init__() got an unexpected keyword argument 'model_service'
+_______________ TestIntentParseChain.test_execute_error_handling _______________
+test/unit/test_intent_parse_chain.py:74: in test_execute_error_handling
+    chain = self._create_chain(handler)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+test/unit/test_intent_parse_chain.py:22: in _create_chain
+    resource = IntentParseResource(intent_handler=handler, model_service=MagicMock())
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   TypeError: IntentParseResource.__init__() got an unexpected keyword argument 'model_service'
+_____________ TestIntentParseChain.test_execute_extracts_entities ______________
+test/unit/test_intent_parse_chain.py:93: in test_execute_extracts_entities
+    chain = self._create_chain(handler)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+test/unit/test_intent_parse_chain.py:22: in _create_chain
+    resource = IntentParseResource(intent_handler=handler, model_service=MagicMock())
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   TypeError: IntentParseResource.__init__() got an unexpected keyword argument 'model_service'
+_______________ TestIntentParseChain.test_execute_rewrites_query _______________
+test/unit/test_intent_parse_chain.py:112: in test_execute_rewrites_query
+    chain = self._create_chain(handler)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+test/unit/test_intent_parse_chain.py:22: in _create_chain
+    resource = IntentParseResource(intent_handler=handler, model_service=MagicMock())
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   TypeError: IntentParseResource.__init__() got an unexpected keyword argument 'model_service'
+__________ TestKnowledgeRetrievalChain.test_execute_vector_and_graph ___________
+test/unit/test_knowledge_retrieval_chain.py:50: in test_execute_vector_and_graph
+    resource = KnowledgeRetrievalResource(
+E   TypeError: KnowledgeRetrievalResource.__init__() got an unexpected keyword argument 'vector_encode_service'
+_____________ TestKnowledgeRetrievalChain.test_execute_vector_only _____________
+test/unit/test_knowledge_retrieval_chain.py:75: in test_execute_vector_only
+    resource = KnowledgeRetrievalResource(
+E   TypeError: KnowledgeRetrievalResource.__init__() got an unexpected keyword argument 'vector_encode_service'
+_____________ TestKnowledgeRetrievalChain.test_execute_graph_only ______________
+test/unit/test_knowledge_retrieval_chain.py:99: in test_execute_graph_only
+    resource = KnowledgeRetrievalResource(
+E   TypeError: KnowledgeRetrievalResource.__init__() got an unexpected keyword argument 'vector_encode_service'
+__________ TestKnowledgeRetrievalChain.test_integrate_knowledge_dedup __________
+test/unit/test_knowledge_retrieval_chain.py:116: in test_integrate_knowledge_dedup
+    resource = KnowledgeRetrievalResource(
+E   TypeError: KnowledgeRetrievalResource.__init__() got an unexpected keyword argument 'vector_encode_service'
+__________ TestKnowledgeRetrievalChain.test_integrate_knowledge_sort ___________
+test/unit/test_knowledge_retrieval_chain.py:135: in test_integrate_knowledge_sort
+    resource = KnowledgeRetrievalResource(
+E   TypeError: KnowledgeRetrievalResource.__init__() got an unexpected keyword argument 'vector_encode_service'
+_____________ TestKnowledgeRetrievalChain.test_execute_empty_query _____________
+test/unit/test_knowledge_retrieval_chain.py:155: in test_execute_empty_query
+    resource = KnowledgeRetrievalResource(
+E   TypeError: KnowledgeRetrievalResource.__init__() got an unexpected keyword argument 'vector_encode_service'
+___ TestMilvusConnectionResource.test_milvus_connection_resource_deactivate ____
+test/unit/test_milvus_resource.py:57: in test_milvus_connection_resource_deactivate
+    mock_adapter.disconnect.assert_called_once()
+/home/ai_env/miniforge3/envs/MedicalQA/lib/python3.11/unittest/mock.py:918: in assert_called_once
+    raise AssertionError(msg)
+E   AssertionError: Expected 'disconnect' to have been called once. Called 0 times.
+__________ TestVectorEnhancedRetrievalTool.test_hybrid_search_default __________
+test/unit/test_vector_retrieval_tool.py:31: in test_hybrid_search_default
+    result = self.tool.hybrid_search(query="糖尿病有什么症状")
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+src/tools/vector_retrieval_tool/vector_retrieval_tool.py:114: in hybrid_search
+    raise RuntimeError("Tool not initialized, call _init_resource first")
+E   RuntimeError: Tool not initialized, call _init_resource first
+------------------------------ Captured log call -------------------------------
+ERROR    src.tools.vector_retrieval_tool.vector_retrieval_tool:vector_retrieval_tool.py:141 [VectorEnhancedRetrievalTool] hybrid_search failed, elapsed=0.000s, error=Tool not initialized, call _init_resource first
+__________ TestVectorEnhancedRetrievalTool.test_hybrid_search_custom ___________
+test/unit/test_vector_retrieval_tool.py:57: in test_hybrid_search_custom
+    result = self.tool.hybrid_search(
+src/tools/vector_retrieval_tool/vector_retrieval_tool.py:114: in hybrid_search
+    raise RuntimeError("Tool not initialized, call _init_resource first")
+E   RuntimeError: Tool not initialized, call _init_resource first
+------------------------------ Captured log call -------------------------------
+ERROR    src.tools.vector_retrieval_tool.vector_retrieval_tool:vector_retrieval_tool.py:141 [VectorEnhancedRetrievalTool] hybrid_search failed, elapsed=0.000s, error=Tool not initialized, call _init_resource first
+_____________ TestVectorEnhancedRetrievalTool.test_search_entities _____________
+test/unit/test_vector_retrieval_tool.py:78: in test_search_entities
+    result = self.tool.search_entities(query="糖尿病", top_k=10)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+src/tools/vector_retrieval_tool/vector_retrieval_tool.py:149: in search_entities
+    raise RuntimeError("Tool not initialized, call _init_resource first")
+E   RuntimeError: Tool not initialized, call _init_resource first
+------------------------------ Captured log call -------------------------------
+ERROR    src.tools.vector_retrieval_tool.vector_retrieval_tool:vector_retrieval_tool.py:165 [VectorEnhancedRetrievalTool] search_entities failed, elapsed=0.000s, error=Tool not initialized, call _init_resource first
+____________ TestVectorEnhancedRetrievalTool.test_search_attributes ____________
+test/unit/test_vector_retrieval_tool.py:97: in test_search_attributes
+    result = self.tool.search_attributes(query="糖尿病症状", top_k=10)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+src/tools/vector_retrieval_tool/vector_retrieval_tool.py:173: in search_attributes
+    raise RuntimeError("Tool not initialized, call _init_resource first")
+E   RuntimeError: Tool not initialized, call _init_resource first
+------------------------------ Captured log call -------------------------------
+ERROR    src.tools.vector_retrieval_tool.vector_retrieval_tool:vector_retrieval_tool.py:189 [VectorEnhancedRetrievalTool] search_attributes failed, elapsed=0.000s, error=Tool not initialized, call _init_resource first
+____________ TestVectorEnhancedRetrievalTool.test_search_relations _____________
+test/unit/test_vector_retrieval_tool.py:116: in test_search_relations
+    result = self.tool.search_relations(query="糖尿病药物", top_k=10)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+src/tools/vector_retrieval_tool/vector_retrieval_tool.py:197: in search_relations
+    raise RuntimeError("Tool not initialized, call _init_resource first")
+E   RuntimeError: Tool not initialized, call _init_resource first
+------------------------------ Captured log call -------------------------------
+ERROR    src.tools.vector_retrieval_tool.vector_retrieval_tool:vector_retrieval_tool.py:213 [VectorEnhancedRetrievalTool] search_relations failed, elapsed=0.000s, error=Tool not initialized, call _init_resource first
+=========================== short test summary info ============================
+FAILED test/unit/test_consult_controller.py::TestConsultController::test_validate_request_empty_question - fastapi.exceptions.HTTPException: 400: {'error_code': 2001, 'error_message': 'question不能为空'}
+FAILED test/unit/test_consult_service.py::TestConsultService::test_assemble_agent_resource - AttributeError: ConsultService(agent=Agent(strategy=MagicMock, resources=AgentResource(has_state_machine=False, has_model_service=False, chain_count=0, tool_count=0))) does not have the attribute '_register_handlers'
+FAILED test/unit/test_consult_strategy.py::TestConsultStrategy::test_answer_generation_to_finished - AssertionError: assert 'STREAMING' == 'FINISHED'
+  
+  - FINISHED
+  + STREAMING
+FAILED test/unit/test_intent_classification_tool.py::TestIntentClassificationTool::test_classify_intent - RuntimeError: Tool not initialized, call _init_resource first
+FAILED test/unit/test_intent_classification_tool.py::TestIntentClassificationTool::test_extract_entities - RuntimeError: Tool not initialized, call _init_resource first
+FAILED test/unit/test_intent_parse_chain.py::TestIntentParseChain::test_execute_health_consultation - TypeError: IntentParseResource.__init__() got an unexpected keyword argument 'model_service'
+FAILED test/unit/test_intent_parse_chain.py::TestIntentParseChain::test_execute_non_health - TypeError: IntentParseResource.__init__() got an unexpected keyword argument 'model_service'
+FAILED test/unit/test_intent_parse_chain.py::TestIntentParseChain::test_execute_low_confidence - TypeError: IntentParseResource.__init__() got an unexpected keyword argument 'model_service'
+FAILED test/unit/test_intent_parse_chain.py::TestIntentParseChain::test_execute_error_handling - TypeError: IntentParseResource.__init__() got an unexpected keyword argument 'model_service'
+FAILED test/unit/test_intent_parse_chain.py::TestIntentParseChain::test_execute_extracts_entities - TypeError: IntentParseResource.__init__() got an unexpected keyword argument 'model_service'
+FAILED test/unit/test_intent_parse_chain.py::TestIntentParseChain::test_execute_rewrites_query - TypeError: IntentParseResource.__init__() got an unexpected keyword argument 'model_service'
+FAILED test/unit/test_knowledge_retrieval_chain.py::TestKnowledgeRetrievalChain::test_execute_vector_and_graph - TypeError: KnowledgeRetrievalResource.__init__() got an unexpected keyword argument 'vector_encode_service'
+FAILED test/unit/test_knowledge_retrieval_chain.py::TestKnowledgeRetrievalChain::test_execute_vector_only - TypeError: KnowledgeRetrievalResource.__init__() got an unexpected keyword argument 'vector_encode_service'
+FAILED test/unit/test_knowledge_retrieval_chain.py::TestKnowledgeRetrievalChain::test_execute_graph_only - TypeError: KnowledgeRetrievalResource.__init__() got an unexpected keyword argument 'vector_encode_service'
+FAILED test/unit/test_knowledge_retrieval_chain.py::TestKnowledgeRetrievalChain::test_integrate_knowledge_dedup - TypeError: KnowledgeRetrievalResource.__init__() got an unexpected keyword argument 'vector_encode_service'
+FAILED test/unit/test_knowledge_retrieval_chain.py::TestKnowledgeRetrievalChain::test_integrate_knowledge_sort - TypeError: KnowledgeRetrievalResource.__init__() got an unexpected keyword argument 'vector_encode_service'
+FAILED test/unit/test_knowledge_retrieval_chain.py::TestKnowledgeRetrievalChain::test_execute_empty_query - TypeError: KnowledgeRetrievalResource.__init__() got an unexpected keyword argument 'vector_encode_service'
+FAILED test/unit/test_milvus_resource.py::TestMilvusConnectionResource::test_milvus_connection_resource_deactivate - AssertionError: Expected 'disconnect' to have been called once. Called 0 times.
+FAILED test/unit/test_vector_retrieval_tool.py::TestVectorEnhancedRetrievalTool::test_hybrid_search_default - RuntimeError: Tool not initialized, call _init_resource first
+FAILED test/unit/test_vector_retrieval_tool.py::TestVectorEnhancedRetrievalTool::test_hybrid_search_custom - RuntimeError: Tool not initialized, call _init_resource first
+FAILED test/unit/test_vector_retrieval_tool.py::TestVectorEnhancedRetrievalTool::test_search_entities - RuntimeError: Tool not initialized, call _init_resource first
+FAILED test/unit/test_vector_retrieval_tool.py::TestVectorEnhancedRetrievalTool::test_search_attributes - RuntimeError: Tool not initialized, call _init_resource first
+FAILED test/unit/test_vector_retrieval_tool.py::TestVectorEnhancedRetrievalTool::test_search_relations - RuntimeError: Tool not initialized, call _init_resource first
+ERROR test/unit/test_intent_model_service.py::TestIntentModelService::test_init_model - ModuleNotFoundError: No module named 'src.orchestration.model_business_service.Impl.intent_model_service'
+ERROR test/unit/test_intent_model_service.py::TestIntentModelService::test_call_model_classify - ModuleNotFoundError: No module named 'src.orchestration.model_business_service.Impl.intent_model_service'
+ERROR test/unit/test_intent_model_service.py::TestIntentModelService::test_call_model_extract - ModuleNotFoundError: No module named 'src.orchestration.model_business_service.Impl.intent_model_service'
+ERROR test/unit/test_intent_model_service.py::TestIntentModelService::test_call_model_unknown - ModuleNotFoundError: No module named 'src.orchestration.model_business_service.Impl.intent_model_service'
+ERROR test/unit/test_intent_model_service.py::TestIntentModelService::test_release - ModuleNotFoundError: No module named 'src.orchestration.model_business_service.Impl.intent_model_service'
+ERROR test/unit/test_vector_encode_service.py::TestVectorEncodeService::test_init_model - ModuleNotFoundError: No module named 'src.orchestration.model_business_service.Impl.vector_encode_service'
+ERROR test/unit/test_vector_encode_service.py::TestVectorEncodeService::test_call_model - ModuleNotFoundError: No module named 'src.orchestration.model_business_service.Impl.vector_encode_service'
+ERROR test/unit/test_vector_encode_service.py::TestVectorEncodeService::test_call_model_not_initialized - ModuleNotFoundError: No module named 'src.orchestration.model_business_service.Impl.vector_encode_service'
+ERROR test/unit/test_vector_encode_service.py::TestVectorEncodeService::test_release - ModuleNotFoundError: No module named 'src.orchestration.model_business_service.Impl.vector_encode_service'
+=================== 23 failed, 80 passed, 9 errors in 0.94s ====================

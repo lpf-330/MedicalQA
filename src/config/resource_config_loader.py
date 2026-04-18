@@ -57,7 +57,7 @@ def load_global_config_legacy() -> GlobalConfig:
     config.add_pool_config("neo4j_connection", neo4j_pool_config)
     
     from src.resource_manager.vllm_model import VLLMModelConfig
-    
+
     vllm_resource_config = VLLMModelConfig(
         model_path=model_config.model_path,
         model_name=model_config.model_name,
@@ -66,7 +66,7 @@ def load_global_config_legacy() -> GlobalConfig:
         gpu_memory_utilization=model_config.gpu_memory_utilization
     )
     config.add_resource_config("vllm_model", vllm_resource_config)
-    
+
     vllm_pool_config = PoolConfig(
         max_size=1,
         min_idle=1,
@@ -74,5 +74,60 @@ def load_global_config_legacy() -> GlobalConfig:
         max_wait_time=30000
     )
     config.add_pool_config("vllm_model", vllm_pool_config)
-    
+
+    from src.resource_manager.milvus_connection import MilvusConnectionConfig
+
+    milvus_resource_config = MilvusConnectionConfig(
+        uri=db_config.milvus_uri if hasattr(db_config, 'milvus_uri') else "http://localhost:19530",
+        user=db_config.milvus_user if hasattr(db_config, 'milvus_user') else "root",
+        password=db_config.milvus_password if hasattr(db_config, 'milvus_password') else "Milvus",
+        token=""
+    )
+    config.add_resource_config("milvus_connection", milvus_resource_config)
+
+    milvus_pool_config = PoolConfig(
+        max_size=10,
+        min_idle=2,
+        idle_timeout=300000,
+        max_wait_time=5000
+    )
+    config.add_pool_config("milvus_connection", milvus_pool_config)
+
+    from src.resource_manager.intent_model import IntentModelConfig
+
+    intent_model_resource_config = IntentModelConfig(
+        model_path=model_config.intent_model_path if hasattr(model_config, 'intent_model_path') else "",
+        model_name=model_config.intent_model_name if hasattr(model_config, 'intent_model_name') else "intent-classification",
+        device=model_config.intent_device if hasattr(model_config, 'intent_device') else "cpu",
+        max_length=model_config.intent_max_length if hasattr(model_config, 'intent_max_length') else 128
+    )
+    config.add_resource_config("intent_model", intent_model_resource_config)
+
+    intent_model_pool_config = PoolConfig(
+        max_size=1,
+        min_idle=1,
+        idle_timeout=600000,
+        max_wait_time=30000
+    )
+    config.add_pool_config("intent_model", intent_model_pool_config)
+
+    from src.resource_manager.vector_model import VectorModelConfig
+
+    vector_model_resource_config = VectorModelConfig(
+        model_path=model_config.vector_model_path if hasattr(model_config, 'vector_model_path') else "",
+        model_name=model_config.vector_model_name if hasattr(model_config, 'vector_model_name') else "vector-embedding",
+        device=model_config.vector_device if hasattr(model_config, 'vector_device') else "cpu",
+        dimension=model_config.vector_dimension if hasattr(model_config, 'vector_dimension') else 1024,
+        batch_size=model_config.vector_batch_size if hasattr(model_config, 'vector_batch_size') else 32
+    )
+    config.add_resource_config("vector_model", vector_model_resource_config)
+
+    vector_model_pool_config = PoolConfig(
+        max_size=1,
+        min_idle=1,
+        idle_timeout=600000,
+        max_wait_time=30000
+    )
+    config.add_pool_config("vector_model", vector_model_pool_config)
+
     return config

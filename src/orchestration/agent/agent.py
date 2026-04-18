@@ -121,14 +121,6 @@ class Agent(Generic[I, O]):
         if context is None:
             raise ValueError("context不能为None")
 
-        # 验证session_id一致性
-        if hasattr(self._resources, 'state_machine') and self._resources.state_machine is not None:
-            if context.session_id != self._resources.state_machine.session_id:
-                raise ValueError(
-                    f"session_id不一致：context.session_id={context.session_id}, "
-                    f"state_machine.session_id={self._resources.state_machine.session_id}"
-                )
-
         # 调用agent策略的execute方法
         return self._strategy.execute(context, self._resources)
 

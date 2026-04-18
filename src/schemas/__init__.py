@@ -6,12 +6,13 @@ schemas包
 
 from .base_request import BaseRequest
 from .base_response import BaseResponse
-from .consult_request import ConsultRequest, ConsultRequestBody
+from .consult_request import ConsultRequest, ConsultRequestBody, ChatMessage
 from .consult_response import ConsultResponse, ConsultResponseData
 
 __all__ = [
     "BaseRequest",
     "BaseResponse",
+    "ChatMessage",
     "ConsultRequest",
     "ConsultRequestBody",
     "ConsultResponse",

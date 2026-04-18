@@ -6,9 +6,10 @@ MCP代理层工厂类
 
 from typing import Dict, Optional, TYPE_CHECKING
 
+from src.mcp.factory.config import ProxyType, ToolProxyConfig
+
 if TYPE_CHECKING:
     from src.mcp.proxy.interfaces import MCPTool
-    from src.mcp.factory.config import ToolProxyConfig
 
 
 class MCPProxyFactory:
@@ -215,25 +216,42 @@ class MCPProxyFactory:
         config = self._get_config(tool_proxy_name)
 
         # 根据代理类型创建实例
-        # 注意：这里需要根据具体的代理类型创建对应的实例
-        # 由于目前还没有实现具体的代理类，这里先抛出异常
-        # 实际实现时，需要根据config.proxy_type创建对应的代理实例
-        raise NotImplementedError(
-            f"暂未实现代理类型 {config.proxy_type} 的创建逻辑。"
-            f"请在 mcp/proxy/Impl/ 中实现具体的代理类。"
-        )
+        proxy_instance = None
 
-        # 示例实现（未来实现时取消注释）：
-        # from src.mcp.proxy.interfaces import MCPStandardProxy, MCPFakeProxy
-        #
-        # if config.proxy_type == ProxyType.STANDARD:
-        #     proxy_instance = StandardProxyImpl(config)
-        # else:
-        #     proxy_instance = FakeProxyImpl(config)
-        #
-        # proxy_instance._init_tool()
-        # self._proxy_cache[tool_proxy_name] = proxy_instance
-        # return proxy_instance
+        if config.proxy_type == ProxyType.FAKE:
+            from src.mcp.proxy.Impl.neo4j_medical_proxy import Neo4jMedicalProxy
+            from src.mcp.proxy.Impl.milvus_medical_proxy import MilvusMedicalProxy
+            from src.mcp.proxy.Impl.intent_classification_proxy import IntentClassificationProxy
+
+            tool_name = config.connection_info.get("tool_name", tool_proxy_name)
+
+            if tool_name == "neo4j_medical":
+                proxy_instance = Neo4jMedicalProxy(config.connection_info)
+            elif tool_name == "milvus_medical":
+                proxy_instance = MilvusMedicalProxy(config.connection_info)
+            elif tool_name == "intent_classification":
+                proxy_instance = IntentClassificationProxy(config.connection_info)
+            else:
+                raise ValueError(
+                    f"未知的FAKE代理工具名称: {tool_name}。"
+                    f"支持的工具名称: neo4j_medical, milvus_medical, intent_classification"
+                )
+
+            proxy_instance._init_tool()
+
+        elif config.proxy_type == ProxyType.STANDARD:
+            raise NotImplementedError(
+                f"暂未实现STANDARD代理类型的创建逻辑。"
+                f"请在 mcp/proxy/Impl/ 中实现具体的MCPStandardProxy代理类。"
+            )
+        else:
+            raise ValueError(
+                f"未知的代理类型: {config.proxy_type}。"
+                f"支持的代理类型: STANDARD, FAKE"
+            )
+
+        self._proxy_cache[tool_proxy_name] = proxy_instance
+        return proxy_instance
 
     def delete_tool_proxy_instance(self, tool_proxy_instance_id: str) -> None:
         """

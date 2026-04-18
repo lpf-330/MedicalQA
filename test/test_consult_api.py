@@ -44,8 +44,9 @@ def test_root():
         return False
 
 
-def test_consult_api(question: str):
+def test_consult_api():
     """测试健康咨询API"""
+    question = "头痛怎么办？"
     print(f"\n=== 测试健康咨询API ===")
     print(f"问题: {question}")
     

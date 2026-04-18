@@ -16,6 +16,8 @@
 
 from .neo4j import Neo4jAdapter, Neo4jAdapterImpl
 from .vllm import VLLMAdapter, VLLMAdapterImpl
+from .milvus import MilvusAdapter, MilvusAdapterImpl
+from .transformers import TransformersAdapter, TransformersAdapterImpl
 from .langchain import (
     LangchainAdapter,
     LangchainAdapterImpl,
@@ -34,6 +36,10 @@ __all__ = [
     'Neo4jAdapterImpl',
     'VLLMAdapter',
     'VLLMAdapterImpl',
+    'MilvusAdapter',
+    'MilvusAdapterImpl',
+    'TransformersAdapter',
+    'TransformersAdapterImpl',
     'LangchainAdapter',
     'LangchainAdapterImpl',
     'InternalChain',

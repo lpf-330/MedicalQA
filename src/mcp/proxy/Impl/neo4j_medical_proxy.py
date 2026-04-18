@@ -20,6 +20,9 @@ class Neo4jMedicalProxy(MCPFakeProxy):
     封装Neo4j医疗知识图谱工具，实现MCPFakeProxy接口。
     提供高效的直连调用方式。
     
+    注意：Neo4jMedicalTool现在使用资源池管理连接，
+    不再需要通过Proxy传递连接参数。
+    
     属性：
         _config: 代理配置
         _tool: Neo4j医疗知识图谱工具实例
@@ -34,10 +37,7 @@ class Neo4jMedicalProxy(MCPFakeProxy):
         初始化Neo4j医疗知识图谱代理
         
         Args:
-            config: 代理配置，包含：
-                - uri: Neo4j连接URI
-                - user: 用户名
-                - password: 密码
+            config: 代理配置（保留兼容性，不再使用连接参数）
         """
         self._config = config
         self._tool: Optional[Neo4jMedicalTool] = None
@@ -51,11 +51,7 @@ class Neo4jMedicalProxy(MCPFakeProxy):
         if self._tool is not None:
             return
         
-        self._tool = Neo4jMedicalTool(
-            uri=self._config.get("uri"),
-            user=self._config.get("user"),
-            password=self._config.get("password")
-        )
+        self._tool = Neo4jMedicalTool()
         self._tool._init_resource()
     
     def release_tool(self, tool=None) -> None:

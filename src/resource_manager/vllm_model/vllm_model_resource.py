@@ -69,14 +69,26 @@ class VLLMModelResource(Resource):
         self._last_used_time = int(time.time() * 1000)
     
     def deactivate(self) -> None:
-        """停用资源"""
+        """
+        停用资源（释放回池，保持连接）
+        
+        语义：资源从活跃状态变为空闲状态，归还到资源池
+        行为：仅标记状态，不断开连接
+        场景：资源使用完毕，释放回资源池复用
+        """
         if not self._is_active:
             return
         
         self._is_active = False
     
     def destroy(self) -> None:
-        """销毁资源"""
+        """
+        销毁资源（彻底释放）
+        
+        语义：资源彻底销毁，从资源池移除
+        行为：断开连接，释放所有资源
+        场景：资源池关闭、资源过期、资源异常需销毁
+        """
         if self._adapter is not None:
             self._adapter.unload_model()
         self._adapter = None
