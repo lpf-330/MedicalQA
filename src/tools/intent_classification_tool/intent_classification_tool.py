@@ -53,7 +53,7 @@ class IntentClassificationTool(Tool):
         logger.info("[IntentClassificationTool] _init_resource started")
         start_time = time.time()
         try:
-            self._intent_handle = GlobalResourceManager.acquire("intent_model")
+            self._intent_handle = GlobalResourceManager.acquire("intent_model", "intent_model_config")
             if self._intent_handle is not None:
                 self._intent_resource = self._intent_handle.resource
                 if not self._intent_resource.is_activate():

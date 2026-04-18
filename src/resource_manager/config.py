@@ -107,118 +107,118 @@ class GlobalConfig:
     作为全局资源配置的总容器，统一管理所有资源的配置信息和资源池配置信息。
     
     Attributes:
-        resource_configs: 全局资源配置总容器，key为资源类型唯一标识，value为对应资源的ResourceConfig配置对象
-        pool_configs: 全局资源池配置总容器，key为资源类型唯一标识，value为对应资源池的PoolConfig配置对象
+        resource_configs: 全局资源配置总容器，key为配置ID（config_id），value为对应资源的ResourceConfig配置对象
+        pool_configs: 全局资源池配置总容器，key为配置ID（config_id），value为对应资源池的PoolConfig配置对象
     """
     
     resource_configs: Dict[str, 'ResourceConfig'] = field(default_factory=dict)
     pool_configs: Dict[str, PoolConfig] = field(default_factory=dict)
     
-    def add_resource_config(self, resource_type: str, config: 'ResourceConfig') -> None:
+    def add_resource_config(self, config_id: str, config: 'ResourceConfig') -> None:
         """
         添加资源配置
         
         Args:
-            resource_type: 资源类型唯一标识
+            config_id: 配置ID（唯一标识）
             config: 资源配置对象
         """
-        self.resource_configs[resource_type] = config
+        self.resource_configs[config_id] = config
     
-    def add_pool_config(self, resource_type: str, config: PoolConfig) -> None:
+    def add_pool_config(self, config_id: str, config: PoolConfig) -> None:
         """
         添加资源池配置
         
         Args:
-            resource_type: 资源类型唯一标识
+            config_id: 配置ID（唯一标识）
             config: 资源池配置对象
         """
-        self.pool_configs[resource_type] = config
+        self.pool_configs[config_id] = config
     
-    def get_resource_config(self, resource_type: str) -> 'ResourceConfig':
+    def get_resource_config(self, config_id: str) -> 'ResourceConfig':
         """
-        获取指定类型的资源配置
+        获取指定配置ID的资源配置
         
         Args:
-            resource_type: 资源类型唯一标识
+            config_id: 配置ID（唯一标识）
             
         Returns:
             ResourceConfig: 资源配置对象
             
         Raises:
-            KeyError: 当资源类型不存在时抛出
+            KeyError: 当配置ID不存在时抛出
         """
-        if resource_type not in self.resource_configs:
-            raise KeyError(f"资源配置不存在: {resource_type}")
-        return self.resource_configs[resource_type]
+        if config_id not in self.resource_configs:
+            raise KeyError(f"资源配置不存在: {config_id}")
+        return self.resource_configs[config_id]
     
-    def get_pool_config(self, resource_type: str) -> PoolConfig:
+    def get_pool_config(self, config_id: str) -> PoolConfig:
         """
-        获取指定类型的资源池配置
+        获取指定配置ID的资源池配置
         
         Args:
-            resource_type: 资源类型唯一标识
+            config_id: 配置ID（唯一标识）
             
         Returns:
             PoolConfig: 资源池配置对象
             
         Raises:
-            KeyError: 当资源类型不存在时抛出
+            KeyError: 当配置ID不存在时抛出
         """
-        if resource_type not in self.pool_configs:
-            raise KeyError(f"资源池配置不存在: {resource_type}")
-        return self.pool_configs[resource_type]
+        if config_id not in self.pool_configs:
+            raise KeyError(f"资源池配置不存在: {config_id}")
+        return self.pool_configs[config_id]
     
-    def has_resource_config(self, resource_type: str) -> bool:
+    def has_resource_config(self, config_id: str) -> bool:
         """
-        检查是否存在指定类型的资源配置
+        检查是否存在指定配置ID的资源配置
         
         Args:
-            resource_type: 资源类型唯一标识
+            config_id: 配置ID（唯一标识）
             
         Returns:
             bool: 是否存在资源配置
         """
-        return resource_type in self.resource_configs
+        return config_id in self.resource_configs
     
-    def has_pool_config(self, resource_type: str) -> bool:
+    def has_pool_config(self, config_id: str) -> bool:
         """
-        检查是否存在指定类型的资源池配置
+        检查是否存在指定配置ID的资源池配置
         
         Args:
-            resource_type: 资源类型唯一标识
+            config_id: 配置ID（唯一标识）
             
         Returns:
             bool: 是否存在资源池配置
         """
-        return resource_type in self.pool_configs
+        return config_id in self.pool_configs
     
-    def remove_resource_config(self, resource_type: str) -> None:
+    def remove_resource_config(self, config_id: str) -> None:
         """
-        移除指定类型的资源配置
+        移除指定配置ID的资源配置
         
         Args:
-            resource_type: 资源类型唯一标识
+            config_id: 配置ID（唯一标识）
             
         Raises:
-            KeyError: 当资源类型不存在时抛出
+            KeyError: 当配置ID不存在时抛出
         """
-        if resource_type not in self.resource_configs:
-            raise KeyError(f"资源配置不存在: {resource_type}")
-        del self.resource_configs[resource_type]
+        if config_id not in self.resource_configs:
+            raise KeyError(f"资源配置不存在: {config_id}")
+        del self.resource_configs[config_id]
     
-    def remove_pool_config(self, resource_type: str) -> None:
+    def remove_pool_config(self, config_id: str) -> None:
         """
-        移除指定类型的资源池配置
+        移除指定配置ID的资源池配置
         
         Args:
-            resource_type: 资源类型唯一标识
+            config_id: 配置ID（唯一标识）
             
         Raises:
-            KeyError: 当资源类型不存在时抛出
+            KeyError: 当配置ID不存在时抛出
         """
-        if resource_type not in self.pool_configs:
-            raise KeyError(f"资源池配置不存在: {resource_type}")
-        del self.pool_configs[resource_type]
+        if config_id not in self.pool_configs:
+            raise KeyError(f"资源池配置不存在: {config_id}")
+        del self.pool_configs[config_id]
     
     def to_dict(self) -> Dict[str, Any]:
         """

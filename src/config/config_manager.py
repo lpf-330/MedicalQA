@@ -219,7 +219,7 @@ class ConfigManager:
                     password=resource_config.password,
                     database=getattr(resource_config, "database", "neo4j")
                 )
-                global_config.add_resource_config(resource_type, neo4j_config)
+                global_config.add_resource_config(config_id, neo4j_config)
                 
             elif resource_type == "vllm_model":
                 from src.resource_manager.vllm_model import VLLMModelConfig
@@ -231,7 +231,7 @@ class ConfigManager:
                     max_model_len=getattr(resource_config, "max_model_len", 8192),
                     gpu_memory_utilization=getattr(resource_config, "gpu_memory_utilization", 0.9)
                 )
-                global_config.add_resource_config(resource_type, vllm_config)
+                global_config.add_resource_config(config_id, vllm_config)
 
             elif resource_type == "milvus_connection":
                 from src.resource_manager.milvus_connection import MilvusConnectionConfig
@@ -242,7 +242,7 @@ class ConfigManager:
                     password=resource_config.password,
                     token=getattr(resource_config, "token", "")
                 )
-                global_config.add_resource_config(resource_type, milvus_config)
+                global_config.add_resource_config(config_id, milvus_config)
 
             elif resource_type == "intent_model":
                 from src.resource_manager.intent_model import IntentModelConfig
@@ -253,7 +253,7 @@ class ConfigManager:
                     device=getattr(resource_config, "device", "cpu"),
                     max_length=getattr(resource_config, "max_length", 128)
                 )
-                global_config.add_resource_config(resource_type, intent_model_config)
+                global_config.add_resource_config(config_id, intent_model_config)
 
             elif resource_type == "vector_model":
                 from src.resource_manager.vector_model import VectorModelConfig
@@ -265,12 +265,10 @@ class ConfigManager:
                     dimension=getattr(resource_config, "dimension", 1024),
                     batch_size=getattr(resource_config, "batch_size", 32)
                 )
-                global_config.add_resource_config(resource_type, vector_model_config)
+                global_config.add_resource_config(config_id, vector_model_config)
         
         for config_id, pool_config in self._pool_configs.items():
-            if config_id in self._resource_configs:
-                resource_type = self._resource_configs[config_id].resource_type
-                global_config.add_pool_config(resource_type, pool_config)
+            global_config.add_pool_config(config_id, pool_config)
         
         return global_config
     

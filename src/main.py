@@ -67,27 +67,35 @@ from src.resource_manager import GlobalResourceManager
 from src.resource_manager.neo4j_connection import Neo4jConnectionFactory
 from src.resource_manager.vllm_model import VLLMModelFactory
 from src.resource_manager.milvus_connection import MilvusConnectionFactory
-from src.resource_manager.intent_model import IntentModelFactory
 from src.resource_manager.vector_model import VectorModelFactory
 from src.controller.consult_controller import ConsultController
 from src.service.consult_service import ConsultService
 from src.schemas.consult_request import ConsultRequest, ConsultRequestBody
 from src.orchestration.agent.consult_strategy import ConsultStrategy
-from src.orchestration.chain.intent_parse_chain import IntentParseChain, IntentParseResource
 from src.orchestration.chain.knowledge_retrieval_chain import KnowledgeRetrievalChain, KnowledgeRetrievalResource
 from src.orchestration.chain.answer_generation_chain import AnswerGenerationChain, AnswerGenerationResource
 from src.orchestration.tool_call_handler.Impl.neo4j_medical_handler import Neo4jMedicalHandler
 from src.orchestration.tool_call_handler.Impl.vector_retrieval_handler import VectorRetrievalHandler
-from src.orchestration.tool_call_handler.Impl.intent_classification_handler import IntentClassificationHandler
 from src.orchestration.model_business_service.Impl.consult_model_service import ConsultModelService
 from src.orchestration.agent.agent_resource import AgentResource
 from src.orchestration.agent.agent import Agent
 from src.orchestration.state_machine.state_machine import StateMachine
 from src.mcp.proxy.Impl.neo4j_medical_proxy import Neo4jMedicalProxy
 from src.mcp.proxy.Impl.milvus_medical_proxy import MilvusMedicalProxy
-from src.mcp.proxy.Impl.intent_classification_proxy import IntentClassificationProxy
 from src.mcp.factory.mcp_proxy_factory import MCPProxyFactory
 from src.mcp.factory.config import ProxyType, ToolProxyConfig
+
+from src.controller.report_controller import ReportController
+from src.service.report_service import ReportService
+from src.schemas.report_request import ReportRequest, ReportRequestBody
+from src.orchestration.agent.report_strategy.report_strategy import ReportStrategy
+from src.orchestration.chain.data_prepare_chain.data_prepare_chain import DataPrepareChain, DataPrepareResource
+from src.orchestration.chain.multi_analysis_chain.multi_analysis_chain import MultiAnalysisChain, MultiAnalysisResource
+from src.orchestration.chain.dimension_evaluation_chain.dimension_evaluation_chain import DimensionEvaluationChain, DimensionEvaluationResource
+from src.orchestration.chain.report_knowledge_retrieval_chain.report_knowledge_retrieval_chain import ReportKnowledgeRetrievalChain, ReportKnowledgeRetrievalResource
+from src.orchestration.chain.integration_chain.integration_chain import IntegrationChain, IntegrationResource
+from src.orchestration.chain.report_generation_chain.report_generation_chain import ReportGenerationChain, ReportGenerationResource
+from src.orchestration.model_business_service.Impl.report_model_service import ReportModelService
 from fastapi import FastAPI
 from contextlib import asynccontextmanager
 import uvicorn
@@ -134,10 +142,6 @@ def _register_resource_factories():
         MilvusConnectionFactory()
     )
     GlobalResourceManager.INSTANCE.register_factory(
-        "intent_model",
-        IntentModelFactory()
-    )
-    GlobalResourceManager.INSTANCE.register_factory(
         "vector_model",
         VectorModelFactory()
     )
@@ -160,7 +164,6 @@ def _init_business_components(config_manager: ConfigManager):
     neo4j_resource_config = config_manager.get_resource_config("neo4j_config")
     vllm_resource_config = config_manager.get_resource_config("vllm_config")
     milvus_resource_config = config_manager.get_resource_config("milvus_config")
-    intent_model_resource_config = config_manager.get_resource_config("intent_model_config")
     vector_model_resource_config = config_manager.get_resource_config("vector_model_config")
 
     neo4j_proxy = Neo4jMedicalProxy({
@@ -179,29 +182,14 @@ def _init_business_components(config_manager: ConfigManager):
         "vector_dimension": vector_model_resource_config.dimension
     })
 
-    intent_proxy = IntentClassificationProxy({
-        "model_path": intent_model_resource_config.model_path,
-        "device": intent_model_resource_config.device,
-        "max_length": intent_model_resource_config.max_length
-    })
-
     neo4j_handler = Neo4jMedicalHandler()
     neo4j_handler._init_tool(neo4j_proxy)
 
     vector_handler = VectorRetrievalHandler()
     vector_handler._init_tool(milvus_proxy)
 
-    intent_handler = IntentClassificationHandler()
-    intent_handler._init_tool(intent_proxy)
-
     consult_model_service = ConsultModelService()
-    consult_model_service._init_model()
-    logger.info("咨询模型服务初始化完成")
-
-    intent_parse_resource = IntentParseResource(
-        intent_handler=intent_handler
-    )
-    intent_parse_chain = IntentParseChain(intent_parse_resource)
+    logger.info("咨询模型服务创建完成")
 
     knowledge_retrieval_resource = KnowledgeRetrievalResource(
         vector_handler=vector_handler,
@@ -215,12 +203,10 @@ def _init_business_components(config_manager: ConfigManager):
     answer_generation_chain = AnswerGenerationChain(answer_generation_resource)
 
     agent_resource = AgentResource()
-    agent_resource.register_chain("intent_parse_chain", intent_parse_chain)
     agent_resource.register_chain("knowledge_retrieval_chain", knowledge_retrieval_chain)
     agent_resource.register_chain("answer_generation_chain", answer_generation_chain)
     agent_resource.register_tool_handler("neo4j_medical", neo4j_handler)
     agent_resource.register_tool_handler("vector_retrieval", vector_handler)
-    agent_resource.register_tool_handler("intent_classification", intent_handler)
     agent_resource.model_service = consult_model_service
 
     consult_strategy = ConsultStrategy()
@@ -233,7 +219,59 @@ def _init_business_components(config_manager: ConfigManager):
     consult_service = ConsultService(agent=agent)
     consult_controller = ConsultController(consult_service=consult_service)
 
-    return consult_controller, neo4j_handler, vector_handler, intent_handler, consult_model_service
+    report_model_service = ReportModelService()
+    logger.info("报告模型服务创建完成")
+
+    data_prepare_resource = DataPrepareResource()
+    data_prepare_chain = DataPrepareChain(resource=data_prepare_resource)
+
+    multi_analysis_resource = MultiAnalysisResource()
+    multi_analysis_chain = MultiAnalysisChain(resource=multi_analysis_resource)
+
+    dimension_evaluation_resource = DimensionEvaluationResource(
+        vector_handler=vector_handler,
+        neo4j_handler=neo4j_handler
+    )
+    dimension_evaluation_chain = DimensionEvaluationChain(resource=dimension_evaluation_resource)
+
+    report_knowledge_retrieval_resource = ReportKnowledgeRetrievalResource(
+        vector_handler=vector_handler,
+        neo4j_handler=neo4j_handler
+    )
+    report_knowledge_retrieval_chain = ReportKnowledgeRetrievalChain(resource=report_knowledge_retrieval_resource)
+
+    integration_resource = IntegrationResource()
+    integration_chain = IntegrationChain(resource=integration_resource)
+
+    report_generation_resource = ReportGenerationResource(
+        model_service=report_model_service
+    )
+    report_generation_chain = ReportGenerationChain(resource=report_generation_resource)
+
+    report_strategy = ReportStrategy()
+
+    report_agent_resource = AgentResource(
+        model_service=report_model_service,
+        chain_registry={
+            "data_prepare_chain": data_prepare_chain,
+            "multi_analysis_chain": multi_analysis_chain,
+            "dimension_evaluation_chain": dimension_evaluation_chain,
+            "report_knowledge_retrieval_chain": report_knowledge_retrieval_chain,
+            "integration_chain": integration_chain,
+            "report_generation_chain": report_generation_chain
+        },
+        tool_handlers={
+            "neo4j_tool": neo4j_handler,
+            "vector_tool": vector_handler
+        }
+    )
+
+    report_agent = Agent(strategy=report_strategy, resources=report_agent_resource)
+
+    report_service = ReportService(agent=report_agent)
+    report_controller = ReportController(report_service=report_service)
+
+    return consult_controller, neo4j_handler, vector_handler, consult_model_service, report_controller, report_model_service
 
 
 @asynccontextmanager
@@ -253,12 +291,13 @@ async def lifespan(app: FastAPI):
         _create_initial_resources(config_manager)
         
         logger.info("步骤4: 初始化业务组件...")
-        consult_controller, neo4j_handler, vector_handler, intent_handler, consult_model_service = _init_business_components(config_manager)
+        consult_controller, neo4j_handler, vector_handler, consult_model_service, report_controller, report_model_service = _init_business_components(config_manager)
         app.state.consult_controller = consult_controller
         app.state.neo4j_handler = neo4j_handler
         app.state.vector_handler = vector_handler
-        app.state.intent_handler = intent_handler
         app.state.model_service = consult_model_service
+        app.state.report_controller = report_controller
+        app.state.report_model_service = report_model_service
         
         logger.info("=" * 60)
         logger.info("健康咨询服务初始化完成")
@@ -273,9 +312,9 @@ async def lifespan(app: FastAPI):
         model_service = getattr(app.state, 'model_service', None)
         if model_service:
             model_service.release()
-        intent_handler = getattr(app.state, 'intent_handler', None)
-        if intent_handler:
-            intent_handler.release()
+        report_model_service = getattr(app.state, 'report_model_service', None)
+        if report_model_service:
+            report_model_service.release()
         vector_handler = getattr(app.state, 'vector_handler', None)
         if vector_handler:
             vector_handler.release()
@@ -335,6 +374,28 @@ async def consult(body: ConsultRequestBody, request_id: str = "default", user_id
     )
     controller = app.state.consult_controller
     return controller.consult(consult_request)
+
+
+@app.post("/api/v1/report")
+async def generate_report(body: ReportRequestBody, request_id: str = "default", user_id: str = None):
+    """
+    健康报告生成API
+    
+    Args:
+        body: 报告请求体（包含task_id, monitoring_data, user_profile等）
+        request_id: 请求ID（可选）
+        user_id: 用户ID（可选）
+        
+    Returns:
+        健康报告生成结果
+    """
+    report_request = ReportRequest(
+        request_id=request_id,
+        user_id=user_id,
+        body=body
+    )
+    controller = app.state.report_controller
+    return controller.generate_report(report_request)
 
 
 def main():

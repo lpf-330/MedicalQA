@@ -8,6 +8,8 @@ from .base_request import BaseRequest
 from .base_response import BaseResponse
 from .consult_request import ConsultRequest, ConsultRequestBody, ChatMessage
 from .consult_response import ConsultResponse, ConsultResponseData
+from .report_request import ReportRequest, ReportRequestBody, MonitoringData, UserProfile
+from .report_response import ReportResponse, ReportResponseData
 
 __all__ = [
     "BaseRequest",
@@ -17,4 +19,10 @@ __all__ = [
     "ConsultRequestBody",
     "ConsultResponse",
     "ConsultResponseData",
+    "ReportRequest",
+    "ReportRequestBody",
+    "MonitoringData",
+    "UserProfile",
+    "ReportResponse",
+    "ReportResponseData",
 ]

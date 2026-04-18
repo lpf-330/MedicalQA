@@ -50,10 +50,18 @@ class GlobalResourceManager:
         
         logger.info("Initializing GlobalResourceManager...")
         
-        for resource_type, pool_config in global_config.pool_configs.items():
-            resource_config = global_config.get_resource_config(resource_type)
+        # 遍历所有config_id
+        for config_id, pool_config in global_config.pool_configs.items():
+            resource_config = global_config.get_resource_config(config_id)
             if resource_config is None:
-                logger.warning(f"No resource config found for {resource_type}")
+                logger.warning(f"No resource config found for config_id: {config_id}")
+                continue
+            
+            resource_type = resource_config.resource_type
+            
+            # 检查pool是否已存在（共享pool）
+            if self._poolManager.has_pool(resource_type, config_id):
+                logger.info(f"Pool already exists for {resource_type}:{config_id}, sharing...")
                 continue
             
             factory = self._resourceRegistry.get_factory(resource_type)
@@ -61,12 +69,14 @@ class GlobalResourceManager:
                 logger.warning(f"No factory registered for {resource_type}")
                 continue
             
-            self._poolManager.create_pool(resource_type, pool_config, resource_config)
+            # 创建pool
+            self._poolManager.create_pool(resource_type, pool_config, resource_config, config_id)
             
-            pool = self._poolManager.get_pool(resource_type)
+            # 初始化最小空闲资源
+            pool = self._poolManager.get_pool(resource_type, config_id)
             pool.create_initial_resources(pool_config.min_idle)
             
-            logger.info(f"Pool created for {resource_type}: min_idle={pool_config.min_idle}")
+            logger.info(f"Pool created for {resource_type}:{config_id}: min_idle={pool_config.min_idle}")
         
         self._initialized = True
         logger.info("GlobalResourceManager initialized successfully")
@@ -84,12 +94,13 @@ class GlobalResourceManager:
         logger.info(f"Factory registered for {resource_type}")
     
     @classmethod
-    def acquire(cls, resource_type: str, wait_ms: int = None) -> Optional[ResourceHandle]:
+    def acquire(cls, resource_type: str, config_id: str = None, wait_ms: int = None) -> Optional[ResourceHandle]:
         """
         获取资源
         
         Args:
             resource_type: 资源类型
+            config_id: 配置ID，如果为None则使用默认值
             wait_ms: 等待时间（毫秒）
             
         Returns:
@@ -98,7 +109,7 @@ class GlobalResourceManager:
         if cls.INSTANCE is None:
             raise RuntimeError("GlobalResourceManager not initialized")
         
-        return cls.INSTANCE._poolManager.acquire(resource_type, wait_ms)
+        return cls.INSTANCE._poolManager.acquire(resource_type, config_id, wait_ms)
     
     @classmethod
     def release(cls, handle: ResourceHandle) -> None:

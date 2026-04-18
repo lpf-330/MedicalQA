@@ -5,5 +5,6 @@
 """
 
 from src.controller.consult_controller import ConsultController
+from src.controller.report_controller import ReportController
 
-__all__ = ['ConsultController']
+__all__ = ['ConsultController', 'ReportController']

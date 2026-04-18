@@ -83,7 +83,6 @@ class ResourcePool:
             with self._lock:
                 if self._idle_resources:
                     resource_id, resource = self._idle_resources.popitem()
-                    resource.activate()
                     self._active_resources[resource_id] = resource
                     logger.info(f"[ResourcePool] 从空闲池获取资源: type={self._resource_type}, resource_id={resource_id[:8]}..., idle={len(self._idle_resources)}, active={len(self._active_resources)}")
                     return ResourceHandle(resource_id, resource, self)
@@ -94,7 +93,7 @@ class ResourcePool:
                     resource_id = str(uuid4())
                     resource.activate()
                     self._active_resources[resource_id] = resource
-                    logger.info(f"[ResourcePool] 新资源创建成功: type={self._resource_type}, resource_id={resource_id[:8]}..., active={len(self._active_resources)}")
+                    logger.info(f"[ResourcePool] 新资源创建并激活成功: type={self._resource_type}, resource_id={resource_id[:8]}..., active={len(self._active_resources)}")
                     return ResourceHandle(resource_id, resource, self)
             
             if time.time() * 1000 - start_time >= wait_ms:
@@ -114,7 +113,6 @@ class ResourcePool:
             resource_id = handle.resource_id
             if resource_id in self._active_resources:
                 resource = self._active_resources.pop(resource_id)
-                resource.deactivate()
                 self._idle_resources[resource_id] = resource
                 logger.info(f"[ResourcePool] 资源释放归还: type={self._resource_type}, resource_id={resource_id[:8]}..., idle={len(self._idle_resources)}, active={len(self._active_resources)}")
             else:
@@ -122,7 +120,7 @@ class ResourcePool:
     
     def create_initial_resources(self, count: int) -> None:
         """
-        创建初始资源实例
+        创建初始资源实例并激活
         
         Args:
             count: 要创建的资源数量
@@ -132,8 +130,9 @@ class ResourcePool:
             for i in range(count):
                 resource = self._factory.create(self._resource_config)
                 resource_id = str(uuid4())
+                resource.activate()
                 self._idle_resources[resource_id] = resource
-                logger.debug(f"[ResourcePool] 初始资源创建: type={self._resource_type}, index={i+1}/{count}, resource_id={resource_id[:8]}...")
+                logger.debug(f"[ResourcePool] 初始资源创建并激活: type={self._resource_type}, index={i+1}/{count}, resource_id={resource_id[:8]}...")
         logger.info(f"[ResourcePool] 初始资源创建完成: type={self._resource_type}, total={len(self._idle_resources)}")
     
     def destroy_all(self) -> None:

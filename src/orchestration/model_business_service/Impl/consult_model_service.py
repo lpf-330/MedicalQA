@@ -1,4 +1,14 @@
 # -*- coding: utf-8 -*-
+"""
+健康咨询模型业务服务
+
+提供健康咨询业务场景下的模型服务。
+
+资源获取时机说明：
+- 系统启动时：Pool根据min_idle配置预创建资源实例（处于空闲状态）
+- 处理请求时：调用acquire()获取资源，处理完成后立即释放
+- 禁止在初始化时获取资源并长期持有
+"""
 
 import logging
 import time
@@ -21,40 +31,26 @@ class ConsultModelService(ModelBusinessService[List[Dict[str, str]], str]):
     ):
         self._model_path = model_path
         self._system_prompt = system_prompt
-        self._model_handle: Optional[ResourceHandle] = None
-        self._model_client: Optional[VLLMModelClient] = None
-
-    def _init_model(self) -> None:
-        if self._model_handle is not None:
-            logger.debug("[ConsultModelService] _init_model skipped, already initialized")
-            return
-
-        logger.info("[ConsultModelService] _init_model started")
-        start_time = time.time()
-        try:
-            self._model_handle = GlobalResourceManager.acquire("vllm_model")
-            if self._model_handle is None:
-                raise RuntimeError("Failed to acquire vllm_model resource")
-
-            self._model_client = VLLMModelClient(self._model_handle.resource)
-            elapsed = time.time() - start_time
-            logger.info(f"[ConsultModelService] _init_model completed, elapsed={elapsed:.3f}s")
-        except Exception as e:
-            elapsed = time.time() - start_time
-            logger.error(f"[ConsultModelService] _init_model failed, elapsed={elapsed:.3f}s, error={str(e)}")
-            raise
 
     def call_model(self, messages: List[Dict[str, str]]) -> str:
+        """
+        调用模型 - 在需要时获取资源，处理完成后立即释放
+        """
         logger.debug(f"[ConsultModelService] call_model called, message_count={len(messages)}")
         logger.debug(f"[ConsultModelService] LLM输入 - messages: {messages}")
         start_time = time.time()
+        
+        handle = None
         try:
-            if self._model_client is None:
-                raise RuntimeError("Model not initialized, call _init_model first")
-
+            handle = GlobalResourceManager.acquire("vllm_model", "vllm_config")
+            if handle is None:
+                raise RuntimeError("Failed to acquire vllm_model resource")
+            
+            model_client = VLLMModelClient(handle.resource)
+            
             prompt = self._build_prompt(messages)
             logger.debug(f"[ConsultModelService] LLM输入 - 构建的prompt:\n{prompt[:2000]}{'...' if len(prompt) > 2000 else ''}")
-            result = self._model_client.generate(prompt)
+            result = model_client.generate(prompt)
             elapsed = time.time() - start_time
             logger.info(f"[ConsultModelService] call_model completed, elapsed={elapsed:.3f}s, response_length={len(result)}")
             logger.debug(f"[ConsultModelService] LLM输出 - 内容:\n{result[:2000]}{'...' if len(result) > 2000 else ''}")
@@ -63,6 +59,9 @@ class ConsultModelService(ModelBusinessService[List[Dict[str, str]], str]):
             elapsed = time.time() - start_time
             logger.error(f"[ConsultModelService] call_model failed, elapsed={elapsed:.3f}s, error={str(e)}")
             raise
+        finally:
+            if handle is not None:
+                GlobalResourceManager.release(handle)
 
     def _build_prompt(self, messages: List[Dict[str, str]]) -> str:
         prompt_parts = [self._system_prompt]
@@ -104,12 +103,20 @@ class ConsultModelService(ModelBusinessService[List[Dict[str, str]], str]):
             raise
 
     def stream_generate_with_context(self, user_query: str, knowledge_context: str) -> Iterator[str]:
+        """
+        流式生成 - 在需要时获取资源，流式输出完成后释放
+        """
         logger.info(f"[ConsultModelService] stream_generate_with_context called, query_length={len(user_query)}, context_length={len(knowledge_context)}")
         start_time = time.time()
+        
+        handle = None
         try:
-            if self._model_client is None:
-                raise RuntimeError("Model not initialized, call _init_model first")
-
+            handle = GlobalResourceManager.acquire("vllm_model", "vllm_config")
+            if handle is None:
+                raise RuntimeError("Failed to acquire vllm_model resource")
+            
+            model_client = VLLMModelClient(handle.resource)
+            
             messages = [
                 {"role": "system", "content": self._system_prompt},
                 {"role": "system", "content": f"参考知识：\n{knowledge_context}"},
@@ -117,7 +124,6 @@ class ConsultModelService(ModelBusinessService[List[Dict[str, str]], str]):
             ]
             prompt = self._build_prompt(messages)
             
-            # 记录完整的LLM输入
             logger.info(f"[ConsultModelService] ========== LLM完整输入 ==========")
             logger.info(f"[ConsultModelService] System Prompt: {self._system_prompt}")
             logger.info(f"[ConsultModelService] Knowledge Context (长度={len(knowledge_context)}):")
@@ -127,26 +133,21 @@ class ConsultModelService(ModelBusinessService[List[Dict[str, str]], str]):
             logger.info(f"{prompt}")
             logger.info(f"[ConsultModelService] ==============================")
             
-            result = self._model_client.stream_generate(prompt)
+            for chunk in model_client.stream_generate(prompt):
+                yield chunk
+            
             elapsed = time.time() - start_time
-            logger.info(f"[ConsultModelService] stream_generate_with_context initiated, elapsed={elapsed:.3f}s")
-            return result
+            logger.info(f"[ConsultModelService] stream_generate_with_context completed, elapsed={elapsed:.3f}s")
         except Exception as e:
             elapsed = time.time() - start_time
             logger.error(f"[ConsultModelService] stream_generate_with_context failed, elapsed={elapsed:.3f}s, error={str(e)}")
             raise
+        finally:
+            if handle is not None:
+                GlobalResourceManager.release(handle)
 
     def release(self) -> None:
-        logger.info("[ConsultModelService] release started")
-        start_time = time.time()
-        try:
-            if self._model_handle is not None:
-                GlobalResourceManager.release(self._model_handle)
-                self._model_handle = None
-                self._model_client = None
-            elapsed = time.time() - start_time
-            logger.info(f"[ConsultModelService] release completed, elapsed={elapsed:.3f}s")
-        except Exception as e:
-            elapsed = time.time() - start_time
-            logger.error(f"[ConsultModelService] release failed, elapsed={elapsed:.3f}s, error={str(e)}")
-            raise
+        """
+        释放资源 - 由于资源在每次调用后已释放，此方法保持兼容性但无需操作
+        """
+        logger.info("[ConsultModelService] release called (no-op, resources released after each call)")

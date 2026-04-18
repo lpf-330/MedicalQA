@@ -1,0 +1,49 @@
+{
+  "total_tests": 30,
+  "passed_count": 30,
+  "failed_count": 0,
+  "warning_count": 2,
+  "passed": [
+    "状态定义验证 - 初始状态(INITIAL)",
+    "状态定义验证 - 数据准备状态(DATA_PREPARE)",
+    "状态定义验证 - 模型分析状态(MULTI_ANALYSIS)",
+    "状态定义验证 - 并行处理状态(PARALLEL_PROCESSING)",
+    "状态定义验证 - 整合计算状态(INTEGRATION)",
+    "状态定义验证 - 报告生成状态(REPORT_GENERATION)",
+    "状态定义验证 - 流式返回状态(STREAMING)",
+    "状态定义验证 - 组装结束状态(ASSEMBLY)",
+    "状态定义验证 - 完成状态(FINISHED)",
+    "状态定义验证 - 错误状态(ERROR)",
+    "状态机验证 - 状态定义完整性",
+    "上下文类验证 - ReportContext",
+    "上下文类验证 - ReportContextBody",
+    "上下文类验证 - ReportResultData",
+    "状态转换验证 - INITIAL→DATA_PREPARE",
+    "状态转换验证 - DATA_PREPARE→MULTI_ANALYSIS",
+    "状态转换验证 - MULTI_ANALYSIS→PARALLEL_PROCESSING",
+    "状态转换验证 - PARALLEL_PROCESSING→INTEGRATION",
+    "状态转换验证 - INTEGRATION→REPORT_GENERATION",
+    "状态转换验证 - REPORT_GENERATION→STREAMING",
+    "状态转换验证 - STREAMING→ASSEMBLY",
+    "状态转换验证 - ASSEMBLY→FINISHED",
+    "状态转换验证 - 任意状态→ERROR",
+    "状态机验证 - 状态转换完整性",
+    "Chain执行验证 - DataPrepareChain",
+    "Chain执行验证 - MultiAnalysisChain",
+    "Chain执行验证 - DimensionEvaluationChain",
+    "Chain执行验证 - ReportKnowledgeRetrievalChain",
+    "Chain执行验证 - IntegrationChain",
+    "Chain执行验证 - ReportGenerationChain"
+  ],
+  "failed": [],
+  "warnings": [
+    [
+      "并行处理验证 - asyncio.gather",
+      "未找到asyncio.gather调用"
+    ],
+    [
+      "并行处理验证 - 异步实现",
+      "未找到异步实现"
+    ]
+  ]
+}

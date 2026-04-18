@@ -46,7 +46,7 @@ class Neo4jMedicalTool(Tool):
         logger.info("[Neo4jMedicalTool] _init_resource started")
         start_time = time.time()
         try:
-            self._resource_handle = GlobalResourceManager.acquire("neo4j_connection")
+            self._resource_handle = GlobalResourceManager.acquire("neo4j_connection", "neo4j_config")
             if self._resource_handle is None:
                 raise RuntimeError("Failed to acquire neo4j_connection resource")
             

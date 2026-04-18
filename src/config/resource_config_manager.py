@@ -279,7 +279,8 @@ class ResourceConfigManager(BaseConfig):
                 password=self._database_config.neo4j_password,
                 database=self._database_config.neo4j_database
             )
-            global_config.add_resource_config("neo4j_connection", neo4j_config)
+            global_config.add_resource_config("neo4j_config", neo4j_config)
+            global_config.add_pool_config("neo4j_config", self._pool_configs.get("neo4j_connection", PoolConfig()))
         
         if self._model_config:
             from src.resource_manager.vllm_model import VLLMModelConfig
@@ -291,10 +292,8 @@ class ResourceConfigManager(BaseConfig):
                 max_model_len=self._model_config.max_model_len,
                 gpu_memory_utilization=self._model_config.gpu_memory_utilization
             )
-            global_config.add_resource_config("vllm_model", vllm_config)
-        
-        for resource_type, pool_config in self._pool_configs.items():
-            global_config.add_pool_config(resource_type, pool_config)
+            global_config.add_resource_config("vllm_config", vllm_config)
+            global_config.add_pool_config("vllm_config", self._pool_configs.get("vllm_model", PoolConfig()))
         
         return global_config
     

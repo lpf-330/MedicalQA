@@ -52,7 +52,7 @@ class VectorEnhancedRetrievalTool(Tool):
         logger.info("[VectorEnhancedRetrievalTool] _init_resource started")
         start_time = time.time()
         try:
-            self._milvus_handle = GlobalResourceManager.acquire("milvus_connection")
+            self._milvus_handle = GlobalResourceManager.acquire("milvus_connection", "milvus_config")
             if self._milvus_handle is not None:
                 self._milvus_resource = self._milvus_handle.resource
                 if not self._milvus_resource.is_activate():
@@ -61,7 +61,7 @@ class VectorEnhancedRetrievalTool(Tool):
             else:
                 logger.warning("[VectorEnhancedRetrievalTool] failed to acquire milvus_connection resource")
 
-            self._vector_handle = GlobalResourceManager.acquire("vector_model")
+            self._vector_handle = GlobalResourceManager.acquire("vector_model", "vector_model_config")
             if self._vector_handle is not None:
                 self._vector_resource = self._vector_handle.resource
                 if not self._vector_resource.is_activate():

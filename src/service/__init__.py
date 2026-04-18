@@ -5,5 +5,6 @@
 """
 
 from src.service.consult_service import ConsultService
+from src.service.report_service import ReportService
 
-__all__ = ['ConsultService']
+__all__ = ['ConsultService', 'ReportService']

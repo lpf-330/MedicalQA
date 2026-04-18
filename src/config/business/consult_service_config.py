@@ -36,7 +36,7 @@ class ConsultServiceConfig(BusinessConfig):
     """
 
     business_id: str = "consult_service"
-    resource_configs: List[str] = field(default_factory=lambda: ["neo4j_config", "vllm_config", "milvus_config", "intent_model_config", "vector_model_config"])
+    resource_configs: List[str] = field(default_factory=lambda: ["neo4j_config", "vllm_config", "milvus_config", "vector_model_config"])
 
     max_retries: int = 3
     timeout: int = 60

@@ -2,14 +2,18 @@
 编排层模型业务服务接口
 
 该模块定义了ModelBusinessService接口，是模型业务服务的核心抽象。
+
+资源获取时机说明：
+- 系统启动时：Pool根据min_idle配置预创建资源实例（处于空闲状态）
+- 处理请求时：调用acquire()获取资源，处理完成后立即释放
+- 禁止在初始化时获取资源并长期持有
 """
 
 from abc import ABC, abstractmethod
-from typing import Generic, TypeVar, Any, Dict, List
+from typing import Generic, TypeVar, Any, Dict, List, Iterator
 
-# 定义泛型类型变量
-I = TypeVar('I')  # 输入数据类型
-O = TypeVar('O')  # 输出数据类型
+I = TypeVar('I')
+O = TypeVar('O')
 
 
 class ModelBusinessService(ABC, Generic[I, O]):
@@ -25,38 +29,22 @@ class ModelBusinessService(ABC, Generic[I, O]):
         - ConsultModelService: 健康咨询业务场景下的模型服务
         - ReportModelService: 健康报告业务场景下的模型服务
 
+    资源获取时机：
+        - 系统启动时：Pool根据min_idle配置预创建资源实例（处于空闲状态）
+        - 处理请求时：调用acquire()获取资源，处理完成后立即释放
+        - 禁止在初始化时获取资源并长期持有
+
     职责：
-        - 初始化模型
         - 调用模型服务
-        - 释放模型资源
+        - 管理资源生命周期（获取和释放）
 
     使用示例：
         >>> class ConsultModelService(ModelBusinessService[List[Dict], str]):
-        ...     def __init__(self, model_config: Dict[str, Any]):
-        ...         self._model_config = model_config
-        ...         self._model = None
-        ...
-        ...     def _init_model(self) -> None:
-        ...         # 初始化模型实例
-        ...         self._model = load_model(self._model_config)
-        ...
         ...     def call_model(self, messages: List[Dict]) -> str:
-        ...         if self._model is None:
-        ...             raise ValueError("model未初始化")
-        ...         # 调用模型生成回答
-        ...         response = self._model.generate(messages)
-        ...         return response
-        ...
-        ...     def release(self) -> None:
-        ...         if self._model is not None:
-        ...             self._model.close()
-        ...             self._model = None
-
-    生命周期：
-        1. 创建ModelBusinessService实例
-        2. 调用_init_model初始化模型
-        3. 调用call_model使用模型服务
-        4. 调用release释放模型资源
+        ...         # 在处理请求时获取资源，处理完成后自动释放
+        ...         with GlobalResourceManager.acquire("vllm_model", "vllm_config") as handle:
+        ...             client = handle.get_client()
+        ...             return client.generate(messages)
 
     泛型参数：
         I: 模型调用的输入数据类型（通常是消息列表）
@@ -64,29 +52,12 @@ class ModelBusinessService(ABC, Generic[I, O]):
     """
 
     @abstractmethod
-    def _init_model(self) -> None:
-        """
-        初始化模型
-
-        在ModelBusinessService实例创建后调用，用于初始化模型实例。
-        该方法为私有方法，由agent策略或chain策略内部调用。
-
-        Raises:
-            ResourceException: 资源初始化失败时抛出
-            ConfigException: 配置错误时抛出
-
-        Example:
-            >>> model_service._init_model()
-        """
-        pass
-
-    @abstractmethod
     def call_model(self, messages: I) -> O:
         """
         使用模型服务
 
         通过模型实例调用模型服务，生成输出。
-        输入类型和输出类型由实现该接口的类型的泛型决定。
+        在此方法内部获取资源，处理完成后释放资源。
 
         Args:
             messages: 模型调用的输入数据，通常是消息列表
@@ -109,13 +80,12 @@ class ModelBusinessService(ABC, Generic[I, O]):
         """
         pass
 
-    @abstractmethod
     def release(self) -> None:
         """
         释放模型资源
 
-        在ModelBusinessService使用完毕后调用，用于释放模型资源。
-        该方法应该是幂等的，即多次调用不会产生副作用。
+        由于资源在每次调用后已释放，此方法保持兼容性但默认无需操作。
+        子类可以覆盖此方法以实现特定的清理逻辑。
 
         Example:
             >>> model_service.release()

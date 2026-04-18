@@ -17,8 +17,8 @@ class GlobalConfig:
     包含所有资源的配置信息和资源池配置信息。
     
     属性：
-        resource_configs: 资源配置总容器，key为资源类型唯一标识，value为ResourceConfig
-        pool_configs: 资源池配置总容器，key为资源类型唯一标识，value为PoolConfig
+        resource_configs: 资源配置总容器，key为配置ID（config_id），value为ResourceConfig
+        pool_configs: 资源池配置总容器，key为配置ID（config_id），value为PoolConfig
     """
     
     def __init__(self):
@@ -36,49 +36,49 @@ class GlobalConfig:
         """获取资源池配置字典"""
         return self._pool_configs
     
-    def add_resource_config(self, resource_type: str, config: Any) -> None:
+    def add_resource_config(self, config_id: str, config: Any) -> None:
         """
         添加资源配置
         
         Args:
-            resource_type: 资源类型唯一标识
+            config_id: 配置ID（唯一标识）
             config: 资源配置对象
         """
-        self._resource_configs[resource_type] = config
+        self._resource_configs[config_id] = config
     
-    def get_resource_config(self, resource_type: str) -> Any:
+    def get_resource_config(self, config_id: str) -> Any:
         """
         获取资源配置
         
         Args:
-            resource_type: 资源类型唯一标识
+            config_id: 配置ID（唯一标识）
             
         Returns:
             资源配置对象
         """
-        return self._resource_configs.get(resource_type)
+        return self._resource_configs.get(config_id)
     
-    def add_pool_config(self, resource_type: str, config: PoolConfig) -> None:
+    def add_pool_config(self, config_id: str, config: PoolConfig) -> None:
         """
         添加资源池配置
         
         Args:
-            resource_type: 资源类型唯一标识
+            config_id: 配置ID（唯一标识）
             config: 资源池配置对象
         """
-        self._pool_configs[resource_type] = config
+        self._pool_configs[config_id] = config
     
-    def get_pool_config(self, resource_type: str) -> PoolConfig:
+    def get_pool_config(self, config_id: str) -> PoolConfig:
         """
         获取资源池配置
         
         Args:
-            resource_type: 资源类型唯一标识
+            config_id: 配置ID（唯一标识）
             
         Returns:
             PoolConfig: 资源池配置对象
         """
-        return self._pool_configs.get(resource_type)
+        return self._pool_configs.get(config_id)
     
     def validate(self) -> bool:
         """

@@ -46,7 +46,7 @@ def load_global_config_legacy() -> GlobalConfig:
         password=db_config.neo4j_password,
         database=db_config.neo4j_database
     )
-    config.add_resource_config("neo4j_connection", neo4j_resource_config)
+    config.add_resource_config("neo4j_config", neo4j_resource_config)
     
     neo4j_pool_config = PoolConfig(
         max_size=10,
@@ -54,7 +54,7 @@ def load_global_config_legacy() -> GlobalConfig:
         idle_timeout=300000,
         max_wait_time=5000
     )
-    config.add_pool_config("neo4j_connection", neo4j_pool_config)
+    config.add_pool_config("neo4j_config", neo4j_pool_config)
     
     from src.resource_manager.vllm_model import VLLMModelConfig
 
@@ -65,7 +65,7 @@ def load_global_config_legacy() -> GlobalConfig:
         max_model_len=model_config.max_model_len,
         gpu_memory_utilization=model_config.gpu_memory_utilization
     )
-    config.add_resource_config("vllm_model", vllm_resource_config)
+    config.add_resource_config("vllm_config", vllm_resource_config)
 
     vllm_pool_config = PoolConfig(
         max_size=1,
@@ -73,7 +73,7 @@ def load_global_config_legacy() -> GlobalConfig:
         idle_timeout=600000,
         max_wait_time=30000
     )
-    config.add_pool_config("vllm_model", vllm_pool_config)
+    config.add_pool_config("vllm_config", vllm_pool_config)
 
     from src.resource_manager.milvus_connection import MilvusConnectionConfig
 
@@ -83,7 +83,7 @@ def load_global_config_legacy() -> GlobalConfig:
         password=db_config.milvus_password if hasattr(db_config, 'milvus_password') else "Milvus",
         token=""
     )
-    config.add_resource_config("milvus_connection", milvus_resource_config)
+    config.add_resource_config("milvus_config", milvus_resource_config)
 
     milvus_pool_config = PoolConfig(
         max_size=10,
@@ -91,7 +91,7 @@ def load_global_config_legacy() -> GlobalConfig:
         idle_timeout=300000,
         max_wait_time=5000
     )
-    config.add_pool_config("milvus_connection", milvus_pool_config)
+    config.add_pool_config("milvus_config", milvus_pool_config)
 
     from src.resource_manager.intent_model import IntentModelConfig
 
@@ -101,7 +101,7 @@ def load_global_config_legacy() -> GlobalConfig:
         device=model_config.intent_device if hasattr(model_config, 'intent_device') else "cpu",
         max_length=model_config.intent_max_length if hasattr(model_config, 'intent_max_length') else 128
     )
-    config.add_resource_config("intent_model", intent_model_resource_config)
+    config.add_resource_config("intent_model_config", intent_model_resource_config)
 
     intent_model_pool_config = PoolConfig(
         max_size=1,
@@ -109,7 +109,7 @@ def load_global_config_legacy() -> GlobalConfig:
         idle_timeout=600000,
         max_wait_time=30000
     )
-    config.add_pool_config("intent_model", intent_model_pool_config)
+    config.add_pool_config("intent_model_config", intent_model_pool_config)
 
     from src.resource_manager.vector_model import VectorModelConfig
 
@@ -120,7 +120,7 @@ def load_global_config_legacy() -> GlobalConfig:
         dimension=model_config.vector_dimension if hasattr(model_config, 'vector_dimension') else 1024,
         batch_size=model_config.vector_batch_size if hasattr(model_config, 'vector_batch_size') else 32
     )
-    config.add_resource_config("vector_model", vector_model_resource_config)
+    config.add_resource_config("vector_model_config", vector_model_resource_config)
 
     vector_model_pool_config = PoolConfig(
         max_size=1,
@@ -128,6 +128,6 @@ def load_global_config_legacy() -> GlobalConfig:
         idle_timeout=600000,
         max_wait_time=30000
     )
-    config.add_pool_config("vector_model", vector_model_pool_config)
+    config.add_pool_config("vector_model_config", vector_model_pool_config)
 
     return config
