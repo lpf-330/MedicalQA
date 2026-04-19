@@ -35,14 +35,21 @@ class ReportModelService(ModelBusinessService[List[Dict[str, str]], str]):
         - 报告输出：约3500 Token
     """
 
-    DEFAULT_SYSTEM_PROMPT = """你是一位专业的医疗健康评估助手，请根据提供的监测数据和医学知识生成健康评估报告。
-报告应包含以下内容：
-1. 健康综合评分及等级
-2. 监测数据分析
-3. 风险评估
-4. 各维度评估
-5. 健康建议
-6. 免责声明"""
+    DEFAULT_SYSTEM_PROMPT = """你是一位专业的医疗健康评估助手。请严格按照用户提供的报告模板结构生成健康评估报告。
+
+输出要求：
+1. 直接以"# 健康评估报告"开头，以免责声明结束
+2. 严格按模板输出六个章节，不得增减
+3. 第一至第四节：专业学术分析风格，语言严谨准确，不使用图标、特殊符号、emoji表情，仅进行数据分析，不提出建议
+4. 第五节：针对老年用户，采用适老化表达，直接、明确地提出建议
+
+禁止输出：
+- 禁止输出"分析部分"、"建议部分"等分类标题
+- 禁止输出"全文完"、"报告完毕"、"总字数："等结束语或统计信息
+- 禁止输出任何报告正文之外的说明、总结、提示等内容
+- 禁止输出对本次生成任务的完成汇报
+
+只输出报告正文内容，不输出任何附加内容。"""
 
     def __init__(
         self,
@@ -71,7 +78,7 @@ class ReportModelService(ModelBusinessService[List[Dict[str, str]], str]):
             prompt = self._build_prompt(messages)
             logger.debug(f"[ReportModelService] LLM输入 - 构建的prompt:\n{prompt[:2000]}{'...' if len(prompt) > 2000 else ''}")
 
-            result = model_client.generate(prompt, max_tokens=3500)
+            result = model_client.generate(prompt, max_tokens=5000)
             elapsed = time.time() - start_time
             logger.info(f"[ReportModelService] call_model completed, elapsed={elapsed:.3f}s, response_length={len(result)}")
             logger.debug(f"[ReportModelService] LLM输出 - 内容:\n{result[:2000]}{'...' if len(result) > 2000 else ''}")
@@ -87,7 +94,7 @@ class ReportModelService(ModelBusinessService[List[Dict[str, str]], str]):
     def generate_report(
         self,
         prompt: str,
-        max_tokens: int = 3500
+        max_tokens: int = 5000
     ) -> str:
         """
         生成报告 - 在需要时获取资源，处理完成后立即释放
@@ -184,11 +191,8 @@ class ReportModelService(ModelBusinessService[List[Dict[str, str]], str]):
             prompt_parts.append("助手：")
             
             full_prompt = "\n".join(prompt_parts)
-            
-            logger.debug(f"[ReportModelService] LLM流式输入 - prompt长度: {len(full_prompt)}字符")
-            logger.debug(f"[ReportModelService] LLM流式输入 - prompt内容:\n{full_prompt[:2000]}{'...' if len(full_prompt) > 2000 else ''}")
 
-            for chunk in model_client.stream_generate(full_prompt, max_tokens=3500):
+            for chunk in model_client.stream_generate(full_prompt, max_tokens=5000):
                 yield chunk
             
             elapsed = time.time() - start_time

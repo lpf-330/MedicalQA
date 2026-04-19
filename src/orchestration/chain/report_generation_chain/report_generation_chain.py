@@ -19,8 +19,8 @@ logger = logging.getLogger(__name__)
 DISCLAIMER = "以上信息仅供参考，不构成医疗建议。如有健康问题，请及时就医。"
 
 # 报告长度控制常量
-MIN_WORDS = 1000
-MAX_WORDS = 5000
+MIN_WORDS = 2000
+MAX_WORDS = 4000
 
 # 最大重试次数
 MAX_RETRY_COUNT = 2
@@ -317,7 +317,21 @@ class ReportGenerationChain(Chain[ChainContext[ReportGenerationContextBody], Cha
             包含system_message和user_message的字典
         """
         # 系统指令
-        system_message = "你是一位专业的医疗健康评估助手，请根据提供的监测数据和医学知识生成健康评估报告。"
+        system_message = """你是一位专业的医疗健康评估助手。请严格按照用户提供的报告模板结构生成健康评估报告。
+
+输出要求：
+1. 直接以"# 健康评估报告"开头，以免责声明结束
+2. 严格按模板输出六个章节，不得增减
+3. 第一至第四节：专业学术分析风格，语言严谨准确，不使用图标、特殊符号、emoji表情，仅进行数据分析，不提出建议
+4. 第五节：针对老年用户，采用适老化表达，直接、明确地提出建议
+
+禁止输出：
+- 禁止输出"分析部分"、"建议部分"等分类标题
+- 禁止输出"全文完"、"报告完毕"、"总字数："等结束语或统计信息
+- 禁止输出任何报告正文之外的说明、总结、提示等内容
+- 禁止输出对本次生成任务的完成汇报
+
+只输出报告正文内容，不输出任何附加内容。"""
 
         # 添加知识素材
         knowledge_context = self._build_knowledge_context(context_body.report_materials)
@@ -481,63 +495,28 @@ class ReportGenerationChain(Chain[ChainContext[ReportGenerationContextBody], Cha
         report_materials = context_body.report_materials or {}
         monitoring_data = context_body.monitoring_data or report_materials.get("monitoring_data", {})
         if monitoring_data:
-            monitoring_parts = ["\n监测数据："]
+            monitoring_parts = ["\n监测数据（阶段性统计特征）："]
 
-            # 心率数据
-            heart_rate = monitoring_data.get('heart_rate', {})
-            if isinstance(heart_rate, dict) and heart_rate.get('latest'):
-                latest_hr_list = heart_rate['latest']
-                if isinstance(latest_hr_list, list) and latest_hr_list:
-                    latest_hr = latest_hr_list[-1] if isinstance(latest_hr_list[-1], dict) else {}
-                    hr_value = latest_hr.get('value', '未知')
-                    monitoring_parts.append(f"- 心率：{hr_value} 次/分钟")
+            indicators = [
+                ('heart_rate', '心率', '次/分钟', 'value'),
+                ('blood_glucose', '血糖', 'mmol/L', 'value'),
+                ('perfusion_index', '灌注指数', 'PI', 'value'),
+                ('blood_oxygen', '血氧', '%', 'value'),
+                ('sleep', '睡眠', '小时', 'duration'),
+            ]
 
-            # 血压数据
+            for indicator_key, indicator_name, unit, value_key in indicators:
+                indicator_data = monitoring_data.get(indicator_key, {})
+                if isinstance(indicator_data, dict):
+                    stats_text = self._extract_indicator_stats(indicator_data, indicator_name, unit, value_key)
+                    if stats_text:
+                        monitoring_parts.append(stats_text)
+
             blood_pressure = monitoring_data.get('blood_pressure', {})
-            if isinstance(blood_pressure, dict) and blood_pressure.get('latest'):
-                latest_bp_list = blood_pressure['latest']
-                if isinstance(latest_bp_list, list) and latest_bp_list:
-                    latest_bp = latest_bp_list[-1] if isinstance(latest_bp_list[-1], dict) else {}
-                    systolic = latest_bp.get('systolic', '未知')
-                    diastolic = latest_bp.get('diastolic', '未知')
-                    monitoring_parts.append(f"- 血压：收缩压 {systolic} mmHg，舒张压 {diastolic} mmHg")
-
-            # 血糖数据
-            blood_glucose = monitoring_data.get('blood_glucose', {})
-            if isinstance(blood_glucose, dict) and blood_glucose.get('latest'):
-                latest_glucose_list = blood_glucose['latest']
-                if isinstance(latest_glucose_list, list) and latest_glucose_list:
-                    latest_glucose = latest_glucose_list[-1] if isinstance(latest_glucose_list[-1], dict) else {}
-                    glucose_value = latest_glucose.get('value', '未知')
-                    glucose_type = latest_glucose.get('type', '空腹')
-                    monitoring_parts.append(f"- 血糖：{glucose_type}血糖 {glucose_value} mmol/L")
-
-            # 血氧数据
-            blood_oxygen = monitoring_data.get('blood_oxygen', {})
-            if isinstance(blood_oxygen, dict) and blood_oxygen.get('latest'):
-                latest_oxygen_list = blood_oxygen['latest']
-                if isinstance(latest_oxygen_list, list) and latest_oxygen_list:
-                    latest_oxygen = latest_oxygen_list[-1] if isinstance(latest_oxygen_list[-1], dict) else {}
-                    oxygen_value = latest_oxygen.get('value', '未知')
-                    monitoring_parts.append(f"- 血氧：{oxygen_value}%")
-
-            # 睡眠数据
-            sleep = monitoring_data.get('sleep', {})
-            if isinstance(sleep, dict) and sleep.get('latest'):
-                latest_sleep_list = sleep['latest']
-                if isinstance(latest_sleep_list, list) and latest_sleep_list:
-                    latest_sleep = latest_sleep_list[-1] if isinstance(latest_sleep_list[-1], dict) else {}
-                    sleep_value = latest_sleep.get('value', '未知')
-                    monitoring_parts.append(f"- 睡眠：{sleep_value} 小时")
-
-            # 灌注指数数据
-            perfusion_index = monitoring_data.get('perfusion_index', {})
-            if isinstance(perfusion_index, dict) and perfusion_index.get('latest'):
-                latest_pi_list = perfusion_index['latest']
-                if isinstance(latest_pi_list, list) and latest_pi_list:
-                    latest_pi = latest_pi_list[-1] if isinstance(latest_pi_list[-1], dict) else {}
-                    pi_value = latest_pi.get('value', '未知')
-                    monitoring_parts.append(f"- 灌注指数：{pi_value} PI")
+            if isinstance(blood_pressure, dict):
+                bp_stats_text = self._extract_blood_pressure_stats(blood_pressure)
+                if bp_stats_text:
+                    monitoring_parts.append(bp_stats_text)
 
             if len(monitoring_parts) > 1:
                 monitoring_data_text = "\n".join(monitoring_parts)
@@ -549,27 +528,87 @@ class ReportGenerationChain(Chain[ChainContext[ReportGenerationContextBody], Cha
                 risk_diseases_text = "、".join(disease_names)
 
         report_template = f"""
-请根据以上信息生成一份完整的健康评估报告，报告结构如下：
+【报告结构模板 - 必须严格按此结构输出，不得输出任何模板说明文字】
 
 # 健康评估报告
 
+---
+
 ## 一、健康综合评分
-[{context_body.health_score}分]（{context_body.health_level}）
+
+**评分：{context_body.health_score}分（{context_body.health_level}）**
+
+[详细说明评分依据、评分等级含义、与用户健康状况的对应关系]
+
+---
 
 ## 二、监测数据分析
-[异常指标分析]
+
+[根据提供的阶段性监测数据统计特征，逐项详细分析各指标：
+ - 分析各项指标的当前数值、变化趋势、波动情况
+ - 结合正常医学参考范围进行对比分析
+ - 分析指标之间的关联性和相互影响
+ - 识别异常指标并分析其可能的医学意义
+ - 每项指标分析应包含数据解读和临床意义说明]
+
+---
 
 ## 三、风险评估
-[{context_body.risk_level}]：{risk_diseases_text}
+
+**风险等级：{context_body.risk_level}**
+
+**风险疾病：{risk_diseases_text if risk_diseases_text else '暂无'}**
+
+[详细分析风险因素：
+ - 逐一分析各风险因素的来源、严重程度
+ - 结合用户病史、家族史、监测数据进行综合评估
+ - 说明各风险因素之间的关联性
+ - 分析潜在的健康威胁和发展趋势]
+
+---
 
 ## 四、各维度评估
-[8个维度的评估结果]
+
+基于提供的用户信息、监测数据、风险因素及参考评估结果，对用户进行以下维度的综合评估：
+
+### 1. 整体健康状态评估
+
+[综合所有生理指标和风险因素，评估用户当前整体健康状态]
+
+### 2. 慢性病管理效果评估
+
+[基于血压、血糖等慢性病相关指标的变化趋势，评估慢性病控制效果]
+
+### 3. 生活方式健康度评估
+
+[基于睡眠、作息等生活方式相关指标，评估生活方式健康程度]
+
+### 4. 疾病发展趋势评估
+
+[基于当前指标变化趋势和风险因素，评估潜在疾病发展趋势]
+
+### 5. 健康风险预警评估
+
+[综合风险因素和异常指标，评估需要重点警惕的健康隐患]
+
+### 6. 健康改善空间评估
+
+[分析当前健康状况与理想状态的差距，评估可优化的健康方向]
+
+---
 
 ## 五、健康建议
-[综合建议]
+
+[针对用户具体情况，提出详细、具体、可操作的健康建议：
+ - 每条建议应明确说明具体做法
+ - 建议内容应便于老年用户理解和执行
+ - 建议应覆盖日常生活的各个方面]
+
+---
 
 ## 六、免责声明
-以上信息仅供参考，不构成医疗建议。如有健康问题，请及时就医。
+
+> {DISCLAIMER}
 """
 
         user_message = f"""
@@ -578,16 +617,197 @@ class ReportGenerationChain(Chain[ChainContext[ReportGenerationContextBody], Cha
 
 {report_template}
 
-生成要求：
-1. 报告长度：{MIN_WORDS}-{MAX_WORDS}字
-2. 必须包含免责声明
-3. 必须包含健康评分
-4. 基于提供的知识素材进行分析，不要编造信息
-5. 语言专业、准确、易懂
-6. 在报告末尾必须添加免责声明：'{DISCLAIMER}'
+【输出规范 - 必须严格遵守】
+
+1. 报告长度：{MIN_WORDS}-{MAX_WORDS}字，内容要详实丰富
+
+2. 内容要求：
+   - 第一至第四节（健康评分、监测数据分析、风险评估、各维度评估）：采用专业学术分析风格，语言严谨准确，不使用任何图标、特殊符号、emoji表情，仅进行数据分析，不提出建议。每个章节内容要详实，分析要深入透彻。
+   - 第五节（健康建议）：针对老年用户，采用适老化表达，直接、明确地提出建议。建议要具体详细，便于执行。
+
+3. 禁止输出的内容：
+   - 禁止输出"分析部分"、"建议部分"等分类标题
+   - 禁止输出"全文完"、"报告完毕"、"总字数："等结束语或统计信息
+   - 禁止输出任何报告正文之外的说明、总结、提示等内容
+   - 禁止输出对本次生成任务的完成汇报
+
+4. 格式要求：
+   - 直接以"# 健康评估报告"开头
+   - 严格按模板结构输出六个章节
+   - 以免责声明结束，之后不得有任何内容
+
+5. 内容丰富度要求：
+   - 监测数据分析章节：每项指标分析不少于100字
+   - 风险评估章节：每个风险因素分析不少于50字
+   - 各维度评估章节：6个评估维度，每个维度评估不少于80字
+   - 健康建议章节：建议条目不少于5条，每条不少于30字
 """
 
         return user_message
+
+    def _extract_indicator_stats(self, indicator_data: Dict, indicator_name: str, unit: str, value_key: str) -> str:
+        """
+        提取单个监测指标的统计特征
+
+        Args:
+            indicator_data: 指标数据字典，包含latest, daily_stats, weekly_stats, monthly_stats
+            indicator_name: 指标名称
+            unit: 单位
+            value_key: 值字段名称
+
+        Returns:
+            格式化的统计特征文本
+        """
+        import statistics
+
+        stats_parts = [f"\n【{indicator_name}】"]
+
+        latest_data = indicator_data.get('latest', [])
+        if latest_data and isinstance(latest_data, list):
+            values = []
+            for item in latest_data:
+                if isinstance(item, dict):
+                    val = item.get(value_key)
+                    if val is not None and isinstance(val, (int, float)):
+                        values.append(float(val))
+            if values:
+                stats_parts.append(f"  最新值: {values[-1]:.1f} {unit}")
+                if len(values) > 1:
+                    stats_parts.append(f"  近期均值（共{len(values)}次）: {statistics.mean(values):.1f} {unit}")
+                    stats_parts.append(f"  近期波动: {min(values):.1f} - {max(values):.1f} {unit}")
+
+        daily_stats = indicator_data.get('daily_stats', [])
+        if daily_stats and isinstance(daily_stats, list):
+            daily_values = []
+            for item in daily_stats:
+                if isinstance(item, dict):
+                    val = item.get('avg_value')
+                    if val is not None and isinstance(val, (int, float)):
+                        daily_values.append(float(val))
+            if daily_values:
+                count = len(daily_values)
+                stats_parts.append(f"  日均值（共{count}天）: {statistics.mean(daily_values):.1f} {unit}")
+                stats_parts.append(f"  日最高值: {max(daily_values):.1f} {unit}")
+                stats_parts.append(f"  日最低值: {min(daily_values):.1f} {unit}")
+                if count > 1:
+                    stats_parts.append(f"  日标准差: {statistics.stdev(daily_values):.2f} {unit}")
+
+        weekly_stats = indicator_data.get('weekly_stats', [])
+        if weekly_stats and isinstance(weekly_stats, list):
+            weekly_values = []
+            for item in weekly_stats:
+                if isinstance(item, dict):
+                    val = item.get('avg_value')
+                    if val is not None and isinstance(val, (int, float)):
+                        weekly_values.append(float(val))
+            if weekly_values:
+                count = len(weekly_values)
+                stats_parts.append(f"  周均值（共{count}周）: {statistics.mean(weekly_values):.1f} {unit}")
+                if count >= 2:
+                    recent_half = weekly_values[:max(1, count//2)]
+                    older_half = weekly_values[max(1, count//2):max(1, count//2)*2] if count > 2 else weekly_values
+                    if recent_half and older_half:
+                        trend = "上升" if statistics.mean(recent_half) > statistics.mean(older_half) else "下降" if statistics.mean(recent_half) < statistics.mean(older_half) else "稳定"
+                        stats_parts.append(f"  趋势: {trend}")
+
+        monthly_stats = indicator_data.get('monthly_stats', [])
+        if monthly_stats and isinstance(monthly_stats, list):
+            monthly_values = []
+            for item in monthly_stats:
+                if isinstance(item, dict):
+                    val = item.get('avg_value')
+                    if val is not None and isinstance(val, (int, float)):
+                        monthly_values.append(float(val))
+            if monthly_values:
+                count = len(monthly_values)
+                stats_parts.append(f"  月均值（共{count}月）: {statistics.mean(monthly_values):.1f} {unit}")
+
+        return "\n".join(stats_parts) if len(stats_parts) > 1 else ""
+
+    def _extract_blood_pressure_stats(self, bp_data: Dict) -> str:
+        """
+        提取血压的特殊统计特征（收缩压和舒张压）
+
+        Args:
+            bp_data: 血压数据字典
+
+        Returns:
+            格式化的血压统计特征文本
+        """
+        import statistics
+
+        stats_parts = ["\n【血压】"]
+
+        latest_data = bp_data.get('latest', [])
+        if latest_data and isinstance(latest_data, list):
+            systolic_values = []
+            diastolic_values = []
+            for item in latest_data:
+                if isinstance(item, dict):
+                    sys = item.get('systolic')
+                    dia = item.get('diastolic')
+                    if sys is not None and isinstance(sys, (int, float)):
+                        systolic_values.append(float(sys))
+                    if dia is not None and isinstance(dia, (int, float)):
+                        diastolic_values.append(float(dia))
+            if systolic_values and diastolic_values:
+                stats_parts.append(f"  最新值: {systolic_values[-1]:.0f}/{diastolic_values[-1]:.0f} mmHg")
+                if len(systolic_values) > 1:
+                    stats_parts.append(f"  近期均值（共{len(systolic_values)}次）: {statistics.mean(systolic_values):.0f}/{statistics.mean(diastolic_values):.0f} mmHg")
+
+        daily_stats = bp_data.get('daily_stats', [])
+        if daily_stats and isinstance(daily_stats, list):
+            daily_sys = []
+            daily_dia = []
+            for item in daily_stats:
+                if isinstance(item, dict):
+                    sys = item.get('avg_systolic')
+                    dia = item.get('avg_diastolic')
+                    if sys is not None and isinstance(sys, (int, float)):
+                        daily_sys.append(float(sys))
+                    if dia is not None and isinstance(dia, (int, float)):
+                        daily_dia.append(float(dia))
+            if daily_sys and daily_dia:
+                count = len(daily_sys)
+                stats_parts.append(f"  日均值（共{count}天）: {statistics.mean(daily_sys):.0f}/{statistics.mean(daily_dia):.0f} mmHg")
+                stats_parts.append(f"  日最高值: {max(daily_sys):.0f}/{max(daily_dia):.0f} mmHg")
+                stats_parts.append(f"  日最低值: {min(daily_sys):.0f}/{min(daily_dia):.0f} mmHg")
+                if count > 1:
+                    stats_parts.append(f"  日标准差: 收缩压{statistics.stdev(daily_sys):.1f}/舒张压{statistics.stdev(daily_dia):.1f} mmHg")
+
+        weekly_stats = bp_data.get('weekly_stats', [])
+        if weekly_stats and isinstance(weekly_stats, list):
+            weekly_sys = []
+            weekly_dia = []
+            for item in weekly_stats:
+                if isinstance(item, dict):
+                    sys = item.get('avg_systolic')
+                    dia = item.get('avg_diastolic')
+                    if sys is not None and isinstance(sys, (int, float)):
+                        weekly_sys.append(float(sys))
+                    if dia is not None and isinstance(dia, (int, float)):
+                        weekly_dia.append(float(dia))
+            if weekly_sys and weekly_dia:
+                count = len(weekly_sys)
+                stats_parts.append(f"  周均值（共{count}周）: {statistics.mean(weekly_sys):.0f}/{statistics.mean(weekly_dia):.0f} mmHg")
+
+        monthly_stats = bp_data.get('monthly_stats', [])
+        if monthly_stats and isinstance(monthly_stats, list):
+            monthly_sys = []
+            monthly_dia = []
+            for item in monthly_stats:
+                if isinstance(item, dict):
+                    sys = item.get('avg_systolic')
+                    dia = item.get('avg_diastolic')
+                    if sys is not None and isinstance(sys, (int, float)):
+                        monthly_sys.append(float(sys))
+                    if dia is not None and isinstance(dia, (int, float)):
+                        monthly_dia.append(float(dia))
+            if monthly_sys and monthly_dia:
+                count = len(monthly_sys)
+                stats_parts.append(f"  月均值（共{count}月）: {statistics.mean(monthly_sys):.0f}/{statistics.mean(monthly_dia):.0f} mmHg")
+
+        return "\n".join(stats_parts) if len(stats_parts) > 1 else ""
 
     def _check_quality(self, report_content: str, context_body: ReportGenerationContextBody) -> bool:
         """
