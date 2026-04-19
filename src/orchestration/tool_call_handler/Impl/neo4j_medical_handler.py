@@ -6,14 +6,16 @@ from typing import Any, Dict, List, Optional
 
 from src.orchestration.tool_call_handler.tool_call_handler import ToolCallHandler
 from src.mcp.proxy.interfaces import MCPTool
+from src.mcp.factory.mcp_proxy_factory import MCPProxyFactory
 
 logger = logging.getLogger(__name__)
 
 
 class Neo4jMedicalHandler(ToolCallHandler[str, Dict[str, Any]]):
 
-    def __init__(self):
+    def __init__(self, tool_proxy_instance_id: str = "neo4j_medical"):
         self._tool: Optional[MCPTool] = None
+        self._tool_proxy_instance_id = tool_proxy_instance_id
 
     def _init_tool(self, tool: MCPTool) -> None:
         logger.info("[Neo4jMedicalHandler] _init_tool started")
@@ -28,12 +30,28 @@ class Neo4jMedicalHandler(ToolCallHandler[str, Dict[str, Any]]):
             logger.error(f"[Neo4jMedicalHandler] _init_tool failed, elapsed={elapsed:.3f}s, error={str(e)}")
             raise
 
+    def is_initialized(self) -> bool:
+        return self._tool is not None
+
+    def _ensure_initialized(self) -> None:
+        if self._tool is not None:
+            return
+        
+        logger.info("[Neo4jMedicalHandler] Tool not initialized, auto-reinitializing...")
+        try:
+            factory = MCPProxyFactory.get_instance()
+            tool = factory.get_tool_proxy_instance(self._tool_proxy_instance_id)
+            self._tool = tool
+            logger.info(f"[Neo4jMedicalHandler] Auto-reinitialization completed using factory, tool_proxy_instance_id={self._tool_proxy_instance_id}")
+        except Exception as e:
+            logger.error(f"[Neo4jMedicalHandler] Auto-reinitialization failed: {str(e)}")
+            raise
+
     def call_tool(self, context: str) -> Dict[str, Any]:
         logger.debug(f"[Neo4jMedicalHandler] call_tool called, context_length={len(context) if context else 0}")
         start_time = time.time()
         try:
-            if self._tool is None:
-                raise RuntimeError("Tool not initialized, call _init_tool first")
+            self._ensure_initialized()
 
             result = self._tool.call("get_disease_info", {"disease_name": context})
             elapsed = time.time() - start_time
@@ -48,8 +66,7 @@ class Neo4jMedicalHandler(ToolCallHandler[str, Dict[str, Any]]):
         logger.debug(f"[Neo4jMedicalHandler] get_disease_info called, disease_name={disease_name}")
         start_time = time.time()
         try:
-            if self._tool is None:
-                raise RuntimeError("Tool not initialized")
+            self._ensure_initialized()
             result = self._tool.call("get_disease_info", {"disease_name": disease_name})
             elapsed = time.time() - start_time
             logger.info(f"[Neo4jMedicalHandler] get_disease_info completed, elapsed={elapsed:.3f}s, disease_name={disease_name}")
@@ -63,8 +80,7 @@ class Neo4jMedicalHandler(ToolCallHandler[str, Dict[str, Any]]):
         logger.debug(f"[Neo4jMedicalHandler] get_symptoms_by_disease called, disease_name={disease_name}")
         start_time = time.time()
         try:
-            if self._tool is None:
-                raise RuntimeError("Tool not initialized")
+            self._ensure_initialized()
             result = self._tool.call("get_symptoms_by_disease", {"disease_name": disease_name})
             elapsed = time.time() - start_time
             logger.info(f"[Neo4jMedicalHandler] get_symptoms_by_disease completed, elapsed={elapsed:.3f}s, disease_name={disease_name}, symptom_count={len(result) if isinstance(result, list) else 'N/A'}")
@@ -78,8 +94,7 @@ class Neo4jMedicalHandler(ToolCallHandler[str, Dict[str, Any]]):
         logger.debug(f"[Neo4jMedicalHandler] get_drugs_by_disease called, disease_name={disease_name}")
         start_time = time.time()
         try:
-            if self._tool is None:
-                raise RuntimeError("Tool not initialized")
+            self._ensure_initialized()
             result = self._tool.call("get_drugs_by_disease", {"disease_name": disease_name})
             elapsed = time.time() - start_time
             logger.info(f"[Neo4jMedicalHandler] get_drugs_by_disease completed, elapsed={elapsed:.3f}s, disease_name={disease_name}")
@@ -93,8 +108,7 @@ class Neo4jMedicalHandler(ToolCallHandler[str, Dict[str, Any]]):
         logger.debug(f"[Neo4jMedicalHandler] get_foods_by_disease called, disease_name={disease_name}")
         start_time = time.time()
         try:
-            if self._tool is None:
-                raise RuntimeError("Tool not initialized")
+            self._ensure_initialized()
             result = self._tool.call("get_foods_by_disease", {"disease_name": disease_name})
             elapsed = time.time() - start_time
             logger.info(f"[Neo4jMedicalHandler] get_foods_by_disease completed, elapsed={elapsed:.3f}s, disease_name={disease_name}")
@@ -108,8 +122,7 @@ class Neo4jMedicalHandler(ToolCallHandler[str, Dict[str, Any]]):
         logger.debug(f"[Neo4jMedicalHandler] get_disease_by_node_id called, node_id={node_id}")
         start_time = time.time()
         try:
-            if self._tool is None:
-                raise RuntimeError("Tool not initialized")
+            self._ensure_initialized()
             result = self._tool.call("get_disease_by_node_id", {"node_id": node_id})
             elapsed = time.time() - start_time
             logger.info(f"[Neo4jMedicalHandler] get_disease_by_node_id completed, elapsed={elapsed:.3f}s, node_id={node_id}")
@@ -123,8 +136,7 @@ class Neo4jMedicalHandler(ToolCallHandler[str, Dict[str, Any]]):
         logger.debug(f"[Neo4jMedicalHandler] get_symptom_by_node_id called, node_id={node_id}")
         start_time = time.time()
         try:
-            if self._tool is None:
-                raise RuntimeError("Tool not initialized")
+            self._ensure_initialized()
             result = self._tool.call("get_symptom_by_node_id", {"node_id": node_id})
             elapsed = time.time() - start_time
             logger.info(f"[Neo4jMedicalHandler] get_symptom_by_node_id completed, elapsed={elapsed:.3f}s, node_id={node_id}")
@@ -138,8 +150,7 @@ class Neo4jMedicalHandler(ToolCallHandler[str, Dict[str, Any]]):
         logger.debug(f"[Neo4jMedicalHandler] get_diseases_by_symptom_node_id called, node_id={node_id}")
         start_time = time.time()
         try:
-            if self._tool is None:
-                raise RuntimeError("Tool not initialized")
+            self._ensure_initialized()
             result = self._tool.call("get_diseases_by_symptom_node_id", {"node_id": node_id})
             elapsed = time.time() - start_time
             logger.info(f"[Neo4jMedicalHandler] get_diseases_by_symptom_node_id completed, elapsed={elapsed:.3f}s, node_id={node_id}, disease_count={len(result) if isinstance(result, list) else 'N/A'}")
@@ -153,8 +164,7 @@ class Neo4jMedicalHandler(ToolCallHandler[str, Dict[str, Any]]):
         logger.debug(f"[Neo4jMedicalHandler] get_symptoms_by_node_id called, node_id={node_id}")
         start_time = time.time()
         try:
-            if self._tool is None:
-                raise RuntimeError("Tool not initialized")
+            self._ensure_initialized()
             result = self._tool.call("get_symptoms_by_node_id", {"node_id": node_id})
             elapsed = time.time() - start_time
             logger.info(f"[Neo4jMedicalHandler] get_symptoms_by_node_id completed, elapsed={elapsed:.3f}s, node_id={node_id}, symptom_count={len(result) if isinstance(result, list) else 'N/A'}")
@@ -168,8 +178,7 @@ class Neo4jMedicalHandler(ToolCallHandler[str, Dict[str, Any]]):
         logger.debug(f"[Neo4jMedicalHandler] get_drugs_by_node_id called, node_id={node_id}")
         start_time = time.time()
         try:
-            if self._tool is None:
-                raise RuntimeError("Tool not initialized")
+            self._ensure_initialized()
             result = self._tool.call("get_drugs_by_node_id", {"node_id": node_id})
             elapsed = time.time() - start_time
             logger.info(f"[Neo4jMedicalHandler] get_drugs_by_node_id completed, elapsed={elapsed:.3f}s, node_id={node_id}")
@@ -183,8 +192,7 @@ class Neo4jMedicalHandler(ToolCallHandler[str, Dict[str, Any]]):
         logger.debug(f"[Neo4jMedicalHandler] get_foods_by_node_id called, node_id={node_id}")
         start_time = time.time()
         try:
-            if self._tool is None:
-                raise RuntimeError("Tool not initialized")
+            self._ensure_initialized()
             result = self._tool.call("get_foods_by_node_id", {"node_id": node_id})
             elapsed = time.time() - start_time
             logger.info(f"[Neo4jMedicalHandler] get_foods_by_node_id completed, elapsed={elapsed:.3f}s, node_id={node_id}")
@@ -198,8 +206,7 @@ class Neo4jMedicalHandler(ToolCallHandler[str, Dict[str, Any]]):
         logger.debug(f"[Neo4jMedicalHandler] search_diseases_by_symptom called, symptom_name={symptom_name}")
         start_time = time.time()
         try:
-            if self._tool is None:
-                raise RuntimeError("Tool not initialized")
+            self._ensure_initialized()
             result = self._tool.call("search_diseases_by_symptom", {"symptom_name": symptom_name})
             elapsed = time.time() - start_time
             logger.info(f"[Neo4jMedicalHandler] search_diseases_by_symptom completed, elapsed={elapsed:.3f}s, symptom_name={symptom_name}, disease_count={len(result) if isinstance(result, list) else 'N/A'}")
@@ -213,9 +220,7 @@ class Neo4jMedicalHandler(ToolCallHandler[str, Dict[str, Any]]):
         logger.info("[Neo4jMedicalHandler] release started")
         start_time = time.time()
         try:
-            if self._tool is not None:
-                self._tool.release_tool(None)
-                self._tool = None
+            self._tool = None
             elapsed = time.time() - start_time
             logger.info(f"[Neo4jMedicalHandler] release completed, elapsed={elapsed:.3f}s")
         except Exception as e:

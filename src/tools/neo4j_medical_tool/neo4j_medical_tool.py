@@ -208,7 +208,11 @@ class Neo4jMedicalTool(Tool):
         return [r["cure_method"] for r in results]
     
     def get_disease_by_node_id(self, node_id: int) -> Optional[Dict[str, Any]]:
-        """通过Neo4j节点ID获取疾病信息"""
+        """通过Neo4j节点ID获取疾病信息
+        
+        注意：使用id()函数查询，Neo4j 5.x中id()函数已被弃用，但仍可正常工作。
+        向量检索返回的是整数类型的node_id，因此保留使用id()查询。
+        """
         query = """
         MATCH (d:Disease)
         WHERE id(d) = $node_id
@@ -220,7 +224,11 @@ class Neo4jMedicalTool(Tool):
         return results[0] if results else None
     
     def get_symptom_by_node_id(self, node_id: int) -> Optional[Dict[str, Any]]:
-        """通过Neo4j节点ID获取症状信息"""
+        """通过Neo4j节点ID获取症状信息
+        
+        注意：使用id()函数查询，Neo4j 5.x中id()函数已被弃用，但仍可正常工作。
+        向量检索返回的是整数类型的node_id，因此保留使用id()查询。
+        """
         query = """
         MATCH (s:Symptom)
         WHERE id(s) = $node_id
@@ -230,7 +238,11 @@ class Neo4jMedicalTool(Tool):
         return results[0] if results else None
     
     def get_diseases_by_symptom_node_id(self, node_id: int) -> List[str]:
-        """通过症状节点ID查询相关疾病"""
+        """通过症状节点ID查询相关疾病
+        
+        注意：使用id()函数查询，Neo4j 5.x中id()函数已被弃用，但仍可正常工作。
+        向量检索返回的是整数类型的node_id，因此保留使用id()查询。
+        """
         query = """
         MATCH (s:Symptom)
         WHERE id(s) = $node_id
@@ -241,7 +253,11 @@ class Neo4jMedicalTool(Tool):
         return [r["disease_name"] for r in results]
     
     def get_symptoms_by_node_id(self, node_id: int) -> List[str]:
-        """通过Neo4j节点ID获取疾病的症状"""
+        """通过Neo4j节点ID获取疾病的症状
+        
+        注意：使用id()函数查询，Neo4j 5.x中id()函数已被弃用，但仍可正常工作。
+        向量检索返回的是整数类型的node_id，因此保留使用id()查询。
+        """
         query = """
         MATCH (d:Disease)
         WHERE id(d) = $node_id
@@ -252,7 +268,11 @@ class Neo4jMedicalTool(Tool):
         return [r["symptom"] for r in results]
     
     def get_drugs_by_node_id(self, node_id: int) -> Dict[str, List[str]]:
-        """通过Neo4j节点ID获取疾病的常用药物和推荐药物"""
+        """通过Neo4j节点ID获取疾病的常用药物和推荐药物
+        
+        注意：使用id()函数查询，Neo4j 5.x中id()函数已被弃用，但仍可正常工作。
+        向量检索返回的是整数类型的node_id，因此保留使用id()查询。
+        """
         common_drug_query = """
         MATCH (d:Disease)
         WHERE id(d) = $node_id
@@ -270,7 +290,11 @@ class Neo4jMedicalTool(Tool):
         return {"common_drugs": common_drugs, "recommand_drugs": recommand_drugs}
     
     def get_foods_by_node_id(self, node_id: int) -> Dict[str, List[str]]:
-        """通过Neo4j节点ID获取疾病的饮食建议"""
+        """通过Neo4j节点ID获取疾病的饮食建议
+        
+        注意：使用id()函数查询，Neo4j 5.x中id()函数已被弃用，但仍可正常工作。
+        向量检索返回的是整数类型的node_id，因此保留使用id()查询。
+        """
         do_eat_query = """
         MATCH (d:Disease)
         WHERE id(d) = $node_id

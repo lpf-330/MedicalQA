@@ -243,23 +243,15 @@ class ReportService:
         """
         释放Agent资源
 
-        释放tool handlers和model service资源。
+        释放model service资源。
+        注意：tool handlers使用自动重新初始化机制，不需要显式释放。
         """
         agent_resource = self._agent.resources
-        if agent_resource is not None:
-            # 释放tool handlers
-            for handler in agent_resource.tool_handlers.values():
-                try:
-                    handler.release()
-                except Exception as e:
-                    logger.error(f"[ReportService] 释放tool handler失败: {e}")
-
-            # 释放model service
-            if agent_resource.model_service is not None:
-                try:
-                    agent_resource.model_service.release()
-                except Exception as e:
-                    logger.error(f"[ReportService] 释放model service失败: {e}")
+        if agent_resource is not None and agent_resource.model_service is not None:
+            try:
+                agent_resource.model_service.release()
+            except Exception as e:
+                logger.error(f"[ReportService] 释放model service失败: {e}")
 
     def __repr__(self) -> str:
         """

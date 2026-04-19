@@ -10,9 +10,8 @@ from typing import Generic, TypeVar, TYPE_CHECKING
 if TYPE_CHECKING:
     from src.mcp.proxy.interfaces import MCPTool
 
-# 定义泛型类型变量
-I = TypeVar('I')  # 输入数据类型
-O = TypeVar('O')  # 输出数据类型
+I = TypeVar('I')
+O = TypeVar('O')
 
 
 class ToolCallHandler(ABC, Generic[I, O]):
@@ -27,31 +26,16 @@ class ToolCallHandler(ABC, Generic[I, O]):
         - 调用tool服务
         - 释放tool功能实例
 
-    使用示例：
-        >>> class Neo4jToolHandler(ToolCallHandler[Neo4jQuery, Neo4jResult]):
-        ...     def __init__(self):
-        ...         self._tool: Optional[MCPTool] = None
-        ...
-        ...     def _init_tool(self, tool: MCPTool) -> None:
-        ...         self._tool = tool
-        ...         tool._init_tool()
-        ...
-        ...     def call_tool(self, context: Neo4jQuery) -> Neo4jResult:
-        ...         if self._tool is None:
-        ...             raise ValueError("tool未初始化")
-        ...         result = self._tool.call("query", {"cypher": context.cypher})
-        ...         return Neo4jResult(data=result)
-        ...
-        ...     def release(self) -> None:
-        ...         if self._tool is not None:
-        ...             self._tool.release_tool(None)
-        ...             self._tool = None
-
     生命周期：
         1. 创建ToolCallHandler实例
         2. 调用_init_tool初始化MCP代理tool
-        3. 调用call_tool执行tool调用
+        3. 调用call_tool执行tool调用（如果未初始化会自动初始化）
         4. 调用release释放tool资源
+
+    自动重新初始化机制：
+        - call_tool方法会检查工具是否已初始化
+        - 如果未初始化，会自动调用_ensure_initialized进行初始化
+        - 这确保了即使release被调用后，后续请求仍能正常工作
 
     泛型参数：
         I: tool调用的输入数据类型
@@ -86,6 +70,9 @@ class ToolCallHandler(ABC, Generic[I, O]):
         通过MCP代理tool调用tool功能实例的方法。
         输入类型和输出类型由实现该接口的类型的泛型决定。
 
+        自动重新初始化：
+            如果工具未初始化，会自动调用_ensure_initialized进行初始化。
+
         Args:
             context: tool调用的输入数据
 
@@ -110,10 +97,26 @@ class ToolCallHandler(ABC, Generic[I, O]):
         在ToolCallHandler使用完毕后调用，用于释放tool功能实例。
         该方法应该是幂等的，即多次调用不会产生副作用。
 
+        注意：
+            调用release后，后续的call_tool会自动重新初始化工具。
+
         Example:
             >>> handler.release()
         """
         pass
+
+    def is_initialized(self) -> bool:
+        """
+        检查工具是否已初始化
+
+        Returns:
+            bool: 如果工具已初始化返回True，否则返回False
+
+        Example:
+            >>> if not handler.is_initialized():
+            ...     handler._init_tool(tool)
+        """
+        return False
 
     def __repr__(self) -> str:
         """返回ToolCallHandler的字符串表示"""

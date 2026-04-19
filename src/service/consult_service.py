@@ -55,17 +55,11 @@ class ConsultService:
             return result
         finally:
             agent_resource = self._agent.resources
-            if agent_resource is not None:
-                for handler in agent_resource.tool_handlers.values():
-                    try:
-                        handler.release()
-                    except Exception as e:
-                        logger.error(f"[ConsultService] 释放tool handler失败: {e}")
-                if agent_resource.model_service is not None:
-                    try:
-                        agent_resource.model_service.release()
-                    except Exception as e:
-                        logger.error(f"[ConsultService] 释放model service失败: {e}")
+            if agent_resource is not None and agent_resource.model_service is not None:
+                try:
+                    agent_resource.model_service.release()
+                except Exception as e:
+                    logger.error(f"[ConsultService] 释放model service失败: {e}")
             elapsed = time.time() - start_time
             logger.info(f"[ConsultService] 咨询处理完成: session_id={context.session_id}, elapsed={elapsed:.2f}s")
 
@@ -117,17 +111,11 @@ class ConsultService:
         
         finally:
             agent_resource = self._agent.resources
-            if agent_resource is not None:
-                for handler in agent_resource.tool_handlers.values():
-                    try:
-                        handler.release()
-                    except Exception as e:
-                        logger.error(f"[ConsultService] 释放tool handler失败: {e}")
-                if agent_resource.model_service is not None:
-                    try:
-                        agent_resource.model_service.release()
-                    except Exception as e:
-                        logger.error(f"[ConsultService] 释放model service失败: {e}")
+            if agent_resource is not None and agent_resource.model_service is not None:
+                try:
+                    agent_resource.model_service.release()
+                except Exception as e:
+                    logger.error(f"[ConsultService] 释放model service失败: {e}")
 
     def _build_agent_context(self, request: ConsultRequest) -> AgentContext:
         session_id = request.get_session_id() or request.body.task_id
