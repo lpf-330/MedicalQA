@@ -207,20 +207,23 @@ class AnswerGenerationChain(Chain[ChainContext[AnswerGenerationContextBody], Cha
         
         try:
             full_response = []
-            for token in model_service.stream_generate_with_context(
-                user_query=context_body.query_text,
-                knowledge_context=context_body.knowledge_context
-            ):
+            messages = [
+                {"role": "system", "content": prompt["system_message"]},
+                {"role": "user", "content": prompt["user_message"]}
+            ]
+            for token in model_service.stream_generate(messages):
                 full_response.append(token)
                 yield token
             
-            disclaimer = "\n\n以上信息仅供参考，不构成医疗建议。如有健康问题，请及时就医。"
-            for char in disclaimer:
-                full_response.append(char)
-                yield char
-            
-            # 记录完整的LLM输出
             complete_answer = ''.join(full_response)
+            
+            if "以上信息仅供参考" not in complete_answer and "不构成医疗建议" not in complete_answer:
+                disclaimer = "\n\n以上信息仅供参考，不构成医疗建议。如有健康问题，请及时就医。"
+                for char in disclaimer:
+                    full_response.append(char)
+                    yield char
+                complete_answer += disclaimer
+            
             logger.info(f"[AnswerGenerationChain] ========== LLM完整输出 ==========")
             logger.info(f"[AnswerGenerationChain] 完整回答 (长度={len(complete_answer)}):")
             logger.info(f"{complete_answer}")
@@ -240,7 +243,12 @@ class AnswerGenerationChain(Chain[ChainContext[AnswerGenerationContextBody], Cha
         Returns:
             包含system_message和user_message的字典
         """
-        system_message = "你是一位专业的医疗健康咨询助手，请根据提供的医学知识素材回答用户的问题。"
+        system_message = """你是一位专业的医疗健康咨询助手，请根据提供的医学知识素材回答用户的问题。
+
+重要要求：
+1. 仅针对用户问题回答，不要对回答本身进行评价或总结
+2. 不要添加"回答内容特点"、"以上是回答"等自我评价内容
+3. 不要在回答末尾添加"✅"等标记或总结性文字"""
 
         if context_body.knowledge_context:
             system_message += f"\n\n参考知识素材：\n{context_body.knowledge_context}"
@@ -252,6 +260,7 @@ class AnswerGenerationChain(Chain[ChainContext[AnswerGenerationContextBody], Cha
             "\n1.回答长度200-800字"
             "\n2.基于知识素材回答，不要编造信息"
             "\n3.如果知识素材不足以回答问题，请如实说明"
+            "\n4.仅针对用户问题回答，不要添加自我评价或总结"
             f"\n\n在回答末尾必须添加免责声明：'{DISCLAIMER}'"
         )
 

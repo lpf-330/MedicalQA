@@ -279,24 +279,24 @@ class ReportGenerationChain(Chain[ChainContext[ReportGenerationContextBody], Cha
         try:
             full_response = []
 
-            # 构建流式生成的上下文
-            knowledge_context = self._build_knowledge_context(context_body.report_materials)
-
-            for token in model_service.stream_generate_with_context(
-                user_query=prompt["user_message"],
-                knowledge_context=knowledge_context
-            ):
+            messages = [
+                {"role": "system", "content": prompt["system_message"]},
+                {"role": "user", "content": prompt["user_message"]}
+            ]
+            
+            for token in model_service.stream_generate(messages):
                 full_response.append(token)
                 yield token
 
-            # 添加免责声明
-            disclaimer = "\n\n" + DISCLAIMER
-            for char in disclaimer:
-                full_response.append(char)
-                yield char
-
-            # 记录完整的LLM输出
             complete_report = ''.join(full_response)
+            
+            if DISCLAIMER not in complete_report:
+                disclaimer = "\n\n" + DISCLAIMER
+                for char in disclaimer:
+                    full_response.append(char)
+                    yield char
+                complete_report += disclaimer
+
             logger.info(f"[ReportGenerationChain] ========== LLM完整输出 ==========")
             logger.info(f"[ReportGenerationChain] 完整报告 (长度={len(complete_report)}):")
             logger.info(f"{complete_report}")
@@ -330,6 +330,7 @@ class ReportGenerationChain(Chain[ChainContext[ReportGenerationContextBody], Cha
 - 禁止输出"全文完"、"报告完毕"、"总字数："等结束语或统计信息
 - 禁止输出任何报告正文之外的说明、总结、提示等内容
 - 禁止输出对本次生成任务的完成汇报
+- 禁止对报告内容进行自我评价或总结（如"✅ 报告特点"、"以上是报告内容"等）
 
 只输出报告正文内容，不输出任何附加内容。"""
 

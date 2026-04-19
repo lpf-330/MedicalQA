@@ -122,11 +122,11 @@ class ReportModelService(ModelBusinessService[List[Dict[str, str]], str]):
             if handle is not None:
                 GlobalResourceManager.release(handle)
 
-    def stream_generate(self, prompt: str) -> Iterator[str]:
+    def stream_generate(self, messages: List[Dict[str, str]]) -> Iterator[str]:
         """
-        流式生成报告内容 - 在需要时获取资源，流式输出完成后释放
+        流式生成报告内容 - 接受完整的messages列表，由调用方控制prompt结构
         """
-        logger.info(f"[ReportModelService] stream_generate called, prompt_length={len(prompt)}")
+        logger.info(f"[ReportModelService] stream_generate called, message_count={len(messages)}")
         start_time = time.time()
         
         handle = None
@@ -136,14 +136,16 @@ class ReportModelService(ModelBusinessService[List[Dict[str, str]], str]):
                 raise RuntimeError("Failed to acquire vllm_model resource")
             
             model_client = VLLMModelClient(handle.resource)
+            prompt = self._build_prompt(messages)
 
             logger.info(f"[ReportModelService] ========== LLM完整输入 ==========")
-            logger.info(f"[ReportModelService] System Prompt: {self._system_prompt}")
+            for i, msg in enumerate(messages):
+                logger.info(f"[ReportModelService] Message[{i}] role={msg.get('role')}: {msg.get('content', '')[:500]}{'...' if len(msg.get('content', '')) > 500 else ''}")
             logger.info(f"[ReportModelService] 构建的完整Prompt (长度={len(prompt)}):")
-            logger.info(f"{prompt}")
+            logger.info(f"{prompt[:3000]}{'...' if len(prompt) > 3000 else ''}")
             logger.info(f"[ReportModelService] ==============================")
 
-            for chunk in model_client.stream_generate(prompt):
+            for chunk in model_client.stream_generate(prompt, max_tokens=5000):
                 yield chunk
             
             elapsed = time.time() - start_time

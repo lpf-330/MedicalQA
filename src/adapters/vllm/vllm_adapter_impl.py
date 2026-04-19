@@ -191,13 +191,10 @@ class VLLMAdapterImpl(VLLMAdapter):
         outputs = self._llm.generate([prompt], sampling_params, use_tqdm=False)
         if outputs:
             generated_text = outputs[0].outputs[0].text
-            logger.debug(f"[VLLMAdapter] LLM流式输出 - 内容:\n{generated_text[:2000]}{'...' if len(generated_text) > 2000 else ''}")
-            tokenizer = self._llm.get_tokenizer()
-            token_ids = outputs[0].outputs[0].token_ids
-            for token_id in token_ids:
-                token_text = tokenizer.decode([token_id])
-                if token_text:
-                    yield token_text
+            logger.debug(f"[VLLMAdapter] LLM流式输出 - 内容长度: {len(generated_text)}")
+            
+            for char in generated_text:
+                yield char
     
     def unload_model(self) -> None:
         """卸载模型，释放资源"""

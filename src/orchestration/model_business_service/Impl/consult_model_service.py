@@ -102,6 +102,42 @@ class ConsultModelService(ModelBusinessService[List[Dict[str, str]], str]):
             logger.error(f"[ConsultModelService] generate_with_context failed, elapsed={elapsed:.3f}s, error={str(e)}")
             raise
 
+    def stream_generate(self, messages: List[Dict[str, str]]) -> Iterator[str]:
+        """
+        流式生成 - 接受完整的messages列表，由调用方控制prompt结构
+        """
+        logger.info(f"[ConsultModelService] stream_generate called, message_count={len(messages)}")
+        start_time = time.time()
+        
+        handle = None
+        try:
+            handle = GlobalResourceManager.acquire("vllm_model", "vllm_config")
+            if handle is None:
+                raise RuntimeError("Failed to acquire vllm_model resource")
+            
+            model_client = VLLMModelClient(handle.resource)
+            prompt = self._build_prompt(messages)
+            
+            logger.info(f"[ConsultModelService] ========== LLM完整输入 ==========")
+            for i, msg in enumerate(messages):
+                logger.info(f"[ConsultModelService] Message[{i}] role={msg.get('role')}: {msg.get('content', '')[:500]}{'...' if len(msg.get('content', '')) > 500 else ''}")
+            logger.info(f"[ConsultModelService] 构建的完整Prompt (长度={len(prompt)}):")
+            logger.info(f"{prompt[:3000]}{'...' if len(prompt) > 3000 else ''}")
+            logger.info(f"[ConsultModelService] ==============================")
+            
+            for chunk in model_client.stream_generate(prompt):
+                yield chunk
+            
+            elapsed = time.time() - start_time
+            logger.info(f"[ConsultModelService] stream_generate completed, elapsed={elapsed:.3f}s")
+        except Exception as e:
+            elapsed = time.time() - start_time
+            logger.error(f"[ConsultModelService] stream_generate failed, elapsed={elapsed:.3f}s, error={str(e)}")
+            raise
+        finally:
+            if handle is not None:
+                GlobalResourceManager.release(handle)
+
     def stream_generate_with_context(self, user_query: str, knowledge_context: str) -> Iterator[str]:
         """
         流式生成 - 在需要时获取资源，流式输出完成后释放
