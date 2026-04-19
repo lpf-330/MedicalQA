@@ -88,6 +88,46 @@ def _graph_query_step(self, anchored_entities, anchored_relations, query_text):
 
 ---
 
+### 问题3：Producer实体类型未纳入知识检索
+
+**问题描述**：
+- 向量数据库中存储了17,201个Producer（生产商）实体，但知识检索链中跳过了该类型
+- Producer实体在健康咨询场景中价值较低，暂不处理
+
+**影响范围**：KNOWLEDGE_RETRIEVAL状态的图查询步骤
+
+**严重程度**：低
+
+**设计依据**：数据库说明文档v1.2.md
+
+**详细说明**：
+Producer实体数量占向量库总数的38.53%，但对健康咨询业务价值较低：
+- 用户咨询通常关注疾病、症状、药物、食物等
+- 生产商信息（如"辉瑞制药"）对健康建议贡献有限
+- 处理Producer实体可能增加查询时间和资源消耗
+
+**当前处理方式**：
+```python
+elif entity_type == "Producer":
+    logger.debug(f"[KnowledgeRetrievalChain] 跳过Producer类型实体: node_id={neo4j_node_id}")
+    continue
+```
+
+**未来修复建议**：
+1. **评估业务需求**：确认是否有用户查询生产商信息的场景
+2. **条件性处理**：仅在用户明确询问药物来源时查询生产商信息
+3. **优化查询**：如需支持，可添加`get_drugs_by_producer_node_id`方法
+
+**预估工作量**：2-3小时
+
+**状态**：待未来处理
+
+**相关代码位置**：
+- src/orchestration/chain/knowledge_retrieval_chain/knowledge_retrieval_chain.py: _query_neo4j_knowledge方法
+- src/orchestration/chain/report_knowledge_retrieval_chain/report_knowledge_retrieval_chain.py: _query_neo4j_knowledge方法
+
+---
+
 ## 三、意图识别功能升级
 
 ### 问题：当前意图识别功能已废弃
@@ -145,6 +185,7 @@ def _graph_query_step(self, anchored_entities, anchored_relations, query_text):
 | 1 | 意图识别功能升级 | 中等 | 8-12小时 | 下次迭代 |
 | 2 | 文档完善建议 | 建议 | 2-4小时 | 下次迭代 |
 | 3 | 图查询关系深度推理 | 中等 | 3-4小时 | 下次迭代 |
+| 4 | Producer实体类型未纳入知识检索 | 低 | 2-3小时 | 按需处理 |
 
 ---
 
@@ -155,9 +196,12 @@ def _graph_query_step(self, anchored_entities, anchored_relations, query_text):
 | 意图识别缺失 | 所有查询都作为健康咨询处理 | 中 | 尽快实现Neo4j关系意图分析模型 |
 | 关系深度推理 | 可能增加响应时间 | 中 | 添加超时控制，异步处理 |
 | 文档完善 | 不影响功能 | 低 | 逐步完善 |
+| Producer跳过 | 用户无法查询药物生产商信息 | 低 | 按需评估业务需求后决定是否支持 |
 
 ---
 
 **文档创建时间**: 2026-04-17
-**文档版本**: v1.0
+**文档更新时间**: 2026-04-19
+**文档版本**: v1.1
 **来源**: 第二轮验收评估测试 phase6_fix_work_report.md
+**更新记录**: 添加Producer实体类型未纳入知识检索问题

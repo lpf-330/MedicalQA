@@ -355,7 +355,6 @@ class ReportKnowledgeRetrievalChain(Chain[ChainContext[ReportKnowledgeRetrievalC
                                f"foods={len(foods.get('do_eat', [])) + len(foods.get('no_eat', [])) + len(foods.get('recommand_eat', []))}")
 
                 elif entity_type == "Symptom":
-                    # 查询症状信息
                     symptom_info = self._resource.neo4j_handler.get_symptom_by_node_id(neo4j_node_id)
                     if not symptom_info:
                         logger.warning(f"[ReportKnowledgeRetrievalChain] 未找到node_id={neo4j_node_id}对应的症状")
@@ -364,10 +363,8 @@ class ReportKnowledgeRetrievalChain(Chain[ChainContext[ReportKnowledgeRetrievalC
                     symptom_name = symptom_info.get("name", "")
                     logger.info(f"[ReportKnowledgeRetrievalChain] 通过node_id={neo4j_node_id}查询到症状: {symptom_name}")
 
-                    # 查询相关疾病
                     diseases = self._resource.neo4j_handler.get_diseases_by_symptom_node_id(neo4j_node_id)
 
-                    # 构建知识结果
                     knowledge_item = {
                         "source": "neo4j",
                         "type": "symptom",
@@ -381,6 +378,135 @@ class ReportKnowledgeRetrievalChain(Chain[ChainContext[ReportKnowledgeRetrievalC
 
                     knowledge_results.append(knowledge_item)
                     logger.info(f"[ReportKnowledgeRetrievalChain] 查询症状知识完成: symptom={symptom_name}, related_diseases={len(diseases)}")
+
+                elif entity_type == "Drug":
+                    drug_info = self._resource.neo4j_handler.get_drug_by_node_id(neo4j_node_id)
+                    if not drug_info:
+                        logger.warning(f"[ReportKnowledgeRetrievalChain] 未找到node_id={neo4j_node_id}对应的药物")
+                        continue
+
+                    drug_name = drug_info.get("name", "")
+                    logger.info(f"[ReportKnowledgeRetrievalChain] 通过node_id={neo4j_node_id}查询到药物: {drug_name}")
+
+                    diseases = self._resource.neo4j_handler.get_diseases_by_drug_node_id(neo4j_node_id)
+
+                    knowledge_item = {
+                        "source": "neo4j",
+                        "type": "drug",
+                        "entity": drug_name,
+                        "data": {
+                            "name": drug_name,
+                            "related_diseases": diseases
+                        },
+                        "score": item.get("score", 0.0)
+                    }
+
+                    knowledge_results.append(knowledge_item)
+                    logger.info(f"[ReportKnowledgeRetrievalChain] 查询药物知识完成: drug={drug_name}, common_drug_diseases={len(diseases.get('common_drug_diseases', []))}, recommand_drug_diseases={len(diseases.get('recommand_drug_diseases', []))}")
+
+                elif entity_type == "Food":
+                    food_info = self._resource.neo4j_handler.get_food_by_node_id(neo4j_node_id)
+                    if not food_info:
+                        logger.warning(f"[ReportKnowledgeRetrievalChain] 未找到node_id={neo4j_node_id}对应的食物")
+                        continue
+
+                    food_name = food_info.get("name", "")
+                    logger.info(f"[ReportKnowledgeRetrievalChain] 通过node_id={neo4j_node_id}查询到食物: {food_name}")
+
+                    diseases = self._resource.neo4j_handler.get_diseases_by_food_node_id(neo4j_node_id)
+
+                    knowledge_item = {
+                        "source": "neo4j",
+                        "type": "food",
+                        "entity": food_name,
+                        "data": {
+                            "name": food_name,
+                            "recommendations": diseases
+                        },
+                        "score": item.get("score", 0.0)
+                    }
+
+                    knowledge_results.append(knowledge_item)
+                    logger.info(f"[ReportKnowledgeRetrievalChain] 查询食物知识完成: food={food_name}, do_eat_diseases={len(diseases.get('do_eat_diseases', []))}, no_eat_diseases={len(diseases.get('no_eat_diseases', []))}, recommand_diseases={len(diseases.get('recommand_diseases', []))}")
+
+                elif entity_type == "Check":
+                    check_info = self._resource.neo4j_handler.get_check_by_node_id(neo4j_node_id)
+                    if not check_info:
+                        logger.warning(f"[ReportKnowledgeRetrievalChain] 未找到node_id={neo4j_node_id}对应的检查项目")
+                        continue
+
+                    check_name = check_info.get("name", "")
+                    logger.info(f"[ReportKnowledgeRetrievalChain] 通过node_id={neo4j_node_id}查询到检查项目: {check_name}")
+
+                    diseases = self._resource.neo4j_handler.get_diseases_by_check_node_id(neo4j_node_id)
+
+                    knowledge_item = {
+                        "source": "neo4j",
+                        "type": "check",
+                        "entity": check_name,
+                        "data": {
+                            "name": check_name,
+                            "related_diseases": diseases
+                        },
+                        "score": item.get("score", 0.0)
+                    }
+
+                    knowledge_results.append(knowledge_item)
+                    logger.info(f"[ReportKnowledgeRetrievalChain] 查询检查项目知识完成: check={check_name}, related_diseases={len(diseases)}")
+
+                elif entity_type == "Department":
+                    department_info = self._resource.neo4j_handler.get_department_by_node_id(neo4j_node_id)
+                    if not department_info:
+                        logger.warning(f"[ReportKnowledgeRetrievalChain] 未找到node_id={neo4j_node_id}对应的科室")
+                        continue
+
+                    department_name = department_info.get("name", "")
+                    logger.info(f"[ReportKnowledgeRetrievalChain] 通过node_id={neo4j_node_id}查询到科室: {department_name}")
+
+                    diseases = self._resource.neo4j_handler.get_diseases_by_department_node_id(neo4j_node_id)
+
+                    knowledge_item = {
+                        "source": "neo4j",
+                        "type": "department",
+                        "entity": department_name,
+                        "data": {
+                            "name": department_name,
+                            "related_diseases": diseases
+                        },
+                        "score": item.get("score", 0.0)
+                    }
+
+                    knowledge_results.append(knowledge_item)
+                    logger.info(f"[ReportKnowledgeRetrievalChain] 查询科室知识完成: department={department_name}, related_diseases={len(diseases)}")
+
+                elif entity_type == "Cure":
+                    cure_info = self._resource.neo4j_handler.get_cure_by_node_id(neo4j_node_id)
+                    if not cure_info:
+                        logger.warning(f"[ReportKnowledgeRetrievalChain] 未找到node_id={neo4j_node_id}对应的治疗方法")
+                        continue
+
+                    cure_name = cure_info.get("name", "")
+                    logger.info(f"[ReportKnowledgeRetrievalChain] 通过node_id={neo4j_node_id}查询到治疗方法: {cure_name}")
+
+                    diseases = self._resource.neo4j_handler.get_diseases_by_cure_node_id(neo4j_node_id)
+
+                    knowledge_item = {
+                        "source": "neo4j",
+                        "type": "cure",
+                        "entity": cure_name,
+                        "data": {
+                            "name": cure_name,
+                            "related_diseases": diseases
+                        },
+                        "score": item.get("score", 0.0)
+                    }
+
+                    knowledge_results.append(knowledge_item)
+                    logger.info(f"[ReportKnowledgeRetrievalChain] 查询治疗方法知识完成: cure={cure_name}, related_diseases={len(diseases)}")
+
+                elif entity_type == "Producer":
+                    logger.debug(f"[ReportKnowledgeRetrievalChain] 跳过Producer类型实体: node_id={neo4j_node_id}")
+                    continue
 
                 else:
                     logger.warning(f"[ReportKnowledgeRetrievalChain] 未知的entity_type={entity_type}, node_id={neo4j_node_id}")

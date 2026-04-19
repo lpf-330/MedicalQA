@@ -328,6 +328,158 @@ class Neo4jMedicalTool(Tool):
         results = self.query_with_params(query, {"symptom": symptom_name})
         return [r["disease_name"] for r in results]
     
+    def get_drug_by_node_id(self, node_id: int) -> Optional[Dict[str, Any]]:
+        """通过Neo4j节点ID获取药物信息
+        
+        注意：使用id()函数查询，Neo4j 5.x中id()函数已被弃用，但仍可正常工作。
+        向量检索返回的是整数类型的node_id，因此保留使用id()查询。
+        """
+        query = """
+        MATCH (dr:Drug)
+        WHERE id(dr) = $node_id
+        RETURN dr.name as name
+        """
+        results = self.query_with_params(query, {"node_id": node_id})
+        return results[0] if results else None
+    
+    def get_diseases_by_drug_node_id(self, node_id: int) -> Dict[str, List[str]]:
+        """通过药物节点ID查询相关疾病
+        
+        返回常用该药物的疾病和推荐该药物的疾病
+        """
+        common_drug_query = """
+        MATCH (dr:Drug)
+        WHERE id(dr) = $node_id
+        MATCH (d:Disease)-[:common_drug]->(dr)
+        RETURN d.name as disease_name
+        """
+        recommand_drug_query = """
+        MATCH (dr:Drug)
+        WHERE id(dr) = $node_id
+        MATCH (d:Disease)-[:recommand_drug]->(dr)
+        RETURN d.name as disease_name
+        """
+        common_diseases = [r["disease_name"] for r in self.query_with_params(common_drug_query, {"node_id": node_id})]
+        recommand_diseases = [r["disease_name"] for r in self.query_with_params(recommand_drug_query, {"node_id": node_id})]
+        return {"common_drug_diseases": common_diseases, "recommand_drug_diseases": recommand_diseases}
+    
+    def get_food_by_node_id(self, node_id: int) -> Optional[Dict[str, Any]]:
+        """通过Neo4j节点ID获取食物信息
+        
+        注意：使用id()函数查询，Neo4j 5.x中id()函数已被弃用，但仍可正常工作。
+        向量检索返回的是整数类型的node_id，因此保留使用id()查询。
+        """
+        query = """
+        MATCH (f:Food)
+        WHERE id(f) = $node_id
+        RETURN f.name as name
+        """
+        results = self.query_with_params(query, {"node_id": node_id})
+        return results[0] if results else None
+    
+    def get_diseases_by_food_node_id(self, node_id: int) -> Dict[str, List[str]]:
+        """通过食物节点ID查询相关疾病
+        
+        返回宜吃、忌吃、推荐吃该食物的疾病
+        """
+        do_eat_query = """
+        MATCH (f:Food)
+        WHERE id(f) = $node_id
+        MATCH (d:Disease)-[:do_eat]->(f)
+        RETURN d.name as disease_name
+        """
+        no_eat_query = """
+        MATCH (f:Food)
+        WHERE id(f) = $node_id
+        MATCH (d:Disease)-[:no_eat]->(f)
+        RETURN d.name as disease_name
+        """
+        recommand_eat_query = """
+        MATCH (f:Food)
+        WHERE id(f) = $node_id
+        MATCH (d:Disease)-[:recommand_eat]->(f)
+        RETURN d.name as disease_name
+        """
+        do_eat_diseases = [r["disease_name"] for r in self.query_with_params(do_eat_query, {"node_id": node_id})]
+        no_eat_diseases = [r["disease_name"] for r in self.query_with_params(no_eat_query, {"node_id": node_id})]
+        recommand_diseases = [r["disease_name"] for r in self.query_with_params(recommand_eat_query, {"node_id": node_id})]
+        return {"do_eat_diseases": do_eat_diseases, "no_eat_diseases": no_eat_diseases, "recommand_diseases": recommand_diseases}
+    
+    def get_check_by_node_id(self, node_id: int) -> Optional[Dict[str, Any]]:
+        """通过Neo4j节点ID获取检查项目信息
+        
+        注意：使用id()函数查询，Neo4j 5.x中id()函数已被弃用，但仍可正常工作。
+        向量检索返回的是整数类型的node_id，因此保留使用id()查询。
+        """
+        query = """
+        MATCH (c:Check)
+        WHERE id(c) = $node_id
+        RETURN c.name as name
+        """
+        results = self.query_with_params(query, {"node_id": node_id})
+        return results[0] if results else None
+    
+    def get_diseases_by_check_node_id(self, node_id: int) -> List[str]:
+        """通过检查项目节点ID查询相关疾病"""
+        query = """
+        MATCH (c:Check)
+        WHERE id(c) = $node_id
+        MATCH (d:Disease)-[:need_check]->(c)
+        RETURN d.name as disease_name
+        """
+        results = self.query_with_params(query, {"node_id": node_id})
+        return [r["disease_name"] for r in results]
+    
+    def get_department_by_node_id(self, node_id: int) -> Optional[Dict[str, Any]]:
+        """通过Neo4j节点ID获取科室信息
+        
+        注意：使用id()函数查询，Neo4j 5.x中id()函数已被弃用，但仍可正常工作。
+        向量检索返回的是整数类型的node_id，因此保留使用id()查询。
+        """
+        query = """
+        MATCH (dep:Department)
+        WHERE id(dep) = $node_id
+        RETURN dep.name as name
+        """
+        results = self.query_with_params(query, {"node_id": node_id})
+        return results[0] if results else None
+    
+    def get_diseases_by_department_node_id(self, node_id: int) -> List[str]:
+        """通过科室节点ID查询相关疾病"""
+        query = """
+        MATCH (dep:Department)
+        WHERE id(dep) = $node_id
+        MATCH (d:Disease)-[:belongs_to]->(dep)
+        RETURN d.name as disease_name
+        """
+        results = self.query_with_params(query, {"node_id": node_id})
+        return [r["disease_name"] for r in results]
+    
+    def get_cure_by_node_id(self, node_id: int) -> Optional[Dict[str, Any]]:
+        """通过Neo4j节点ID获取治疗方法信息
+        
+        注意：使用id()函数查询，Neo4j 5.x中id()函数已被弃用，但仍可正常工作。
+        向量检索返回的是整数类型的node_id，因此保留使用id()查询。
+        """
+        query = """
+        MATCH (c:Cure)
+        WHERE id(c) = $node_id
+        RETURN c.name as name
+        """
+        results = self.query_with_params(query, {"node_id": node_id})
+        return results[0] if results else None
+    
+    def get_diseases_by_cure_node_id(self, node_id: int) -> List[str]:
+        """通过治疗方法节点ID查询相关疾病"""
+        query = """
+        MATCH (c:Cure)
+        WHERE id(c) = $node_id
+        MATCH (d:Disease)-[:cure_way]->(c)
+        RETURN d.name as disease_name
+        """
+        results = self.query_with_params(query, {"node_id": node_id})
+        return [r["disease_name"] for r in results]
+    
     def query_with_params(
         self, 
         query: str, 
