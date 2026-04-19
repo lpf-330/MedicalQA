@@ -8,7 +8,7 @@
 import logging
 import time
 from dataclasses import dataclass, field
-from typing import Any, Dict, Generator, List, Optional
+from typing import Any, AsyncGenerator, Dict, Generator, List, Optional
 
 from src.orchestration.chain.chain import Chain
 from src.orchestration.chain.data_classes import ChainContext, ChainResult
@@ -223,59 +223,26 @@ class ReportGenerationChain(Chain[ChainContext[ReportGenerationContextBody], Cha
 
         return ChainResult(session_id=chain_context.session_id, data=result_data)
 
-    def execute_stream(self, chain_context: ChainContext[ReportGenerationContextBody]) -> Generator[str, None, None]:
-        """
-        流式执行Chain策略
-
-        Args:
-            chain_context: Chain输入数据容器
-
-        Yields:
-            生成的报告内容片段
-        """
+    async def execute_stream(self, chain_context) -> AsyncGenerator[str, None]:
         context_body = chain_context.body
         if context_body is None:
             yield "抱歉，无法生成健康报告。"
             return
 
-        # 构建提示词
         prompt = self._build_prompt(context_body)
-
-        # 检查模型服务是否可用
+        
         if self._resource is None or self._resource.model_service is None:
-            logger.warning("[ReportGenerationChain] 模型服务不可用，使用降级策略")
-            self._is_degraded = True
-            degraded_report = self._generate_degraded_report(context_body)
-            for char in degraded_report:
-                yield char
+            yield "抱歉，模型服务不可用。"
             return
 
         model_service = self._resource.model_service
+        if hasattr(model_service, 'get_model_result'):
+            model_service = model_service.get_model_result()
 
-        # 检查是否支持流式生成
-        if not hasattr(model_service, 'stream_generate_with_context'):
-            logger.warning("[ReportGenerationChain] 模型服务不支持流式生成，使用普通生成")
-            messages = [
-                {"role": "system", "content": prompt["system_message"]},
-                {"role": "user", "content": prompt["user_message"]}
-            ]
-            try:
-                report_content = self._resource.get_model_result(messages)
-                for char in report_content:
-                    yield char
-                # 添加免责声明
-                if DISCLAIMER not in report_content:
-                    for char in "\n\n" + DISCLAIMER:
-                        yield char
-            except Exception as e:
-                logger.error(f"[ReportGenerationChain] 模型生成失败: {str(e)}")
-                self._is_degraded = True
-                degraded_report = self._generate_degraded_report(context_body)
-                for char in degraded_report:
-                    yield char
+        if model_service is None:
+            yield "抱歉，模型服务不可用。"
             return
 
-        # 使用流式生成
         try:
             full_response = []
 
@@ -284,7 +251,7 @@ class ReportGenerationChain(Chain[ChainContext[ReportGenerationContextBody], Cha
                 {"role": "user", "content": prompt["user_message"]}
             ]
             
-            for token in model_service.stream_generate(messages):
+            async for token in model_service.async_stream_generate(messages):
                 full_response.append(token)
                 yield token
 

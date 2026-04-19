@@ -6,7 +6,7 @@ VLLM模型资源封装
 """
 
 import time
-from typing import Any, Dict, Iterator, List, Optional
+from typing import Any, AsyncIterator, Dict, Iterator, List, Optional
 
 from src.resource_manager.resource import Resource
 from src.resource_manager.resource_config import ResourceConfig
@@ -101,6 +101,10 @@ class VLLMModelResource(Resource):
         Returns:
             VLLMAdapterImpl: VLLM适配器实例
         """
+        return self._adapter
+
+    def get_async_adapter(self) -> Optional[VLLMAdapterImpl]:
+        """获取VLLM异步适配器实例（与同步适配器为同一实例）"""
         return self._adapter
 
 
@@ -338,6 +342,26 @@ class VLLMModelClient(ResourceClient):
             top_p=top_p,
             **kwargs
         )
+    
+    async def async_stream_generate(
+        self, 
+        prompt: str, 
+        max_tokens: int = 512,
+        temperature: float = 0.7,
+        top_p: float = 0.9,
+        **kwargs
+    ) -> 'AsyncIterator[str]':
+        adapter = self._resource.get_async_adapter()
+        if adapter is None:
+            raise RuntimeError("VLLM async adapter not initialized")
+        async for chunk in adapter.async_stream_generate(
+            prompt=prompt,
+            max_tokens=max_tokens,
+            temperature=temperature,
+            top_p=top_p,
+            **kwargs
+        ):
+            yield chunk
     
     def is_model_loaded(self) -> bool:
         """

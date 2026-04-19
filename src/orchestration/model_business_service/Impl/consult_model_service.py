@@ -12,7 +12,7 @@
 
 import logging
 import time
-from typing import Any, Dict, Iterator, List, Optional
+from typing import Any, AsyncIterator, Dict, Iterator, List, Optional
 
 from src.orchestration.model_business_service.model_business_service import ModelBusinessService
 from src.resource_manager.global_resource_manager import GlobalResourceManager
@@ -133,6 +133,42 @@ class ConsultModelService(ModelBusinessService[List[Dict[str, str]], str]):
         except Exception as e:
             elapsed = time.time() - start_time
             logger.error(f"[ConsultModelService] stream_generate failed, elapsed={elapsed:.3f}s, error={str(e)}")
+            raise
+        finally:
+            if handle is not None:
+                GlobalResourceManager.release(handle)
+
+    async def async_stream_generate(self, messages: List[Dict[str, str]]) -> 'AsyncIterator[str]':
+        """
+        异步流式生成 - 接受完整的messages列表，使用AsyncLLM实现真正的实时流式输出
+        """
+        logger.info(f"[ConsultModelService] async_stream_generate called, message_count={len(messages)}")
+        start_time = time.time()
+        
+        handle = None
+        try:
+            handle = GlobalResourceManager.acquire("vllm_model", "vllm_config")
+            if handle is None:
+                raise RuntimeError("Failed to acquire vllm_model resource")
+            
+            model_client = VLLMModelClient(handle.resource)
+            prompt = self._build_prompt(messages)
+            
+            logger.info(f"[ConsultModelService] ========== AsyncLLM流式输入 ==========")
+            for i, msg in enumerate(messages):
+                logger.info(f"[ConsultModelService] Message[{i}] role={msg.get('role')}: {msg.get('content', '')[:500]}{'...' if len(msg.get('content', '')) > 500 else ''}")
+            logger.info(f"[ConsultModelService] 构建的完整Prompt (长度={len(prompt)}):")
+            logger.info(f"{prompt[:3000]}{'...' if len(prompt) > 3000 else ''}")
+            logger.info(f"[ConsultModelService] ==============================")
+            
+            async for chunk in model_client.async_stream_generate(prompt):
+                yield chunk
+            
+            elapsed = time.time() - start_time
+            logger.info(f"[ConsultModelService] async_stream_generate completed, elapsed={elapsed:.3f}s")
+        except Exception as e:
+            elapsed = time.time() - start_time
+            logger.error(f"[ConsultModelService] async_stream_generate failed, elapsed={elapsed:.3f}s, error={str(e)}")
             raise
         finally:
             if handle is not None:

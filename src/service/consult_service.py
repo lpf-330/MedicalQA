@@ -6,7 +6,7 @@
 
 import logging
 import time
-from typing import TYPE_CHECKING, TypeVar, TypeAlias, Any, Dict, List, Generator
+from typing import TYPE_CHECKING, TypeVar, TypeAlias, Any, Dict, List, AsyncGenerator
 
 if TYPE_CHECKING:
     from src.orchestration.agent.agent import Agent
@@ -63,36 +63,36 @@ class ConsultService:
             elapsed = time.time() - start_time
             logger.info(f"[ConsultService] 咨询处理完成: session_id={context.session_id}, elapsed={elapsed:.2f}s")
 
-    def process_consult_stream(self, context: ConsultContext) -> Generator[str, None, None]:
+    async def process_consult_stream(self, context: ConsultContext) -> AsyncGenerator[str, None]:
         import json
-        
+
         if context is None:
             yield f"event: error\ndata: {json.dumps({'error_code': 400, 'error_message': 'context不能为None'})}\n\n"
             return
-        
+
         if not hasattr(context, 'session_id') or not context.session_id:
             yield f"event: error\ndata: {json.dumps({'error_code': 400, 'error_message': 'session_id不能为空'})}\n\n"
             return
-        
-        logger.info(f"[ConsultService] 开始流式处理咨询: session_id={context.session_id}")
-        
+
+        logger.info(f"[ConsultService] 开始流式处理: session_id={context.session_id}")
+
         try:
             result = self._agent.run(context)
-            
+
             if result is not None and result.data is not None:
                 body = context.body
+
                 if hasattr(body, 'stream_generator') and body.stream_generator is not None:
-                    for token in body.stream_generator:
+                    async for token in body.stream_generator:
                         payload = json.dumps({"content": token}, ensure_ascii=False)
                         yield f"event: message\ndata: {payload}\n\n"
-                    
-                    context.answer_text = getattr(body, 'answer_text', '')
+
                     context.is_streaming = False
-                    
+
                     end_data = {
                         "session_id": result.session_id,
+                        "intent_label": getattr(body, 'intent_label', ''),
                         "sources": getattr(body, 'sources', []),
-                        "is_health_consultation": getattr(body, 'is_health_consultation', True),
                         "error_code": getattr(body, 'error_code', 0),
                     }
                     yield f"event: end\ndata: {json.dumps(end_data, ensure_ascii=False)}\n\n"
@@ -100,22 +100,28 @@ class ConsultService:
                     answer = result.data.answer if hasattr(result.data, 'answer') else str(result.data)
                     payload = json.dumps({"content": answer}, ensure_ascii=False)
                     yield f"event: message\ndata: {payload}\n\n"
-                    end_data = {"session_id": result.session_id}
+
+                    end_data = {
+                        "session_id": result.session_id,
+                    }
                     yield f"event: end\ndata: {json.dumps(end_data, ensure_ascii=False)}\n\n"
             else:
                 yield f"event: error\ndata: {json.dumps({'error_code': 500, 'error_message': '处理结果为空'})}\n\n"
-        
+
         except Exception as e:
             logger.error(f"[ConsultService] 流式处理异常: {str(e)}")
             yield f"event: error\ndata: {json.dumps({'error_code': 500, 'error_message': str(e)})}\n\n"
-        
+
         finally:
-            agent_resource = self._agent.resources
-            if agent_resource is not None and agent_resource.model_service is not None:
-                try:
-                    agent_resource.model_service.release()
-                except Exception as e:
-                    logger.error(f"[ConsultService] 释放model service失败: {e}")
+            self._release_resources()
+
+    def _release_resources(self) -> None:
+        agent_resource = self._agent.resources
+        if agent_resource is not None and agent_resource.model_service is not None:
+            try:
+                agent_resource.model_service.release()
+            except Exception as e:
+                logger.error(f"[ConsultService] 释放model service失败: {e}")
 
     def _build_agent_context(self, request: ConsultRequest) -> AgentContext:
         session_id = request.get_session_id() or request.body.task_id

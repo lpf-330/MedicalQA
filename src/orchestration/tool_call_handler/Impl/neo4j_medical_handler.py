@@ -202,6 +202,146 @@ class Neo4jMedicalHandler(ToolCallHandler[str, Dict[str, Any]]):
             logger.error(f"[Neo4jMedicalHandler] get_foods_by_node_id failed, elapsed={elapsed:.3f}s, node_id={node_id}, error={str(e)}")
             raise
 
+    def get_cure_by_node_id(self, node_id: int) -> Optional[Dict[str, Any]]:
+        logger.debug(f"[Neo4jMedicalHandler] get_cure_by_node_id called, node_id={node_id}")
+        start_time = time.time()
+        try:
+            self._ensure_initialized()
+            result = self._tool.call("get_cure_by_node_id", {"node_id": node_id})
+            elapsed = time.time() - start_time
+            logger.info(f"[Neo4jMedicalHandler] get_cure_by_node_id completed, elapsed={elapsed:.3f}s, node_id={node_id}")
+            return result
+        except Exception as e:
+            elapsed = time.time() - start_time
+            logger.error(f"[Neo4jMedicalHandler] get_cure_by_node_id failed, elapsed={elapsed:.3f}s, node_id={node_id}, error={str(e)}")
+            raise
+
+    def get_diseases_by_cure_node_id(self, node_id: int) -> List[str]:
+        logger.debug(f"[Neo4jMedicalHandler] get_diseases_by_cure_node_id called, node_id={node_id}")
+        start_time = time.time()
+        try:
+            self._ensure_initialized()
+            result = self._tool.call("get_diseases_by_cure_node_id", {"node_id": node_id})
+            elapsed = time.time() - start_time
+            logger.info(f"[Neo4jMedicalHandler] get_diseases_by_cure_node_id completed, elapsed={elapsed:.3f}s, node_id={node_id}, disease_count={len(result) if isinstance(result, list) else 'N/A'}")
+            return result
+        except Exception as e:
+            elapsed = time.time() - start_time
+            logger.error(f"[Neo4jMedicalHandler] get_diseases_by_cure_node_id failed, elapsed={elapsed:.3f}s, node_id={node_id}, error={str(e)}")
+            raise
+
+    def get_drug_by_node_id(self, node_id: int) -> Optional[Dict[str, Any]]:
+        logger.debug(f"[Neo4jMedicalHandler] get_drug_by_node_id called, node_id={node_id}")
+        start_time = time.time()
+        try:
+            self._ensure_initialized()
+            result = self._tool.call("get_drug_by_node_id", {"node_id": node_id})
+            elapsed = time.time() - start_time
+            logger.info(f"[Neo4jMedicalHandler] get_drug_by_node_id completed, elapsed={elapsed:.3f}s, node_id={node_id}")
+            return result
+        except Exception as e:
+            elapsed = time.time() - start_time
+            logger.error(f"[Neo4jMedicalHandler] get_drug_by_node_id failed, elapsed={elapsed:.3f}s, node_id={node_id}, error={str(e)}")
+            raise
+
+    def get_diseases_by_drug_node_id(self, node_id: int) -> Dict[str, List[str]]:
+        logger.debug(f"[Neo4jMedicalHandler] get_diseases_by_drug_node_id called, node_id={node_id}")
+        start_time = time.time()
+        try:
+            self._ensure_initialized()
+            result = self._tool.call("get_diseases_by_drug_node_id", {"node_id": node_id})
+            elapsed = time.time() - start_time
+            logger.info(f"[Neo4jMedicalHandler] get_diseases_by_drug_node_id completed, elapsed={elapsed:.3f}s, node_id={node_id}")
+            return result
+        except Exception as e:
+            elapsed = time.time() - start_time
+            logger.error(f"[Neo4jMedicalHandler] get_diseases_by_drug_node_id failed, elapsed={elapsed:.3f}s, node_id={node_id}, error={str(e)}")
+            raise
+
+    def get_food_by_node_id(self, node_id: int) -> Optional[Dict[str, Any]]:
+        logger.debug(f"[Neo4jMedicalHandler] get_food_by_node_id called, node_id={node_id}")
+        start_time = time.time()
+        try:
+            self._ensure_initialized()
+            result = self._tool.call("get_food_by_node_id", {"node_id": node_id})
+            elapsed = time.time() - start_time
+            logger.info(f"[Neo4jMedicalHandler] get_food_by_node_id completed, elapsed={elapsed:.3f}s, node_id={node_id}")
+            return result
+        except Exception as e:
+            elapsed = time.time() - start_time
+            logger.error(f"[Neo4jMedicalHandler] get_food_by_node_id failed, elapsed={elapsed:.3f}s, node_id={node_id}, error={str(e)}")
+            raise
+
+    def get_diseases_by_food_node_id(self, node_id: int) -> Dict[str, List[str]]:
+        logger.debug(f"[Neo4jMedicalHandler] get_diseases_by_food_node_id called, node_id={node_id}")
+        start_time = time.time()
+        try:
+            self._ensure_initialized()
+            result = self._tool.call("get_diseases_by_food_node_id", {"node_id": node_id})
+            elapsed = time.time() - start_time
+            logger.info(f"[Neo4jMedicalHandler] get_diseases_by_food_node_id completed, elapsed={elapsed:.3f}s, node_id={node_id}")
+            return result
+        except Exception as e:
+            elapsed = time.time() - start_time
+            logger.error(f"[Neo4jMedicalHandler] get_diseases_by_food_node_id failed, elapsed={elapsed:.3f}s, node_id={node_id}, error={str(e)}")
+            raise
+
+    def get_check_by_node_id(self, node_id: int) -> Optional[Dict[str, Any]]:
+        logger.debug(f"[Neo4jMedicalHandler] get_check_by_node_id called, node_id={node_id}")
+        start_time = time.time()
+        try:
+            self._ensure_initialized()
+            result = self._tool.call("get_check_by_node_id", {"node_id": node_id})
+            elapsed = time.time() - start_time
+            logger.info(f"[Neo4jMedicalHandler] get_check_by_node_id completed, elapsed={elapsed:.3f}s, node_id={node_id}")
+            return result
+        except Exception as e:
+            elapsed = time.time() - start_time
+            logger.error(f"[Neo4jMedicalHandler] get_check_by_node_id failed, elapsed={elapsed:.3f}s, node_id={node_id}, error={str(e)}")
+            raise
+
+    def get_diseases_by_check_node_id(self, node_id: int) -> List[str]:
+        logger.debug(f"[Neo4jMedicalHandler] get_diseases_by_check_node_id called, node_id={node_id}")
+        start_time = time.time()
+        try:
+            self._ensure_initialized()
+            result = self._tool.call("get_diseases_by_check_node_id", {"node_id": node_id})
+            elapsed = time.time() - start_time
+            logger.info(f"[Neo4jMedicalHandler] get_diseases_by_check_node_id completed, elapsed={elapsed:.3f}s, node_id={node_id}, disease_count={len(result) if isinstance(result, list) else 'N/A'}")
+            return result
+        except Exception as e:
+            elapsed = time.time() - start_time
+            logger.error(f"[Neo4jMedicalHandler] get_diseases_by_check_node_id failed, elapsed={elapsed:.3f}s, node_id={node_id}, error={str(e)}")
+            raise
+
+    def get_department_by_node_id(self, node_id: int) -> Optional[Dict[str, Any]]:
+        logger.debug(f"[Neo4jMedicalHandler] get_department_by_node_id called, node_id={node_id}")
+        start_time = time.time()
+        try:
+            self._ensure_initialized()
+            result = self._tool.call("get_department_by_node_id", {"node_id": node_id})
+            elapsed = time.time() - start_time
+            logger.info(f"[Neo4jMedicalHandler] get_department_by_node_id completed, elapsed={elapsed:.3f}s, node_id={node_id}")
+            return result
+        except Exception as e:
+            elapsed = time.time() - start_time
+            logger.error(f"[Neo4jMedicalHandler] get_department_by_node_id failed, elapsed={elapsed:.3f}s, node_id={node_id}, error={str(e)}")
+            raise
+
+    def get_diseases_by_department_node_id(self, node_id: int) -> List[str]:
+        logger.debug(f"[Neo4jMedicalHandler] get_diseases_by_department_node_id called, node_id={node_id}")
+        start_time = time.time()
+        try:
+            self._ensure_initialized()
+            result = self._tool.call("get_diseases_by_department_node_id", {"node_id": node_id})
+            elapsed = time.time() - start_time
+            logger.info(f"[Neo4jMedicalHandler] get_diseases_by_department_node_id completed, elapsed={elapsed:.3f}s, node_id={node_id}, disease_count={len(result) if isinstance(result, list) else 'N/A'}")
+            return result
+        except Exception as e:
+            elapsed = time.time() - start_time
+            logger.error(f"[Neo4jMedicalHandler] get_diseases_by_department_node_id failed, elapsed={elapsed:.3f}s, node_id={node_id}, error={str(e)}")
+            raise
+
     def search_diseases_by_symptom(self, symptom_name: str) -> List[str]:
         logger.debug(f"[Neo4jMedicalHandler] search_diseases_by_symptom called, symptom_name={symptom_name}")
         start_time = time.time()

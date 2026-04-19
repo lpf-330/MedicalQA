@@ -6,7 +6,7 @@ VLLM适配器接口
 """
 
 from abc import ABC, abstractmethod
-from typing import Any, Dict, Iterator, List
+from typing import Any, AsyncIterator, Dict, Iterator, List
 
 
 class VLLMAdapter(ABC):
@@ -96,6 +96,32 @@ class VLLMAdapter(ABC):
         Args:
             prompt: 输入提示
             **kwargs: 其他生成参数
+            
+        Yields:
+            生成的文本片段
+        """
+        pass
+    
+    @abstractmethod
+    async def async_stream_generate(
+        self, 
+        prompt: str, 
+        max_tokens: int = 512,
+        temperature: float = 0.7,
+        top_p: float = 0.9,
+        **kwargs
+    ) -> AsyncIterator[str]:
+        """
+        异步流式生成文本（真正的实时流式）
+        
+        基于AsyncLLM引擎，使用DELTA模式逐token实时输出。
+        内置UTF-8安全的增量解码器，确保中文字符不乱码。
+        
+        Args:
+            prompt: 输入提示
+            max_tokens: 最大生成token数
+            temperature: 温度参数
+            top_p: top_p参数
             
         Yields:
             生成的文本片段

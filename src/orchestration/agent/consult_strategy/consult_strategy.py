@@ -10,7 +10,6 @@ from src.orchestration.agent.data_classes import AgentContext, AgentResult
 from src.orchestration.agent.agent_resource import AgentResource
 from src.orchestration.state_machine.state_machine import StateMachine
 from src.orchestration.chain.data_classes import ChainContext
-from src.orchestration.chain.intent_parse_chain.intent_parse_chain import IntentParseContextBody
 from src.orchestration.chain.knowledge_retrieval_chain.knowledge_retrieval_chain import KnowledgeRetrievalContextBody
 from src.orchestration.chain.answer_generation_chain.answer_generation_chain import AnswerGenerationContextBody
 
@@ -200,45 +199,83 @@ class ConsultStrategy(AgentStrategy[ConsultContextBody, ConsultResultData]):
         query_text = context.question
         logger.info(f"[ConsultStrategy] QUERY_PARSE: query_text={query_text[:100]}...")
         
-        # TODO: 意图识别功能已暂时废弃，未来将升级为Neo4j关系意图分析模型
-        # 详见: test/future_issues.md - 三、意图识别功能升级
-        
-        # 注释掉原有的意图识别逻辑
-        # intent_chain = resource.get_chain("intent_parse_chain")
-        # if intent_chain is None:
-        #     logger.error("[ConsultStrategy] 意图解析链未注册")
-        #     raise ValueError("意图解析链未注册")
-        # 
-        # chain_context = ChainContext(
-        #     session_id=context.session_id,
-        #     body=IntentParseContextBody(
-        #         query_text=context.question,
-        #         chat_history=context.conversation_history
-        #     )
-        # )
-        # 
-        # chain_result = intent_chain.execute(chain_context)
-        # if chain_result.data is None:
-        #     logger.error("[ConsultStrategy] 意图解析链返回空结果")
-        #     raise ValueError("意图解析链返回空结果")
-        # 
-        # context.intent_label = chain_result.data.intent_label
-        # context.extracted_entities = chain_result.data.extracted_entities
-        # context.rewritten_query = chain_result.data.rewritten_query
-        # context.is_health_consultation = chain_result.data.is_health_consultation
-        
-        # 临时方案：默认所有查询都是健康咨询，直接进入知识检索
         context.intent_label = "health_consultation"
         context.extracted_entities = []
-        context.rewritten_query = query_text
         context.is_health_consultation = True
+
+        if context.conversation_history:
+            rewritten = self._resolve_context_reference(query_text, context.conversation_history, resource)
+            context.rewritten_query = rewritten
+            logger.info(f"[ConsultStrategy] QUERY_PARSE 上下文改写: original={query_text[:50]}..., rewritten={context.rewritten_query[:50]}...")
+        else:
+            context.rewritten_query = query_text
+            logger.info(f"[ConsultStrategy] QUERY_PARSE (无对话历史): rewritten_query={context.rewritten_query[:50]}...")
         
-        logger.info(f"[ConsultStrategy] QUERY_PARSE (意图识别已禁用): intent_label={context.intent_label}, "
+        logger.info(f"[ConsultStrategy] QUERY_PARSE: intent_label={context.intent_label}, "
                     f"is_health_consultation={context.is_health_consultation}, "
                     f"rewritten_query={context.rewritten_query[:50]}...")
         
-        # 直接跳转到知识检索
         return "KNOWLEDGE_RETRIEVAL"
+
+    def _resolve_context_reference(self, query_text: str, conversation_history: List[Dict[str, str]], resource: AgentResource) -> str:
+        if not conversation_history:
+            return query_text
+
+        has_reference = any(p in query_text for p in ["它", "他", "她", "这个", "那个", "这些", "那些", "其", "该"])
+        if not has_reference:
+            logger.info(f"[ConsultStrategy] 查询中无指代词，无需上下文改写")
+            return query_text
+
+        referenced_entity = self._extract_referenced_entity(conversation_history)
+        if not referenced_entity:
+            logger.info(f"[ConsultStrategy] 未从对话历史中提取到指代实体，使用原始查询")
+            return query_text
+
+        rewritten = query_text
+        rewritten = rewritten.replace("它的", f"{referenced_entity}的")
+        rewritten = rewritten.replace("它", referenced_entity)
+        rewritten = rewritten.replace("他的", f"{referenced_entity}的")
+        rewritten = rewritten.replace("他", referenced_entity)
+        rewritten = rewritten.replace("她的", f"{referenced_entity}的")
+        rewritten = rewritten.replace("她", referenced_entity)
+        rewritten = rewritten.replace("这个", referenced_entity)
+        rewritten = rewritten.replace("那个", referenced_entity)
+        rewritten = rewritten.replace("这些", referenced_entity)
+        rewritten = rewritten.replace("那些", referenced_entity)
+        rewritten = rewritten.replace("其", f"{referenced_entity}的")
+        rewritten = rewritten.replace("该", f"{referenced_entity}的")
+
+        if rewritten == query_text:
+            logger.info(f"[ConsultStrategy] 指代替换未生效，使用原始查询")
+            return query_text
+
+        logger.info(f"[ConsultStrategy] 上下文改写成功: '{query_text}' -> '{rewritten}'")
+        return rewritten
+
+    def _extract_referenced_entity(self, conversation_history: List[Dict[str, str]]) -> Optional[str]:
+        import re
+        disease_patterns = [
+            r'(\S*病)(?:的|了|是|有|和|与|，|。|\s|$)',
+            r'(\S*综合征)(?:的|了|是|有|和|与|，|。|\s|$)',
+            r'(\S*炎症)(?:的|了|是|有|和|与|，|。|\s|$)',
+            r'(\S*症)(?:的|了|是|有|和|与|，|。|\s|$)',
+        ]
+        entity_candidates = []
+
+        for msg in reversed(conversation_history):
+            role = msg.get("role", "")
+            content = msg.get("content", "")
+            if role == "user" and content:
+                for pattern in disease_patterns:
+                    matches = re.findall(pattern, content)
+                    entity_candidates.extend(matches)
+
+        if entity_candidates:
+            entity = entity_candidates[0]
+            logger.info(f"[ConsultStrategy] 从对话历史提取指代实体: '{entity}'")
+            return entity
+
+        return None
 
     def _handle_knowledge_retrieval(self, context: ConsultContextBody, resource: AgentResource) -> str:
         knowledge_chain = resource.get_chain("knowledge_retrieval_chain")

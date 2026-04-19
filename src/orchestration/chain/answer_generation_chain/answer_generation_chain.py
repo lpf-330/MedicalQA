@@ -8,7 +8,7 @@
 import logging
 import time
 from dataclasses import dataclass, field
-from typing import Any, Dict, Generator, List, Optional
+from typing import Any, AsyncGenerator, Dict, Generator, List, Optional
 
 from src.orchestration.chain.chain import Chain
 from src.orchestration.chain.data_classes import ChainContext, ChainResult
@@ -144,7 +144,7 @@ class AnswerGenerationChain(Chain[ChainContext[AnswerGenerationContextBody], Cha
         logger.info(f"[AnswerGenerationChain] 开始构建提示词: query_text={body.query_text[:50]}...")
         prompt = self._build_prompt(body)
 
-        messages = body.chat_history + [
+        messages = self._truncate_chat_history(body.chat_history) + [
             {"role": "system", "content": prompt["system_message"]},
             {"role": "user", "content": prompt["user_message"]}
         ]
@@ -185,7 +185,7 @@ class AnswerGenerationChain(Chain[ChainContext[AnswerGenerationContextBody], Cha
 
         return ChainResult(session_id=chain_context.session_id, data=result_data)
 
-    def execute_stream(self, chain_context) -> Generator[str, None, None]:
+    async def execute_stream(self, chain_context) -> AsyncGenerator[str, None]:
         context_body = chain_context.body
         if context_body is None:
             yield "抱歉，无法处理您的咨询请求。"
@@ -207,11 +207,12 @@ class AnswerGenerationChain(Chain[ChainContext[AnswerGenerationContextBody], Cha
         
         try:
             full_response = []
-            messages = [
+            truncated_history = self._truncate_chat_history(context_body.chat_history)
+            messages = truncated_history + [
                 {"role": "system", "content": prompt["system_message"]},
                 {"role": "user", "content": prompt["user_message"]}
             ]
-            for token in model_service.stream_generate(messages):
+            async for token in model_service.async_stream_generate(messages):
                 full_response.append(token)
                 yield token
             
@@ -233,16 +234,25 @@ class AnswerGenerationChain(Chain[ChainContext[AnswerGenerationContextBody], Cha
             logger.error(f"[AnswerGenerationChain] 流式生成异常: {str(e)}")
             yield f"\n\n抱歉，生成过程中出现错误。"
 
+    def _truncate_chat_history(self, chat_history: List[Dict[str, str]], max_rounds: int = 2, max_assistant_len: int = 200) -> List[Dict[str, str]]:
+        if not chat_history:
+            return []
+
+        recent = chat_history[-(max_rounds * 2):]
+
+        truncated = []
+        for msg in recent:
+            role = msg.get("role", "")
+            content = msg.get("content", "")
+            if role == "assistant" and len(content) > max_assistant_len:
+                content = content[:max_assistant_len] + "..."
+            truncated.append({"role": role, "content": content})
+
+        return truncated
+
+    MAX_KNOWLEDGE_CHARS = 6000
+
     def _build_prompt(self, context_body: AnswerGenerationContextBody) -> Dict[str, str]:
-        """
-        构建提示词
-
-        Args:
-            context_body: 回答生成专属输入数据
-
-        Returns:
-            包含system_message和user_message的字典
-        """
         system_message = """你是一位专业的医疗健康咨询助手，请根据提供的医学知识素材回答用户的问题。
 
 重要要求：
@@ -251,7 +261,10 @@ class AnswerGenerationChain(Chain[ChainContext[AnswerGenerationContextBody], Cha
 3. 不要在回答末尾添加"✅"等标记或总结性文字"""
 
         if context_body.knowledge_context:
-            system_message += f"\n\n参考知识素材：\n{context_body.knowledge_context}"
+            knowledge = context_body.knowledge_context
+            if len(knowledge) > self.MAX_KNOWLEDGE_CHARS:
+                knowledge = knowledge[:self.MAX_KNOWLEDGE_CHARS] + "\n...(知识素材已截断)"
+            system_message += f"\n\n参考知识素材：\n{knowledge}"
 
         user_message = f"用户问题：{context_body.query_text}"
 

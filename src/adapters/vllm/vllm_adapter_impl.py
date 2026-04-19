@@ -1,15 +1,13 @@
 # -*- coding: utf-8 -*-
-"""
-VLLM适配器实现类
-
-转接适配VLLM引擎，为项目各层级提供统一的模型推理操作接口。
-"""
-
 import logging
 import time
-from typing import Any, Dict, Iterator, List, Optional
+import asyncio
+from typing import Any, AsyncIterator, Dict, Iterator, List, Optional
 
-from vllm import LLM, SamplingParams
+from vllm import SamplingParams
+from vllm.engine.arg_utils import AsyncEngineArgs
+from vllm.sampling_params import RequestOutputKind
+from vllm.v1.engine.async_llm import AsyncLLM
 
 from .vllm_adapter import VLLMAdapter
 
@@ -17,20 +15,9 @@ logger = logging.getLogger(__name__)
 
 
 class VLLMAdapterImpl(VLLMAdapter):
-    """
-    VLLM适配器实现类
-    
-    封装vllm库，为项目提供统一的模型推理操作接口。
-    
-    属性：
-        _llm: VLLM LLM实例
-        _model_path: 模型路径
-        _is_loaded: 模型是否已加载
-    """
     
     def __init__(self):
-        """初始化VLLM适配器"""
-        self._llm: Optional[LLM] = None
+        self._async_llm: Optional[AsyncLLM] = None
         self._model_path: Optional[str] = None
         self._is_loaded: bool = False
         logger.debug("[VLLMAdapter] 初始化VLLM适配器")
@@ -41,14 +28,6 @@ class VLLMAdapterImpl(VLLMAdapter):
         tensor_parallel_size: int = 1,
         **kwargs
     ) -> None:
-        """
-        加载模型
-        
-        Args:
-            model_path: 模型路径
-            tensor_parallel_size: 张量并行大小
-            **kwargs: 其他VLLM参数
-        """
         if self._is_loaded:
             logger.debug(f"[VLLMAdapter] 模型已加载，跳过: model_path={model_path}")
             return
@@ -57,12 +36,15 @@ class VLLMAdapterImpl(VLLMAdapter):
         start_time = time.time()
         
         try:
-            self._llm = LLM(
+            async_engine_args = AsyncEngineArgs(
                 model=model_path,
                 tensor_parallel_size=tensor_parallel_size,
                 enforce_eager=True,
-                **kwargs
+                max_model_len=kwargs.get('max_model_len', 8192),
+                gpu_memory_utilization=kwargs.get('gpu_memory_utilization', 0.9),
+                disable_log_stats=True,
             )
+            self._async_llm = AsyncLLM.from_engine_args(async_engine_args)
             self._model_path = model_path
             self._is_loaded = True
             
@@ -73,9 +55,6 @@ class VLLMAdapterImpl(VLLMAdapter):
             logger.error(f"[VLLMAdapter] 模型加载失败: model_path={model_path}, elapsed={elapsed:.2f}s")
             logger.error(f"[VLLMAdapter] 错误类型: {type(e).__name__}")
             logger.error(f"[VLLMAdapter] 错误信息: {str(e)}")
-            logger.error(f"[VLLMAdapter] 配置参数: tensor_parallel_size={tensor_parallel_size}, kwargs={kwargs}")
-            logger.error(f"[VLLMAdapter] GPU内存利用率: {kwargs.get('gpu_memory_utilization', '未设置')}")
-            logger.error(f"[VLLMAdapter] 最大模型长度: {kwargs.get('max_model_len', '未设置')}")
             raise
     
     def generate(
@@ -86,43 +65,43 @@ class VLLMAdapterImpl(VLLMAdapter):
         top_p: float = 0.9,
         **kwargs
     ) -> str:
-        """
-        生成文本
-        
-        Args:
-            prompt: 输入提示
-            max_tokens: 最大生成token数
-            temperature: 温度参数
-            top_p: top_p参数
-            **kwargs: 其他生成参数
-            
-        Returns:
-            生成的文本
-        """
-        if not self._is_loaded or self._llm is None:
-            logger.error("[VLLMAdapter] 生成失败，模型未加载")
+        if not self._is_loaded or self._async_llm is None:
             raise RuntimeError("Model not loaded")
         
         logger.debug(f"[VLLMAdapter] LLM输入 - prompt长度: {len(prompt)}字符")
-        logger.debug(f"[VLLMAdapter] LLM输入 - prompt内容:\n{prompt[:2000]}{'...' if len(prompt) > 2000 else ''}")
-        logger.debug(f"[VLLMAdapter] LLM参数 - max_tokens={max_tokens}, temperature={temperature}, top_p={top_p}, kwargs={kwargs}")
         
         start_time = time.time()
         
-        sampling_params = SamplingParams(
-            max_tokens=max_tokens,
-            temperature=temperature,
-            top_p=top_p,
-            **kwargs
-        )
-        
-        outputs = self._llm.generate([prompt], sampling_params)
-        result = outputs[0].outputs[0].text
+        full_text = ""
+        loop = asyncio.new_event_loop()
+        try:
+            async def _collect():
+                nonlocal full_text
+                import uuid
+                sampling_params = SamplingParams(
+                    max_tokens=max_tokens,
+                    temperature=temperature,
+                    top_p=top_p,
+                    output_kind=RequestOutputKind.CUMULATIVE,
+                    **kwargs
+                )
+                request_id = f"sync-gen-{uuid.uuid4().hex[:8]}"
+                async for output in self._async_llm.generate(
+                    request_id=request_id,
+                    prompt=prompt,
+                    sampling_params=sampling_params
+                ):
+                    for completion in output.outputs:
+                        full_text = completion.text
+                    if output.finished:
+                        break
+            loop.run_until_complete(_collect())
+        finally:
+            loop.close()
         
         elapsed = time.time() - start_time
-        logger.info(f"[VLLMAdapter] 生成完成: output_len={len(result)}, elapsed={elapsed:.2f}s")
-        logger.debug(f"[VLLMAdapter] LLM输出 - 内容:\n{result[:2000]}{'...' if len(result) > 2000 else ''}")
-        return result
+        logger.info(f"[VLLMAdapter] 生成完成: output_len={len(full_text)}, elapsed={elapsed:.2f}s")
+        return full_text
     
     def generate_batch(
         self, 
@@ -132,38 +111,16 @@ class VLLMAdapterImpl(VLLMAdapter):
         top_p: float = 0.9,
         **kwargs
     ) -> List[str]:
-        """
-        批量生成文本
-        
-        Args:
-            prompts: 输入提示列表
-            max_tokens: 最大生成token数
-            temperature: 温度参数
-            top_p: top_p参数
-            **kwargs: 其他生成参数
-            
-        Returns:
-            生成的文本列表
-        """
-        if not self._is_loaded or self._llm is None:
-            logger.error("[VLLMAdapter] 批量生成失败，模型未加载")
+        if not self._is_loaded or self._async_llm is None:
             raise RuntimeError("Model not loaded")
         
         logger.debug(f"[VLLMAdapter] 开始批量生成: batch_size={len(prompts)}, max_tokens={max_tokens}")
-        start_time = time.time()
         
-        sampling_params = SamplingParams(
-            max_tokens=max_tokens,
-            temperature=temperature,
-            top_p=top_p,
-            **kwargs
-        )
+        results = []
+        for prompt in prompts:
+            result = self.generate(prompt, max_tokens, temperature, top_p, **kwargs)
+            results.append(result)
         
-        outputs = self._llm.generate(prompts, sampling_params)
-        results = [output.outputs[0].text for output in outputs]
-        
-        elapsed = time.time() - start_time
-        logger.info(f"[VLLMAdapter] 批量生成完成: batch_size={len(results)}, elapsed={elapsed:.2f}s")
         return results
     
     def stream_generate(
@@ -174,46 +131,66 @@ class VLLMAdapterImpl(VLLMAdapter):
         top_p: float = 0.9,
         **kwargs
     ) -> Iterator[str]:
-        if not self._is_loaded or self._llm is None:
+        if not self._is_loaded or self._async_llm is None:
             raise RuntimeError("Model not loaded")
         
         logger.debug(f"[VLLMAdapter] LLM流式输入 - prompt长度: {len(prompt)}字符")
-        logger.debug(f"[VLLMAdapter] LLM流式输入 - prompt内容:\n{prompt[:2000]}{'...' if len(prompt) > 2000 else ''}")
-        logger.debug(f"[VLLMAdapter] LLM流式参数 - max_tokens={max_tokens}, temperature={temperature}, top_p={top_p}, kwargs={kwargs}")
+        
+        full_text = self.generate(prompt, max_tokens, temperature, top_p, **kwargs)
+        for char in full_text:
+            yield char
+    
+    async def async_stream_generate(
+        self, 
+        prompt: str, 
+        max_tokens: int = 512,
+        temperature: float = 0.7,
+        top_p: float = 0.9,
+        **kwargs
+    ) -> AsyncIterator[str]:
+        if self._async_llm is None:
+            raise RuntimeError("AsyncLLM not loaded")
+        
+        logger.debug(f"[VLLMAdapter] AsyncLLM流式输入 - prompt长度: {len(prompt)}字符")
         
         sampling_params = SamplingParams(
             max_tokens=max_tokens,
             temperature=temperature,
             top_p=top_p,
+            output_kind=RequestOutputKind.DELTA,
             **kwargs
         )
         
-        outputs = self._llm.generate([prompt], sampling_params, use_tqdm=False)
-        if outputs:
-            generated_text = outputs[0].outputs[0].text
-            logger.debug(f"[VLLMAdapter] LLM流式输出 - 内容长度: {len(generated_text)}")
+        import uuid
+        request_id = f"async-stream-{uuid.uuid4().hex[:8]}"
+        
+        async for output in self._async_llm.generate(
+            request_id=request_id,
+            prompt=prompt,
+            sampling_params=sampling_params
+        ):
+            for completion in output.outputs:
+                new_text = completion.text
+                if new_text:
+                    yield new_text
             
-            for char in generated_text:
-                yield char
+            if output.finished:
+                break
     
     def unload_model(self) -> None:
-        """卸载模型，释放资源"""
-        if self._llm is not None:
+        if self._async_llm is not None:
             logger.info(f"[VLLMAdapter] 开始卸载模型: model_path={self._model_path}")
-            del self._llm
-            self._llm = None
+            self._async_llm.shutdown()
+            self._async_llm = None
             logger.info("[VLLMAdapter] 模型卸载完成")
         self._model_path = None
         self._is_loaded = False
     
     def is_model_loaded(self) -> bool:
-        """检查模型是否已加载"""
-        return self._is_loaded
+        return self._is_loaded and self._async_llm is not None
     
     def __enter__(self) -> 'VLLMAdapterImpl':
-        """上下文管理器入口"""
         return self
     
     def __exit__(self, exc_type, exc_val, exc_tb) -> None:
-        """上下文管理器退出"""
         self.unload_model()

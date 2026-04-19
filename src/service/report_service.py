@@ -6,7 +6,7 @@
 
 import logging
 import time
-from typing import TYPE_CHECKING, TypeVar, TypeAlias, Any, Generator
+from typing import TYPE_CHECKING, TypeVar, TypeAlias, Any, AsyncGenerator
 
 if TYPE_CHECKING:
     from src.orchestration.agent.agent import Agent
@@ -104,33 +104,13 @@ class ReportService:
             elapsed = time.time() - start_time
             logger.info(f"[ReportService] 报告处理完成: session_id={context.session_id}, elapsed={elapsed:.2f}s")
 
-    def process_report_stream(self, context: ReportContext) -> Generator[str, None, None]:
-        """
-        流式处理报告请求
-
-        验证输入参数，调用Agent执行报告生成策略，并以SSE格式流式输出报告内容。
-
-        Args:
-            context: Agent输入数据容器，包含报告生成所需的上下文数据
-
-        Yields:
-            str: SSE格式的流式数据
-                - event: message - 报告内容块
-                - event: end - 结束信号
-                - event: error - 错误信息
-
-        Example:
-            >>> for chunk in report_service.process_report_stream(context):
-            ...     print(chunk)
-        """
+    async def process_report_stream(self, context: ReportContext) -> AsyncGenerator[str, None]:
         import json
 
-        # 验证context不为None
         if context is None:
             yield f"event: error\ndata: {json.dumps({'error_code': 400, 'error_message': 'context不能为None'})}\n\n"
             return
 
-        # 验证session_id不为空
         if not hasattr(context, 'session_id') or not context.session_id:
             yield f"event: error\ndata: {json.dumps({'error_code': 400, 'error_message': 'session_id不能为空'})}\n\n"
             return
@@ -138,24 +118,18 @@ class ReportService:
         logger.info(f"[ReportService] 开始流式处理报告: session_id={context.session_id}")
 
         try:
-            # 调用Agent执行报告生成策略
             result = self._agent.run(context)
 
-            # 处理流式输出
             if result is not None and result.data is not None:
                 body = context.body
 
-                # 如果有流式生成器，则流式输出
                 if hasattr(body, 'stream_generator') and body.stream_generator is not None:
-                    # 流式输出报告内容
-                    for token in body.stream_generator:
+                    async for token in body.stream_generator:
                         payload = json.dumps({"content": token}, ensure_ascii=False)
                         yield f"event: message\ndata: {payload}\n\n"
 
-                    # 更新上下文状态
                     context.is_streaming = False
 
-                    # 发送结束事件
                     end_data = {
                         "session_id": result.session_id,
                         "health_score": getattr(body, 'health_score', 0),
@@ -166,12 +140,10 @@ class ReportService:
                     }
                     yield f"event: end\ndata: {json.dumps(end_data, ensure_ascii=False)}\n\n"
                 else:
-                    # 如果没有流式生成器，直接输出完整报告
                     report = result.data.report if hasattr(result.data, 'report') else str(result.data)
                     payload = json.dumps({"content": report}, ensure_ascii=False)
                     yield f"event: message\ndata: {payload}\n\n"
 
-                    # 发送结束事件
                     end_data = {
                         "session_id": result.session_id,
                         "health_score": result.data.health_score if hasattr(result.data, 'health_score') else 0,
@@ -180,16 +152,13 @@ class ReportService:
                     }
                     yield f"event: end\ndata: {json.dumps(end_data, ensure_ascii=False)}\n\n"
             else:
-                # 结果为空，发送错误事件
                 yield f"event: error\ndata: {json.dumps({'error_code': 500, 'error_message': '处理结果为空'})}\n\n"
 
         except Exception as e:
-            # 异常处理，发送错误事件
             logger.error(f"[ReportService] 流式处理异常: {str(e)}")
             yield f"event: error\ndata: {json.dumps({'error_code': 500, 'error_message': str(e)})}\n\n"
 
         finally:
-            # 释放资源
             self._release_resources()
 
     def _build_agent_context(self, request: ReportRequest) -> AgentContext:
