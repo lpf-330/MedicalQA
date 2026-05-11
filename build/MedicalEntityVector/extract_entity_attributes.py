@@ -1,3 +1,4 @@
+# AI辅助生成：GLM-5, 2026-04-18
 import json
 import os
 import re

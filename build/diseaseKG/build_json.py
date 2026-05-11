@@ -1,5 +1,5 @@
 # coding: utf-8
-
+# AI辅助生成：GLM-5, 2026-04-06
 
 import os
 import json

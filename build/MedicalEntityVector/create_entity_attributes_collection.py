@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+# AI辅助生成：GLM-5, 2026-04-18
 """
 实体属性向量集合创建模块
 用于创建MedicalEntityVector向量数据库的entity_attributes集合

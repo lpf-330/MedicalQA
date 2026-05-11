@@ -1,3 +1,4 @@
+# AI辅助生成：GLM-5，2026-04-15
 # -*- coding: utf-8 -*-
 """
 Langchain适配器接口

@@ -1,3 +1,4 @@
+# AI辅助生成：GLM-5, 2026-04-18
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """

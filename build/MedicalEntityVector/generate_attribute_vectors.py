@@ -1,3 +1,4 @@
+# AI辅助生成：GLM-5, 2026-04-18
 """
 属性向量生成与导入模块
 用于从Disease实体属性生成向量并导入到entity_attributes集合
