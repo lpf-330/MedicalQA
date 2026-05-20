@@ -86,6 +86,24 @@ class IntentClassificationTool(Tool):
             logger.error(f"[IntentClassificationTool] release_source failed, elapsed={elapsed:.3f}s, error={str(e)}")
             raise
 
+    def destroy_source(self) -> None:
+        """彻底销毁意图识别模型资源 - 断开连接"""
+        logger.info("[IntentClassificationTool] destroy_source started")
+        start_time = time.time()
+        try:
+            if self._intent_handle is not None:
+                GlobalResourceManager.destroy(self._intent_handle)
+                self._intent_handle = None
+                self._intent_resource = None
+                logger.info("[IntentClassificationTool] intent_model resource destroyed")
+
+            elapsed = time.time() - start_time
+            logger.info(f"[IntentClassificationTool] destroy_source completed, elapsed={elapsed:.3f}s")
+        except Exception as e:
+            elapsed = time.time() - start_time
+            logger.error(f"[IntentClassificationTool] destroy_source failed, elapsed={elapsed:.3f}s, error={str(e)}")
+            raise
+
     def classify_intent(self, text: str) -> Dict[str, Any]:
         logger.debug(f"[IntentClassificationTool] classify_intent called, text_length={len(text)}")
         start_time = time.time()

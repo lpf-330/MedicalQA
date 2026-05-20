@@ -64,6 +64,26 @@ class Tool(ABC):
         """
         pass
 
+    @abstractmethod
+    def destroy_source(self) -> None:
+        """
+        彻底销毁所用资源
+
+        在Tool需要彻底销毁资源时调用，用于彻底断开连接、释放所有资源。
+        例如：断开数据库连接、卸载模型、清理所有客户端资源等。
+
+        该方法为公共方法，由外部调用者（如MCP代理层）调用。
+
+        注意：
+            - 该方法应该是幂等的，即多次调用不会产生副作用
+            - 即使资源未初始化，调用该方法也不应抛出异常
+            - 与release_source()的区别：release_source()是归还资源池，destroy_source()是彻底销毁
+
+        Raises:
+            ResourceException: 资源销毁失败时抛出
+        """
+        pass
+
     def __enter__(self) -> 'Tool':
         """
         上下文管理器入口方法

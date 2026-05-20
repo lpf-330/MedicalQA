@@ -22,6 +22,10 @@ DISCLAIMER = "以上信息仅供参考，不构成医疗建议。如有健康问
 MIN_WORDS = 2000
 MAX_WORDS = 4000
 
+# Prompt长度控制常量（避免超过模型上下文长度）
+MAX_PROMPT_CHARS = 16000  # 约4000 tokens，留出空间给system prompt和output
+MAX_KNOWLEDGE_CHARS = 12000  # 知识素材最大字符数
+
 # 最大重试次数
 MAX_RETRY_COUNT = 2
 
@@ -317,37 +321,63 @@ class ReportGenerationChain(Chain[ChainContext[ReportGenerationContextBody], Cha
     def _build_knowledge_context(self, report_materials: Dict) -> str:
         """
         构建知识素材上下文
-
+        
+        添加长度限制，避免超过模型上下文长度（8192 tokens）
+        
         Args:
             report_materials: 报告素材
-
+        
         Returns:
             知识素材文本
         """
         if not report_materials:
             return ""
-
+        
         context_parts = []
-
+        total_chars = 0
+        
         merged_results = report_materials.get("merged_results", [])
         if merged_results:
             context_parts.append("=== 知识检索结果 ===")
+            total_chars += len(context_parts[-1])
+            
             for item in merged_results:
+                if total_chars >= MAX_KNOWLEDGE_CHARS:
+                    logger.warning(f"[ReportGenerationChain] 知识素材长度达到上限，截断merged_results")
+                    break
+                
                 if isinstance(item, dict):
                     entity = item.get("entity", "")
                     data = item.get("data", {})
                     if entity and data:
-                        context_parts.append(f"实体：{entity}")
+                        entity_text = f"实体：{entity}"
+                        context_parts.append(entity_text)
+                        total_chars += len(entity_text)
+                        
                         if isinstance(data, dict):
                             for key, value in data.items():
                                 if value:
-                                    context_parts.append(f"  {key}：{value}")
+                                    if total_chars >= MAX_KNOWLEDGE_CHARS:
+                                        break
+                                    value_text = f"  {key}：{value}"
+                                    if len(value_text) > 500:
+                                        value_text = value_text[:500] + "..."
+                                    context_parts.append(value_text)
+                                    total_chars += len(value_text)
                         else:
-                            context_parts.append(f"  数据：{data}")
-
+                            data_text = f"  数据：{data}"
+                            context_parts.append(data_text)
+                            total_chars += len(data_text)
+        
+        if total_chars >= MAX_KNOWLEDGE_CHARS:
+            return "\n".join(context_parts)
+        
         dimension_results = report_materials.get("dimension_results", {})
         if dimension_results:
-            context_parts.append("\n=== 8维度评估结果 ===")
+            dim_header = "\n=== 8维度评估结果 ==="
+            context_parts.append(dim_header)
+            total_chars += len(dim_header)
+            
             dimension_names = {
                 "dimension_1": "疾病风险评估",
                 "dimension_2": "用药建议",
@@ -358,54 +388,119 @@ class ReportGenerationChain(Chain[ChainContext[ReportGenerationContextBody], Cha
                 "dimension_7": "预防措施",
                 "dimension_8": "易感人群"
             }
+            
             for dim_key, dim_result in dimension_results.items():
+                if total_chars >= MAX_KNOWLEDGE_CHARS:
+                    logger.warning(f"[ReportGenerationChain] 知识素材长度达到上限，截断dimension_results")
+                    break
+                
                 dim_name = dimension_names.get(dim_key, dim_key)
                 if isinstance(dim_result, dict):
                     score = dim_result.get("score", dim_result.get("confidence", "未知"))
                     level = dim_result.get("level", "未知")
                     analysis = dim_result.get("analysis", dim_result.get("evaluation_result", ""))
-                    context_parts.append(f"\n【{dim_name}】")
+                    
+                    dim_text = f"\n【{dim_name}】"
+                    context_parts.append(dim_text)
+                    total_chars += len(dim_text)
+                    
                     if isinstance(score, (int, float)):
-                        context_parts.append(f"  置信度：{score:.2f}")
+                        score_text = f"  置信度：{score:.2f}"
                     else:
-                        context_parts.append(f"  置信度：{score}")
+                        score_text = f"  置信度：{score}"
+                    context_parts.append(score_text)
+                    total_chars += len(score_text)
+                    
                     if analysis and isinstance(analysis, dict):
                         for key, value in analysis.items():
                             if value:
-                                context_parts.append(f"  {key}：{value}")
+                                if total_chars >= MAX_KNOWLEDGE_CHARS:
+                                    break
+                                value_text = f"  {key}：{value}"
+                                if len(value_text) > 300:
+                                    value_text = value_text[:300] + "..."
+                                context_parts.append(value_text)
+                                total_chars += len(value_text)
                     elif analysis:
-                        context_parts.append(f"  详情：{analysis}")
-
+                        analysis_text = f"  详情：{analysis}"
+                        if len(analysis_text) > 300:
+                            analysis_text = analysis_text[:300] + "..."
+                        context_parts.append(analysis_text)
+                        total_chars += len(analysis_text)
+        
+        if total_chars >= MAX_KNOWLEDGE_CHARS:
+            return "\n".join(context_parts)
+        
         anomalies = report_materials.get("anomalies", [])
         if anomalies:
-            context_parts.append("\n=== 异常指标 ===")
+            anomaly_header = "\n=== 异常指标 ==="
+            context_parts.append(anomaly_header)
+            total_chars += len(anomaly_header)
+            
             for anomaly in anomalies:
+                if total_chars >= MAX_KNOWLEDGE_CHARS:
+                    logger.warning(f"[ReportGenerationChain] 知识素材长度达到上限，截断anomalies")
+                    break
+                
                 if isinstance(anomaly, dict):
                     indicator = anomaly.get("indicator", anomaly.get("name", "未知指标"))
                     value = anomaly.get("value", "")
                     reference = anomaly.get("reference", "")
                     severity = anomaly.get("severity", "")
-                    context_parts.append(f"- {indicator}：{value}")
+                    
+                    indicator_text = f"- {indicator}：{value}"
+                    context_parts.append(indicator_text)
+                    total_chars += len(indicator_text)
+                    
                     if reference:
-                        context_parts.append(f"  参考范围：{reference}")
+                        ref_text = f"  参考范围：{reference}"
+                        context_parts.append(ref_text)
+                        total_chars += len(ref_text)
+                    
                     if severity:
-                        context_parts.append(f"  严重程度：{severity}")
-
+                        sev_text = f"  严重程度：{severity}"
+                        context_parts.append(sev_text)
+                        total_chars += len(sev_text)
+        
+        if total_chars >= MAX_KNOWLEDGE_CHARS:
+            return "\n".join(context_parts)
+        
         risk_factors = report_materials.get("risk_factors", [])
         if risk_factors:
-            context_parts.append("\n=== 风险因素 ===")
+            risk_header = "\n=== 风险因素 ==="
+            context_parts.append(risk_header)
+            total_chars += len(risk_header)
+            
             for factor in risk_factors:
+                if total_chars >= MAX_KNOWLEDGE_CHARS:
+                    logger.warning(f"[ReportGenerationChain] 知识素材长度达到上限，截断risk_factors")
+                    break
+                
                 if isinstance(factor, dict):
                     name = factor.get("factor_name", factor.get("name", factor.get("factor", "未知因素")))
                     risk_level = factor.get("risk_level", "")
                     basis = factor.get("basis", "")
-                    context_parts.append(f"- {name}")
+                    
+                    name_text = f"- {name}"
+                    context_parts.append(name_text)
+                    total_chars += len(name_text)
+                    
                     if risk_level:
-                        context_parts.append(f"  风险等级：{risk_level}")
+                        level_text = f"  风险等级：{risk_level}"
+                        context_parts.append(level_text)
+                        total_chars += len(level_text)
+                    
                     if basis:
-                        context_parts.append(f"  依据：{basis}")
-
-        return "\n".join(context_parts)
+                        basis_text = f"  依据：{basis}"
+                        if len(basis_text) > 200:
+                            basis_text = basis_text[:200] + "..."
+                        context_parts.append(basis_text)
+                        total_chars += len(basis_text)
+        
+        result = "\n".join(context_parts)
+        logger.info(f"[ReportGenerationChain] 知识素材构建完成: chars={len(result)}, truncated={len(result) >= MAX_KNOWLEDGE_CHARS}")
+        
+        return result
 
     def _build_user_message(self, context_body: ReportGenerationContextBody) -> str:
         """

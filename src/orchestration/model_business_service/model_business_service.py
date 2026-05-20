@@ -53,6 +53,30 @@ class ModelBusinessService(ABC, Generic[I, O]):
     """
 
     @abstractmethod
+    def _init_Model(self) -> None:
+        """
+        初始化模型
+
+        在ModelBusinessService实例创建后调用，用于初始化模型相关配置。
+        该方法为私有方法，由子类实现具体的初始化逻辑。
+
+        重要说明：
+            根据资源获取时机规范，不应在此方法中获取资源并长期持有。
+            资源应在call_model方法中临时获取，使用后立即释放。
+
+        子类实现示例：
+            >>> def _init_Model(self) -> None:
+            ...     # 初始化模型配置
+            ...     self._validate_config()
+            ...     # 不在此获取资源，资源在call_model中临时获取
+
+        Raises:
+            ParamException: 配置参数错误时抛出
+            ResourceException: 资源初始化失败时抛出
+        """
+        pass
+
+    @abstractmethod
     def call_model(self, messages: I) -> O:
         """
         使用模型服务

@@ -562,56 +562,142 @@ class DimensionEvaluationChain(Chain[ChainContext[DimensionEvaluationContextBody
     def _graph_query(self, medical_entities: List[Dict], query: str) -> List[Dict]:
         """
         图谱查询
-
+        
+        支持两种数据格式：
+        1. 带neo4j_node_id的格式（来自IntentClassificationHandler）
+        2. 不带neo4j_node_id的格式（来自规则引擎降级）
+        
         Args:
             medical_entities: 医疗实体列表
             query: 查询文本
-
+        
         Returns:
             图谱查询结果列表
         """
         if self._resource.neo4j_handler is None:
             logger.warning("[DimensionEvaluationChain] neo4j_handler未初始化")
             return []
-
+        
         knowledge_results: List[Dict] = []
         seen_node_ids = set()
-
+        seen_entity_names = set()
+        
         for entity in medical_entities:
-            # 获取neo4j_node_id和entity_type
             entity_data = entity.get("entity", {})
-            neo4j_node_id_str = entity_data.get("neo4j_node_id")
+            
+            if not entity_data:
+                entity_data = entity
+            
+            entity_name = entity_data.get("name") or entity_data.get("entity_name")
             entity_type = entity_data.get("entity_type", "Disease")
-
-            if not neo4j_node_id_str:
+            
+            if not entity_name:
                 continue
-
-            # 转换node_id为整数
-            try:
-                neo4j_node_id = int(neo4j_node_id_str)
-            except (ValueError, TypeError):
-                continue
-
-            # 避免重复查询
-            if neo4j_node_id in seen_node_ids:
-                continue
-            seen_node_ids.add(neo4j_node_id)
-
-            try:
-                # 根据entity_type查询不同类型的知识
-                if entity_type == "Disease":
-                    knowledge_item = self._query_disease_knowledge(neo4j_node_id, entity)
+            
+            neo4j_node_id_str = entity_data.get("neo4j_node_id")
+            if neo4j_node_id_str:
+                try:
+                    neo4j_node_id = int(neo4j_node_id_str)
+                    if neo4j_node_id in seen_node_ids:
+                        continue
+                    seen_node_ids.add(neo4j_node_id)
+                    
+                    knowledge_item = self._query_knowledge_by_node_id(neo4j_node_id, entity_type, entity)
                     if knowledge_item:
                         knowledge_results.append(knowledge_item)
-                elif entity_type == "Symptom":
-                    knowledge_item = self._query_symptom_knowledge(neo4j_node_id, entity)
-                    if knowledge_item:
-                        knowledge_results.append(knowledge_item)
-            except Exception as e:
-                logger.error(f"[DimensionEvaluationChain] 查询node_id={neo4j_node_id}失败: {str(e)}")
+                    continue
+                except (ValueError, TypeError):
+                    pass
+            
+            if entity_name in seen_entity_names:
                 continue
-
+            seen_entity_names.add(entity_name)
+            
+            knowledge_item = self._query_knowledge_by_name(entity_name, entity_type, entity)
+            if knowledge_item:
+                knowledge_results.append(knowledge_item)
+        
         return knowledge_results
+    
+    def _query_knowledge_by_node_id(self, node_id: int, entity_type: str, entity: Dict) -> Optional[Dict]:
+        """
+        通过node_id查询知识
+        
+        Args:
+            node_id: Neo4j节点ID
+            entity_type: 实体类型
+            entity: 实体数据
+        
+        Returns:
+            知识字典
+        """
+        if entity_type == "Disease":
+            return self._query_disease_knowledge(node_id, entity)
+        elif entity_type == "Symptom":
+            return self._query_symptom_knowledge(node_id, entity)
+        return None
+    
+    def _query_knowledge_by_name(self, entity_name: str, entity_type: str, entity: Dict) -> Optional[Dict]:
+        """
+        通过实体名称查询知识（降级方案）
+        
+        Args:
+            entity_name: 实体名称
+            entity_type: 实体类型
+            entity: 实体数据
+        
+        Returns:
+            知识字典
+        """
+        if self._resource.neo4j_handler is None:
+            return None
+        
+        try:
+            if entity_type == "Disease":
+                disease_info = self._resource.neo4j_handler.get_disease_info(entity_name)
+                if not disease_info:
+                    return None
+                
+                logger.info(f"[DimensionEvaluationChain] 通过名称查询疾病知识: disease={entity_name}")
+                
+                symptoms = self._resource.neo4j_handler.get_symptoms_by_disease(entity_name)
+                drugs = self._resource.neo4j_handler.get_drugs_by_disease(entity_name)
+                foods = self._resource.neo4j_handler.get_foods_by_disease(entity_name)
+                
+                return {
+                    "source": "neo4j",
+                    "type": "disease",
+                    "entity": entity_name,
+                    "data": {
+                        "name": entity_name,
+                        "desc": disease_info.get("desc", ""),
+                        "cause": disease_info.get("cause", ""),
+                        "prevent": disease_info.get("prevent", ""),
+                        "symptoms": symptoms,
+                        "drugs": drugs,
+                        "foods": foods
+                    },
+                    "score": entity.get("confidence", 0.0)
+                }
+            elif entity_type == "Symptom":
+                diseases = self._resource.neo4j_handler.search_diseases_by_symptom(entity_name)
+                
+                logger.info(f"[DimensionEvaluationChain] 通过名称查询症状知识: symptom={entity_name}")
+                
+                return {
+                    "source": "neo4j",
+                    "type": "symptom",
+                    "entity": entity_name,
+                    "data": {
+                        "name": entity_name,
+                        "related_diseases": diseases
+                    },
+                    "score": entity.get("confidence", 0.0)
+                }
+        except Exception as e:
+            logger.error(f"[DimensionEvaluationChain] 通过名称查询知识失败: entity_name={entity_name}, error={str(e)}")
+        
+        return None
 
     def _query_disease_knowledge(self, node_id: int, entity: Dict) -> Optional[Dict]:
         """

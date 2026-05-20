@@ -7,6 +7,7 @@ Neo4j适配器实现类
 
 import logging
 import time
+import threading
 from typing import Any, Dict, List, Optional
 
 from neo4j import GraphDatabase, Driver, Session
@@ -22,12 +23,14 @@ class Neo4jAdapterImpl(Neo4jAdapter):
     
     封装neo4j-python-driver，为项目提供统一的Neo4j数据库操作接口。
     
+    使用线程安全的session管理：每次查询创建新的session，查询完成后关闭。
+    
     属性：
         _uri: 数据库连接URI
         _user: 用户名
         _password: 密码
-        _driver: Neo4j驱动实例
-        _session: 当前会话实例
+        _driver: Neo4j驱动实例（线程安全）
+        _lock: 线程锁
     """
     
     def __init__(self, uri: str, user: str, password: str):
@@ -43,46 +46,44 @@ class Neo4jAdapterImpl(Neo4jAdapter):
         self._user = user
         self._password = password
         self._driver: Optional[Driver] = None
-        self._session: Optional[Session] = None
+        self._lock = threading.Lock()
         logger.debug(f"[Neo4jAdapter] 初始化Neo4j适配器: uri={uri}, user={user}")
     
     def connect(self) -> None:
         """连接Neo4j数据库"""
-        if self._driver is not None:
-            logger.debug("[Neo4jAdapter] 已连接，跳过")
-            return
-        
-        logger.info(f"[Neo4jAdapter] 开始连接数据库: uri={self._uri}")
-        start_time = time.time()
-        
-        self._driver = GraphDatabase.driver(
-            self._uri,
-            auth=(self._user, self._password)
-        )
-        self._session = self._driver.session()
-        
-        elapsed = time.time() - start_time
-        logger.info(f"[Neo4jAdapter] 数据库连接成功: elapsed={elapsed:.2f}s")
+        with self._lock:
+            if self._driver is not None:
+                logger.debug("[Neo4jAdapter] 已连接，跳过")
+                return
+            
+            logger.info(f"[Neo4jAdapter] 开始连接数据库: uri={self._uri}")
+            start_time = time.time()
+            
+            self._driver = GraphDatabase.driver(
+                self._uri,
+                auth=(self._user, self._password)
+            )
+            
+            elapsed = time.time() - start_time
+            logger.info(f"[Neo4jAdapter] 数据库连接成功: elapsed={elapsed:.2f}s")
     
     def disconnect(self) -> None:
         """断开与Neo4j数据库的连接"""
-        logger.info("[Neo4jAdapter] 开始断开数据库连接")
-        
-        if self._session is not None:
-            self._session.close()
-            self._session = None
-            logger.debug("[Neo4jAdapter] Session已关闭")
-        
-        if self._driver is not None:
-            self._driver.close()
-            self._driver = None
-            logger.debug("[Neo4jAdapter] Driver已关闭")
-        
-        logger.info("[Neo4jAdapter] 数据库连接已断开")
+        with self._lock:
+            logger.info("[Neo4jAdapter] 开始断开数据库连接")
+            
+            if self._driver is not None:
+                self._driver.close()
+                self._driver = None
+                logger.debug("[Neo4jAdapter] Driver已关闭")
+            
+            logger.info("[Neo4jAdapter] 数据库连接已断开")
     
     def execute_query(self, query: str) -> List[Dict[str, Any]]:
         """
-        执行Cypher查询
+        执行Cypher查询（线程安全）
+        
+        每次查询创建新的session，查询完成后关闭，确保线程安全。
         
         Args:
             query: Cypher查询语句
@@ -90,19 +91,25 @@ class Neo4jAdapterImpl(Neo4jAdapter):
         Returns:
             查询结果列表
         """
-        if self._session is None:
+        if self._driver is None:
             logger.error("[Neo4jAdapter] 执行查询失败，未连接数据库")
             raise RuntimeError("Not connected to Neo4j database")
         
         logger.debug(f"[Neo4jAdapter] 执行查询: query={query[:100]}...")
         start_time = time.time()
         
-        result = self._session.run(query)
-        records = [record.data() for record in result]
-        
-        elapsed = time.time() - start_time
-        logger.info(f"[Neo4jAdapter] 查询完成: result_count={len(records)}, elapsed={elapsed:.3f}s")
-        return records
+        session = None
+        try:
+            session = self._driver.session()
+            result = session.run(query)
+            records = [record.data() for record in result]
+            
+            elapsed = time.time() - start_time
+            logger.info(f"[Neo4jAdapter] 查询完成: result_count={len(records)}, elapsed={elapsed:.3f}s")
+            return records
+        finally:
+            if session is not None:
+                session.close()
     
     def execute_query_with_params(
         self, 
@@ -110,7 +117,9 @@ class Neo4jAdapterImpl(Neo4jAdapter):
         params: Dict[str, Any]
     ) -> List[Dict[str, Any]]:
         """
-        执行带参数的Cypher查询
+        执行带参数的Cypher查询（线程安全）
+        
+        每次查询创建新的session，查询完成后关闭，确保线程安全。
         
         Args:
             query: Cypher查询语句
@@ -119,23 +128,29 @@ class Neo4jAdapterImpl(Neo4jAdapter):
         Returns:
             查询结果列表
         """
-        if self._session is None:
+        if self._driver is None:
             logger.error("[Neo4jAdapter] 执行参数查询失败，未连接数据库")
             raise RuntimeError("Not connected to Neo4j database")
         
         logger.debug(f"[Neo4jAdapter] 执行参数查询: query={query[:100]}..., params={params}")
         start_time = time.time()
         
-        result = self._session.run(query, params)
-        records = [record.data() for record in result]
-        
-        elapsed = time.time() - start_time
-        logger.info(f"[Neo4jAdapter] 参数查询完成: result_count={len(records)}, elapsed={elapsed:.3f}s")
-        return records
+        session = None
+        try:
+            session = self._driver.session()
+            result = session.run(query, params)
+            records = [record.data() for record in result]
+            
+            elapsed = time.time() - start_time
+            logger.info(f"[Neo4jAdapter] 参数查询完成: result_count={len(records)}, elapsed={elapsed:.3f}s")
+            return records
+        finally:
+            if session is not None:
+                session.close()
     
     def is_connected(self) -> bool:
         """检查是否已连接"""
-        return self._driver is not None and self._session is not None
+        return self._driver is not None
     
     def __enter__(self) -> 'Neo4jAdapterImpl':
         """上下文管理器入口"""

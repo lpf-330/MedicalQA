@@ -14,7 +14,7 @@ from .resource_client import ResourceClient
 from .resource_factory import ResourceFactory
 from .resource_registry import ResourceRegistry
 from .resource_pool import ResourcePool
-from .pool_manager import PoolManager
+from .pool_manager import ResourcePoolManager
 from .resource_handle import ResourceHandle
 from .global_resource_manager import GlobalResourceManager
 
@@ -25,7 +25,7 @@ __all__ = [
     'ResourceFactory',
     'ResourceRegistry',
     'ResourcePool',
-    'PoolManager',
+    'ResourcePoolManager',
     'ResourceHandle',
     'GlobalResourceManager'
 ]

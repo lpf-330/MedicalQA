@@ -3,3 +3,5 @@ __pycache__
 base_models
 .vscode
 .trae
+test/
+

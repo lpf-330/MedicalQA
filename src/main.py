@@ -64,10 +64,6 @@ logger = get_logger(
 from src.config.config_manager import get_config_manager, ConfigManager
 from src.config import load_global_config
 from src.resource_manager import GlobalResourceManager
-from src.resource_manager.neo4j_connection import Neo4jConnectionFactory
-from src.resource_manager.vllm_model import VLLMModelFactory
-from src.resource_manager.milvus_connection import MilvusConnectionFactory
-from src.resource_manager.vector_model import VectorModelFactory
 from src.controller.consult_controller import ConsultController
 from src.service.consult_service import ConsultService
 from src.schemas.consult_request import ConsultRequest, ConsultRequestBody
@@ -82,8 +78,10 @@ from src.orchestration.agent.agent import Agent
 from src.orchestration.state_machine.state_machine import StateMachine
 from src.mcp.proxy.Impl.neo4j_medical_proxy import Neo4jMedicalProxy
 from src.mcp.proxy.Impl.milvus_medical_proxy import MilvusMedicalProxy
+from src.mcp.proxy.Impl.intent_classification_proxy import IntentClassificationProxy
 from src.mcp.factory.mcp_proxy_factory import MCPProxyFactory
 from src.mcp.factory.config import ProxyType, ToolProxyConfig
+from src.orchestration.tool_call_handler.Impl.intent_classification_handler import IntentClassificationHandler
 
 from src.controller.report_controller import ReportController
 from src.service.report_service import ReportService
@@ -99,65 +97,6 @@ from src.orchestration.model_business_service.Impl.report_model_service import R
 from fastapi import FastAPI
 from contextlib import asynccontextmanager
 import uvicorn
-
-
-def _load_configs() -> ConfigManager:
-    """
-    加载所有配置
-    
-    按以下顺序加载：
-    1. 扫描业务配置目录
-    2. 解析业务配置，收集所需的资源配置文件名
-    3. 资源配置去重
-    4. 加载所需的资源配置
-    
-    Returns:
-        ConfigManager: 配置管理器实例
-    """
-    logger.info("步骤1: 加载配置...")
-    config_manager = get_config_manager()
-    
-    logger.info(f"  业务配置: {list(config_manager.business_configs.keys())}")
-    logger.info(f"  资源配置: {list(config_manager.resource_configs.keys())}")
-    logger.info(f"  资源池配置: {list(config_manager.pool_configs.keys())}")
-    
-    if not config_manager.validate():
-        raise RuntimeError("配置验证失败")
-    
-    logger.info("配置加载完成")
-    return config_manager
-
-
-def _register_resource_factories():
-    GlobalResourceManager.INSTANCE.register_factory(
-        "neo4j_connection", 
-        Neo4jConnectionFactory()
-    )
-    GlobalResourceManager.INSTANCE.register_factory(
-        "vllm_model", 
-        VLLMModelFactory()
-    )
-    GlobalResourceManager.INSTANCE.register_factory(
-        "milvus_connection",
-        MilvusConnectionFactory()
-    )
-    GlobalResourceManager.INSTANCE.register_factory(
-        "vector_model",
-        VectorModelFactory()
-    )
-    logger.info("资源工厂注册完成")
-
-
-def _create_initial_resources(config_manager: ConfigManager):
-    """
-    创建初始资源实例
-    
-    根据业务配置确定需要哪些资源配置，然后创建对应的资源池
-    """
-    global_config = config_manager.to_global_config()
-    GlobalResourceManager.INSTANCE._init_global_resource_manager(global_config)
-    stats = GlobalResourceManager.INSTANCE.get_stats()
-    logger.info(f"初始资源创建完成: {stats}")
 
 
 def _init_business_components(config_manager: ConfigManager):
@@ -222,10 +161,31 @@ def _init_business_components(config_manager: ConfigManager):
     report_model_service = ReportModelService()
     logger.info("报告模型服务创建完成")
 
+    intent_handler = None
+    intent_model_resource_config = config_manager.get_resource_config("intent_model_config")
+    if intent_model_resource_config is not None:
+        try:
+            intent_classification_proxy = IntentClassificationProxy({
+                "model_path": intent_model_resource_config.model_path,
+                "device": intent_model_resource_config.device,
+                "max_length": intent_model_resource_config.max_length
+            })
+            intent_classification_proxy._init_tool()
+            logger.info("意图分类代理创建完成")
+
+            intent_handler = IntentClassificationHandler()
+            intent_handler._init_tool(intent_classification_proxy)
+            logger.info("意图分类Handler创建完成")
+        except Exception as e:
+            logger.warning(f"意图分类Handler创建失败，将使用规则引擎降级: {str(e)}")
+            intent_handler = None
+    else:
+        logger.info("未配置intent_model_config，MultiAnalysisChain将使用规则引擎降级")
+
     data_prepare_resource = DataPrepareResource()
     data_prepare_chain = DataPrepareChain(resource=data_prepare_resource)
 
-    multi_analysis_resource = MultiAnalysisResource()
+    multi_analysis_resource = MultiAnalysisResource(intent_handler=intent_handler)
     multi_analysis_chain = MultiAnalysisChain(resource=multi_analysis_resource)
 
     dimension_evaluation_resource = DimensionEvaluationResource(
@@ -282,13 +242,7 @@ async def lifespan(app: FastAPI):
     logger.info("=" * 60)
     
     try:
-        config_manager = _load_configs()
-        
-        logger.info("步骤2: 注册资源工厂...")
-        _register_resource_factories()
-        
-        logger.info("步骤3: 创建初始资源实例...")
-        _create_initial_resources(config_manager)
+        config_manager = GlobalResourceManager.initialize()
         
         logger.info("步骤4: 初始化业务组件...")
         consult_controller, neo4j_handler, vector_handler, consult_model_service, report_controller, report_model_service = _init_business_components(config_manager)

@@ -58,6 +58,20 @@ class ReportModelService(ModelBusinessService[List[Dict[str, str]], str]):
     ):
         self._model_path = model_path
         self._system_prompt = system_prompt if system_prompt is not None else self.DEFAULT_SYSTEM_PROMPT
+        self._init_Model()
+
+    def _init_Model(self) -> None:
+        """
+        初始化模型
+
+        初始化模型相关配置，不获取资源。
+        资源在call_model方法中临时获取，使用后立即释放。
+        """
+        logger.debug(f"[ReportModelService] _init_Model called, model_path={self._model_path}")
+        # 初始化配置验证
+        if not self._system_prompt:
+            logger.warning("[ReportModelService] system_prompt is empty, using default")
+            self._system_prompt = self.DEFAULT_SYSTEM_PROMPT
 
     def call_model(self, messages: List[Dict[str, str]]) -> str:
         """

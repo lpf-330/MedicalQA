@@ -13,7 +13,7 @@ from .resource_handle import ResourceHandle
 from src.config.pool_config import PoolConfig
 
 
-class PoolManager:
+class ResourcePoolManager:
     """
     资源池管理器
     

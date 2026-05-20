@@ -100,6 +100,30 @@ class VectorEnhancedRetrievalTool(Tool):
             logger.error(f"[VectorEnhancedRetrievalTool] release_source failed, elapsed={elapsed:.3f}s, error={str(e)}")
             raise
 
+    def destroy_source(self) -> None:
+        """彻底销毁Milvus连接和向量模型资源 - 断开连接"""
+        logger.info("[VectorEnhancedRetrievalTool] destroy_source started")
+        start_time = time.time()
+        try:
+            if self._milvus_handle is not None:
+                GlobalResourceManager.destroy(self._milvus_handle)
+                self._milvus_handle = None
+                self._milvus_resource = None
+                logger.info("[VectorEnhancedRetrievalTool] milvus_connection resource destroyed")
+
+            if self._vector_handle is not None:
+                GlobalResourceManager.destroy(self._vector_handle)
+                self._vector_handle = None
+                self._vector_resource = None
+                logger.info("[VectorEnhancedRetrievalTool] vector_model resource destroyed")
+
+            elapsed = time.time() - start_time
+            logger.info(f"[VectorEnhancedRetrievalTool] destroy_source completed, elapsed={elapsed:.3f}s")
+        except Exception as e:
+            elapsed = time.time() - start_time
+            logger.error(f"[VectorEnhancedRetrievalTool] destroy_source failed, elapsed={elapsed:.3f}s, error={str(e)}")
+            raise
+
     def hybrid_search(
         self,
         query: str,
