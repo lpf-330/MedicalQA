@@ -7,76 +7,48 @@
 
 import logging
 import time
-from dataclasses import dataclass, field
-from typing import Any, Dict, List, Optional, Tuple
-
+from typing import Any, Dict, List, Optional
 from src.orchestration.chain.chain import Chain
 from src.orchestration.chain.data_classes import ChainContext, ChainResult
+from src.orchestration.chain.report_knowledge_retrieval_chain.report_knowledge_retrieval_context import ReportKnowledgeRetrievalContextBody
+from src.orchestration.chain.report_knowledge_retrieval_chain.report_knowledge_retrieval_result import ReportKnowledgeRetrievalResultData
+from src.orchestration.chain.report_knowledge_retrieval_chain.report_knowledge_retrieval_resource import ReportKnowledgeRetrievalResource
 from src.orchestration.tool_call_handler.Impl.vector_retrieval_handler import VectorRetrievalHandler
 from src.orchestration.tool_call_handler.Impl.neo4j_medical_handler import Neo4jMedicalHandler
+from src.config.business.report_service_config import get_runtime_config
 
 logger = logging.getLogger(__name__)
 
+# 从业务配置读取参数，替代硬编码
+class _LazyReportConfig:
+    """延迟加载配置代理，每次属性访问时从ConfigManager获取真实配置"""
+    def __getattr__(self, name):
+        return getattr(get_runtime_config(), name)
 
-@dataclass
-class ReportKnowledgeRetrievalContextBody:
+_report_config = _LazyReportConfig()
+RELEVANCE_THRESHOLD = _report_config.knowledge_fusion_threshold
+VECTOR_ENTITY_WEIGHT = _report_config.vector_entity_weight
+VECTOR_ATTRIBUTE_WEIGHT = _report_config.vector_attribute_weight
+VECTOR_RELATION_WEIGHT = _report_config.vector_relation_weight
+KNOWLEDGE_RETRIEVAL_TOP_K = _report_config.knowledge_retrieval_top_k
+KNOWLEDGE_MERGE_LIMIT = _report_config.knowledge_merge_limit
+
+
+def _refresh_report_config() -> None:
+    """刷新模块级常量，确保使用ConfigManager合并后的运行期配置值。
+
+    模块加载时 _report_config.xxx 取到的是默认值（ConfigManager尚未初始化），
+    在 execute() 入口调用此函数，利用 _LazyConfig 代理的延迟求值特性，
+    重新从已初始化的 ConfigManager 读取实际配置。
     """
-    报告知识检索Chain策略专属输入数据类
-
-    Attributes:
-        anomalies: 异常指标列表
-        medical_entities: 医疗实体列表
-        risk_diseases: 风险疾病列表
-    """
-    anomalies: List[Dict] = field(default_factory=list)
-    medical_entities: List[Dict] = field(default_factory=list)
-    risk_diseases: List[Dict] = field(default_factory=list)
-
-    def to_dict(self) -> Dict[str, Any]:
-        """转换为字典"""
-        return {
-            "anomalies": self.anomalies,
-            "medical_entities": self.medical_entities,
-            "risk_diseases": self.risk_diseases
-        }
-
-
-@dataclass
-class ReportKnowledgeRetrievalResultData:
-    """
-    报告知识检索Chain策略专属输出数据类
-
-    Attributes:
-        vector_results: 向量检索原始结果
-        knowledge_results: 图谱查询增强结果
-        merged_results: 合并去重后的最终知识素材
-    """
-    vector_results: List[Dict] = field(default_factory=list)
-    knowledge_results: List[Dict] = field(default_factory=list)
-    merged_results: List[Dict] = field(default_factory=list)
-
-    def to_dict(self) -> Dict[str, Any]:
-        """转换为字典"""
-        return {
-            "vector_results": self.vector_results,
-            "knowledge_results": self.knowledge_results,
-            "merged_results": self.merged_results
-        }
-
-
-@dataclass
-class ReportKnowledgeRetrievalResource:
-    """
-    报告知识检索Chain策略专属资源类
-
-    Attributes:
-        vector_handler: 向量检索Handler（复用健康咨询的Handler）
-        neo4j_handler: Neo4j医疗Handler（复用健康咨询的Handler）
-        vector_encode_service: 向量编码服务（复用健康咨询的Service）
-    """
-    vector_handler: Optional[VectorRetrievalHandler] = None
-    neo4j_handler: Optional[Neo4jMedicalHandler] = None
-    vector_encode_service: Optional[Any] = None
+    global RELEVANCE_THRESHOLD, VECTOR_ENTITY_WEIGHT, VECTOR_ATTRIBUTE_WEIGHT
+    global VECTOR_RELATION_WEIGHT, KNOWLEDGE_RETRIEVAL_TOP_K, KNOWLEDGE_MERGE_LIMIT
+    RELEVANCE_THRESHOLD = _report_config.knowledge_fusion_threshold
+    VECTOR_ENTITY_WEIGHT = _report_config.vector_entity_weight
+    VECTOR_ATTRIBUTE_WEIGHT = _report_config.vector_attribute_weight
+    VECTOR_RELATION_WEIGHT = _report_config.vector_relation_weight
+    KNOWLEDGE_RETRIEVAL_TOP_K = _report_config.knowledge_retrieval_top_k
+    KNOWLEDGE_MERGE_LIMIT = _report_config.knowledge_merge_limit
 
 
 class ReportKnowledgeRetrievalChain(Chain[ChainContext[ReportKnowledgeRetrievalContextBody], ChainResult[ReportKnowledgeRetrievalResultData]]):
@@ -88,8 +60,6 @@ class ReportKnowledgeRetrievalChain(Chain[ChainContext[ReportKnowledgeRetrievalC
     2. 图谱查询结构化推理增强
     3. 知识整合去重排序
     """
-
-    RELEVANCE_THRESHOLD = 0.5
 
     def __init__(self, resource: ReportKnowledgeRetrievalResource):
         """
@@ -112,6 +82,7 @@ class ReportKnowledgeRetrievalChain(Chain[ChainContext[ReportKnowledgeRetrievalC
         Returns:
             ChainResult: Chain输出数据容器
         """
+        _refresh_report_config()
         start_time = time.time()
         logger.info(f"[ReportKnowledgeRetrievalChain] 开始执行Chain: session_id={chain_context.session_id}")
 
@@ -236,12 +207,12 @@ class ReportKnowledgeRetrievalChain(Chain[ChainContext[ReportKnowledgeRetrievalC
             return []
 
         # 调用Milvus三集合检索（medical_entity、entity_attributes、entity_relations）
-        # 实现加权融合逻辑（entity: 0.40, attributes: 0.30, relations: 0.30）
+        # 实现加权融合逻辑
         search_result = self._resource.vector_handler.call_tool({
             "query": query_text,
-            "top_k": 30,
+            "top_k": KNOWLEDGE_RETRIEVAL_TOP_K,
             "collections": ["medical_entity", "entity_attributes", "entity_relations"],
-            "weights": {"medical_entity": 0.40, "entity_attributes": 0.30, "entity_relations": 0.30}
+            "weights": {"medical_entity": VECTOR_ENTITY_WEIGHT, "entity_attributes": VECTOR_ATTRIBUTE_WEIGHT, "entity_relations": VECTOR_RELATION_WEIGHT}
         })
 
         vector_results = []
@@ -265,7 +236,7 @@ class ReportKnowledgeRetrievalChain(Chain[ChainContext[ReportKnowledgeRetrievalC
 
         logger.info(f"[ReportKnowledgeRetrievalChain] 向量检索: total={len(vector_results)}, "
                    f"collections=['medical_entity', 'entity_attributes', 'entity_relations'], "
-                   f"weights={{'medical_entity': 0.40, 'entity_attributes': 0.30, 'entity_relations': 0.30}}")
+                   f"weights={{'medical_entity': {VECTOR_ENTITY_WEIGHT}, 'entity_attributes': {VECTOR_ATTRIBUTE_WEIGHT}, 'entity_relations': {VECTOR_RELATION_WEIGHT}}}")
 
         return vector_results
 
@@ -298,12 +269,8 @@ class ReportKnowledgeRetrievalChain(Chain[ChainContext[ReportKnowledgeRetrievalC
             if not neo4j_node_id_str:
                 continue
 
-            # 将neo4j_node_id转换为整数类型
-            try:
-                neo4j_node_id = int(neo4j_node_id_str)
-            except (ValueError, TypeError) as e:
-                logger.warning(f"[ReportKnowledgeRetrievalChain] neo4j_node_id转换失败: neo4j_node_id={neo4j_node_id_str}, error={str(e)}")
-                continue
+            # neo4j_node_id为elementId字符串，直接传递给Neo4j查询
+            neo4j_node_id = neo4j_node_id_str
 
             # 避免重复查询
             if neo4j_node_id in seen_node_ids:
@@ -593,11 +560,11 @@ class ReportKnowledgeRetrievalChain(Chain[ChainContext[ReportKnowledgeRetrievalC
         merged.sort(key=lambda x: x.get("score", 0.0), reverse=True)
 
         # 过滤低于阈值的结果（neo4j数据不过滤）
-        merged = [item for item in merged if item.get("score", 0.0) >= self.RELEVANCE_THRESHOLD or item.get("source") in ["neo4j", "vector_degraded"]]
+        merged = [item for item in merged if item.get("score", 0.0) >= RELEVANCE_THRESHOLD or item.get("source") in ["neo4j", "vector_degraded"]]
 
-        # 限制为Top-30结果
-        merged = merged[:30]
+        # 限制为Top结果
+        merged = merged[:KNOWLEDGE_MERGE_LIMIT]
 
-        logger.info(f"[ReportKnowledgeRetrievalChain] 知识整合: total_results={len(merged)}, top_k_limit=30")
+        logger.info(f"[ReportKnowledgeRetrievalChain] 知识整合: total_results={len(merged)}, top_k_limit={KNOWLEDGE_MERGE_LIMIT}")
 
         return merged

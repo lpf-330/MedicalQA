@@ -26,6 +26,12 @@ class GlobalConfig:
         """初始化全局配置"""
         self._resource_configs: Dict[str, Any] = {}
         self._pool_configs: Dict[str, PoolConfig] = {}
+
+        # 服务端配置
+        self._server_port: int = 8001
+        self._vram_sufficient_gb: float = 8.0
+        self._warmup_timeout: float = 30.0
+        self._timeout_keep_alive: int = 60
     
     @property
     def resource_configs(self) -> Dict[str, Any]:
@@ -36,6 +42,22 @@ class GlobalConfig:
     def pool_configs(self) -> Dict[str, PoolConfig]:
         """获取资源池配置字典"""
         return self._pool_configs
+
+    @property
+    def server_port(self) -> int:
+        return self._server_port
+
+    @property
+    def vram_sufficient_gb(self) -> float:
+        return self._vram_sufficient_gb
+
+    @property
+    def warmup_timeout(self) -> float:
+        return self._warmup_timeout
+
+    @property
+    def timeout_keep_alive(self) -> int:
+        return self._timeout_keep_alive
     
     def add_resource_config(self, config_id: str, config: Any) -> None:
         """
@@ -101,6 +123,10 @@ class GlobalConfig:
     def to_dict(self) -> Dict[str, Any]:
         """转换为字典"""
         return {
+            "server_port": self._server_port,
+            "vram_sufficient_gb": self._vram_sufficient_gb,
+            "warmup_timeout": self._warmup_timeout,
+            "timeout_keep_alive": self._timeout_keep_alive,
             "resource_configs": {
                 k: v.to_dict() if hasattr(v, 'to_dict') else str(v)
                 for k, v in self._resource_configs.items()

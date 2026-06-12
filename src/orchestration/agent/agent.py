@@ -5,16 +5,20 @@
 该模块定义了Agent类，是agent的组合容器类。
 """
 
+import logging
 from typing import Generic, TypeVar, TYPE_CHECKING
+
+from src.utils.logger import log_arch_event
 
 if TYPE_CHECKING:
     from src.orchestration.agent.data_classes import AgentContext, AgentResult
     from src.orchestration.agent.agent_resource import AgentResource
     from src.orchestration.agent.agent_strategy import AgentStrategy
 
-# 定义泛型类型变量
-I = TypeVar('I')  # 输入数据类型
-O = TypeVar('O')  # 输出数据类型
+I = TypeVar('I')
+O = TypeVar('O')
+
+logger = logging.getLogger(__name__)
 
 
 class Agent(Generic[I, O]):
@@ -73,6 +77,7 @@ class Agent(Generic[I, O]):
 
         self._strategy: 'AgentStrategy[I, O]' = strategy
         self._resources: 'AgentResource' = resources
+        logger.info(f"[Agent.__init__] Agent实例创建: strategy={type(strategy).__name__}, resources={resources}")
 
     @property
     def strategy(self) -> 'AgentStrategy[I, O]':
@@ -118,12 +123,24 @@ class Agent(Generic[I, O]):
             >>> result = agent.run(context)
             >>> print(result.data)
         """
-        # 验证context
         if context is None:
             raise ValueError("context不能为None")
 
-        # 调用agent策略的execute方法
-        return self._strategy.execute(context, self._resources)
+        logger.info(f"[Agent.run] Agent开始执行: strategy={type(self._strategy).__name__}, session_id={getattr(context, 'session_id', 'N/A')}, current_state={getattr(context, 'current_state', 'N/A')}")
+        log_arch_event(
+            logger,
+            component="Agent",
+            stage="ORCHESTRATION",
+            event="agent_run_start",
+            status="start",
+            design_id="ARCH-3.1",
+        )
+
+        result = self._strategy.execute(context, self._resources)
+
+        logger.info(f"[Agent.run] Agent执行完成: strategy={type(self._strategy).__name__}, session_id={getattr(result, 'session_id', 'N/A')}")
+        logger.info(f"[AGENT_STRATEGY_EXEC] event=end, strategy_type={type(self._strategy).__name__}, session_id={getattr(result, 'session_id', 'N/A')}")
+        return result
 
     def update_resources(self, resources: 'AgentResource') -> None:
         """

@@ -6,8 +6,10 @@
 
 包结构：
 - adapters/neo4j/ - Neo4j图数据库适配
-- adapters/vllm/ - VLLM模型推理引擎适配
+- adapters/milvus/ - Milvus向量数据库适配
+- adapters/sglang/ - SGLang推理引擎适配
 - adapters/langchain/ - Langchain框架适配
+- adapters/transformers/ - Transformers模型框架适配
 
 每个适配包包含：
 - {dependency}_adapter.py - 适配器接口
@@ -15,7 +17,7 @@
 """
 
 from .neo4j import Neo4jAdapter, Neo4jAdapterImpl
-from .vllm import VLLMAdapter, VLLMAdapterImpl
+from .sglang import SGLangAdapter, SGLangAdapterImpl
 from .milvus import MilvusAdapter, MilvusAdapterImpl
 from .transformers import TransformersAdapter, TransformersAdapterImpl
 from .langchain import (
@@ -34,8 +36,8 @@ from .langchain import (
 __all__ = [
     'Neo4jAdapter',
     'Neo4jAdapterImpl',
-    'VLLMAdapter',
-    'VLLMAdapterImpl',
+    'SGLangAdapter',
+    'SGLangAdapterImpl',
     'MilvusAdapter',
     'MilvusAdapterImpl',
     'TransformersAdapter',

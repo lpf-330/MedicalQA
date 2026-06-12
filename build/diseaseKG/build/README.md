@@ -95,6 +95,38 @@ MATCH (d:Disease)-[r:has_symptom]->(s:Symptom)
 RETURN d.name, s.name LIMIT 5
 ```
 
+## 节点 ID 说明
+
+### id() 已废弃，使用 elementId()
+
+Neo4j 5.x 中 `id()` 函数已废弃，返回的整数 ID 在数据库重建后会改变（非持久化）。本项目重部署后使用 `elementId()` 替代。
+
+**elementId 格式**：
+- 本地/自托管 Neo4j：`{store}:{序号}`，如 `4:0`、`4:10002`
+- Neo4j Aura 云端：`{store}:{UUID}:{序号}`，如 `4:5ea717a9-2355-4798-ba5d-885a858af3d9:0`
+
+当前环境为 Neo4j Aura 云端（5.27-aura Enterprise），节点 elementId 最长 44 字符，关系 elementId 最长 58 字符。
+
+**验证 elementId**：
+```cypher
+MATCH (n) RETURN elementId(n) LIMIT 5
+```
+
+**用 elementId 查询节点**：
+```cypher
+MATCH (n) WHERE elementId(n) = $node_id RETURN n
+```
+
+### 重部署后数据差异说明
+
+使用 `deploy_reliable.py` 重部署后，可能出现节点数/关系数比原数据库略少的情况。这是正常行为，原因如下：
+
+- **MERGE 去重**：部署脚本使用 `MERGE` 语句，当同一标签下存在同名节点时只保留一个。原数据库中可能因多次部署或数据问题存在同名重复节点
+- **关系去重**：同理，相同源节点和目标节点之间的同类型关系只保留一条
+- **实际差异**：最近一次重部署，节点从 44,657 减至 44,655（2个重复Disease去重），关系从 312,226 减至 312,159（67条重复关系去重）
+
+注意：按名称/三元组逐项对比，所有8类节点和11类关系**语义完全一致**，无任何数据丢失。
+
 ## 常见问题
 
 ### 1. 连接失败

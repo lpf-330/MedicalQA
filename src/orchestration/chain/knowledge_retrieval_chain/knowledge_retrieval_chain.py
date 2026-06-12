@@ -7,81 +7,42 @@
 
 import logging
 import time
-from dataclasses import dataclass, field
 from typing import Any, Dict, List, Optional, Tuple
-
 from src.orchestration.chain.chain import Chain
+from src.utils.logger import log_arch_event
 from src.orchestration.chain.data_classes import ChainContext, ChainResult
+from src.orchestration.chain.knowledge_retrieval_chain.knowledge_retrieval_context import KnowledgeRetrievalContextBody
+from src.orchestration.chain.knowledge_retrieval_chain.knowledge_retrieval_result import KnowledgeRetrievalResultData
+from src.orchestration.chain.knowledge_retrieval_chain.knowledge_retrieval_resource import KnowledgeRetrievalResource
 from src.orchestration.tool_call_handler.Impl.vector_retrieval_handler import VectorRetrievalHandler
 from src.orchestration.tool_call_handler.Impl.neo4j_medical_handler import Neo4jMedicalHandler
+from src.config.business.consult_service_config import get_runtime_config
 
 logger = logging.getLogger(__name__)
 
+# 从业务配置读取参数，替代硬编码
+# 使用惰性获取模式：模块级常量在import时求值，此时ConfigManager可能尚未初始化，
+# 因此改为在函数内部通过get_runtime_config()获取运行期配置值。
+def _get_relevance_threshold() -> float:
+    return get_runtime_config().knowledge_fusion_threshold
 
-@dataclass
-class KnowledgeRetrievalContextBody:
-    """
-    知识检索Chain策略专属输入数据类
+def _get_vector_entity_weight() -> float:
+    return get_runtime_config().vector_entity_weight
 
-    Attributes:
-        query_text: 查询文本
-        extracted_entities: 已提取的医疗实体
-        intent_label: 意图标签
-    """
-    query_text: str
-    extracted_entities: List[Dict] = field(default_factory=list)
-    intent_label: str = ""
+def _get_vector_attribute_weight() -> float:
+    return get_runtime_config().vector_attribute_weight
 
-    def to_dict(self) -> Dict[str, Any]:
-        """转换为字典"""
-        return {
-            "query_text": self.query_text,
-            "extracted_entities": self.extracted_entities,
-            "intent_label": self.intent_label
-        }
+def _get_vector_relation_weight() -> float:
+    return get_runtime_config().vector_relation_weight
 
+def _get_knowledge_retrieval_top_k() -> int:
+    return get_runtime_config().knowledge_retrieval_top_k
 
-@dataclass
-class KnowledgeRetrievalResultData:
-    """
-    知识检索Chain策略专属输出数据类
+def _get_knowledge_merge_limit() -> int:
+    return get_runtime_config().knowledge_merge_limit
 
-    Attributes:
-        vector_results: 向量检索原始结果
-        knowledge_results: 图谱查询增强结果
-        merged_results: 合并去重后的最终知识素材
-        anchored_entities: 锚定实体列表
-        anchored_relations: 锚定关系列表
-    """
-    vector_results: List[Dict] = field(default_factory=list)
-    knowledge_results: List[Dict] = field(default_factory=list)
-    merged_results: List[Dict] = field(default_factory=list)
-    anchored_entities: List[Dict] = field(default_factory=list)
-    anchored_relations: List[Dict] = field(default_factory=list)
-
-    def to_dict(self) -> Dict[str, Any]:
-        """转换为字典"""
-        return {
-            "vector_results": self.vector_results,
-            "knowledge_results": self.knowledge_results,
-            "merged_results": self.merged_results,
-            "anchored_entities": self.anchored_entities,
-            "anchored_relations": self.anchored_relations
-        }
-
-
-@dataclass
-class KnowledgeRetrievalResource:
-    """
-    知识检索Chain策略专属资源类
-
-    Attributes:
-        vector_handler: 向量检索Handler
-        neo4j_handler: Neo4j医疗Handler
-    """
-    vector_handler: Optional[VectorRetrievalHandler] = None
-    neo4j_handler: Optional[Neo4jMedicalHandler] = None
-
+def _get_knowledge_sufficiency_min_count() -> int:
+    return get_runtime_config().knowledge_sufficiency_min_count
 
 class KnowledgeRetrievalChain(Chain[ChainContext[KnowledgeRetrievalContextBody], ChainResult[KnowledgeRetrievalResultData]]):
     """
@@ -92,8 +53,6 @@ class KnowledgeRetrievalChain(Chain[ChainContext[KnowledgeRetrievalContextBody],
     2. 图谱查询结构化推理增强
     3. 知识整合去重排序
     """
-
-    RELEVANCE_THRESHOLD = 0.5
 
     def __init__(self, resource: KnowledgeRetrievalResource):
         """
@@ -187,13 +146,28 @@ class KnowledgeRetrievalChain(Chain[ChainContext[KnowledgeRetrievalContextBody],
             logger.warning("[KnowledgeRetrievalChain] vector_handler未初始化")
             return [], [], []
 
+        log_arch_event(
+            logger,
+            component="KnowledgeRetrievalChain",
+            stage="CHAIN",
+            event="vector_search_step",
+            status="start",
+            design_id="BIZ-4.1",
+        )
+
         # 调用Milvus三集合检索（medical_entity、entity_attributes、entity_relations）
         # 实现加权融合逻辑
+        top_k = _get_knowledge_retrieval_top_k()
+        collections = ["medical_entity", "entity_attributes", "entity_relations"]
+        weights = {"medical_entity": _get_vector_entity_weight(), "entity_attributes": _get_vector_attribute_weight(), "entity_relations": _get_vector_relation_weight()}
+
+        logger.debug(f"[RETRIEVAL_PARAMS] query={context_body.query_text}, top_k={top_k}, collections={collections}, weights={weights}")
+
         search_result = self._resource.vector_handler.call_tool({
             "query": context_body.query_text,
-            "top_k": 20,
-            "collections": ["medical_entity", "entity_attributes", "entity_relations"],
-            "weights": {"medical_entity": 0.40, "entity_attributes": 0.30, "entity_relations": 0.30}
+            "top_k": top_k,
+            "collections": collections,
+            "weights": weights
         })
 
         vector_results = []
@@ -237,7 +211,32 @@ class KnowledgeRetrievalChain(Chain[ChainContext[KnowledgeRetrievalContextBody],
         logger.info(f"[KnowledgeRetrievalChain] 向量检索: total={len(vector_results)}, "
                    f"entities={len(anchored_entities)}, relations={len(anchored_relations)}, "
                    f"collections=['medical_entity', 'entity_attributes', 'entity_relations'], "
-                   f"weights={{'medical_entity': 0.40, 'entity_attributes': 0.30, 'entity_relations': 0.30}}")
+                   f"weights={{'medical_entity': {_get_vector_entity_weight()}, 'entity_attributes': {_get_vector_attribute_weight()}, 'entity_relations': {_get_vector_relation_weight()}}}")
+
+        # 结果分数分布日志
+        if vector_results:
+            scores = [r.get("score", 0.0) for r in vector_results if isinstance(r, dict)]
+            if scores:
+                avg_score = sum(scores) / len(scores)
+                max_score = max(scores)
+                min_score = min(scores)
+                high_count = sum(1 for s in scores if s >= 0.8)
+                mid_count = sum(1 for s in scores if 0.6 <= s < 0.8)
+                low_count = sum(1 for s in scores if s < 0.6)
+                logger.debug(f"[RESULT_DISTRIBUTION] total={len(scores)}, avg_score={avg_score:.4f}, "
+                           f"max_score={max_score:.4f}, min_score={min_score:.4f}, "
+                           f"high(>=0.8)={high_count}, mid(0.6-0.8)={mid_count}, low(<0.6)={low_count}")
+                # 逐条结果的相关性评分详情
+                for idx, item in enumerate(vector_results):
+                    if isinstance(item, dict):
+                        score = item.get("score", 0.0)
+                        collection = item.get("collection", item.get("source", ""))
+                        entity = item.get("entity", {})
+                        entity_name = entity.get("name", entity.get("entity_name", "")) if isinstance(entity, dict) else str(entity)
+                        logger.debug(f"[RELEVANCE_SCORE] idx={idx}, vector={score:.4f}, "
+                                   f"collection={collection}, entity_name={entity_name}")
+        else:
+            logger.debug("[RESULT_DISTRIBUTION] total=0, no results returned from vector search")
 
         return vector_results, anchored_entities, anchored_relations
 
@@ -259,6 +258,15 @@ class KnowledgeRetrievalChain(Chain[ChainContext[KnowledgeRetrievalContextBody],
             logger.warning("[KnowledgeRetrievalChain] neo4j_handler未初始化")
             return []
 
+        log_arch_event(
+            logger,
+            component="KnowledgeRetrievalChain",
+            stage="CHAIN",
+            event="graph_query_step",
+            status="start",
+            design_id="BIZ-4.2",
+        )
+
         knowledge_results: List[Dict] = []
         seen_node_ids = set()
 
@@ -271,13 +279,9 @@ class KnowledgeRetrievalChain(Chain[ChainContext[KnowledgeRetrievalContextBody],
             if not neo4j_node_id_str:
                 logger.warning(f"[KnowledgeRetrievalChain] 实体缺少neo4j_node_id: entity_data={entity_data}")
                 continue
-            
-            # 将neo4j_node_id转换为整数类型
-            try:
-                neo4j_node_id = int(neo4j_node_id_str)
-            except (ValueError, TypeError) as e:
-                logger.warning(f"[KnowledgeRetrievalChain] neo4j_node_id转换失败: neo4j_node_id={neo4j_node_id_str}, error={str(e)}")
-                continue
+
+            # neo4j_node_id为elementId字符串，直接传递给Neo4j查询
+            neo4j_node_id = neo4j_node_id_str
             
             # 避免重复查询
             if neo4j_node_id in seen_node_ids:
@@ -558,11 +562,29 @@ class KnowledgeRetrievalChain(Chain[ChainContext[KnowledgeRetrievalContextBody],
         merged.sort(key=lambda x: x.get("score", 0.0), reverse=True)
 
         # 过滤低于阈值的结果（neo4j数据不过滤）
-        merged = [item for item in merged if item.get("score", 0.0) >= self.RELEVANCE_THRESHOLD or item.get("source") in ["neo4j", "vector_degraded"]]
+        before_filter_count = len(merged)
+        merged = [item for item in merged if item.get("score", 0.0) >= _get_relevance_threshold() or item.get("source") in ["neo4j", "vector_degraded"]]
+        after_filter_count = len(merged)
+        filtered_out_count = before_filter_count - after_filter_count
 
-        # 限制为Top-15结果
-        merged = merged[:15]
+        # 充分性判断日志
+        is_sufficient = after_filter_count >= _get_knowledge_sufficiency_min_count()
+        gaps = []
+        if not is_sufficient:
+            gaps.append(f"有效结果不足(仅{after_filter_count}条,需要>={_get_knowledge_sufficiency_min_count()})")
+        if after_filter_count > 0:
+            scores = [item.get("score", 0.0) for item in merged]
+            avg_score = sum(scores) / len(scores)
+            if avg_score < _get_relevance_threshold():
+                gaps.append(f"平均相关性得分偏低(avg={avg_score:.4f}, threshold={_get_relevance_threshold()})")
+        else:
+            gaps.append("无有效结果")
+        logger.debug(f"[SUFFICIENCY] is_sufficient={is_sufficient}, confidence={after_filter_count}, "
+                   f"gaps={gaps}, filtered_out={filtered_out_count}, threshold={_get_relevance_threshold()}")
 
-        logger.info(f"[KnowledgeRetrievalChain] 知识整合: total_results={len(merged)}, top_k_limit=15")
+        # 限制为Top结果
+        merged = merged[:_get_knowledge_merge_limit()]
+
+        logger.info(f"[KnowledgeRetrievalChain] 知识整合: total_results={len(merged)}, top_k_limit={_get_knowledge_merge_limit()}")
 
         return merged

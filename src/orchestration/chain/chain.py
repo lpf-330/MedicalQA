@@ -5,15 +5,17 @@
 该模块定义了Chain接口，是chain策略的核心抽象。
 """
 
+import logging
 from abc import ABC, abstractmethod
-from typing import Generic, TypeVar, TYPE_CHECKING
+from typing import Generator, Generic, TypeVar, TYPE_CHECKING
 
 if TYPE_CHECKING:
     from src.orchestration.chain.data_classes import ChainContext, ChainResult
 
-# 定义泛型类型变量
-I = TypeVar('I')  # 输入数据类型
-O = TypeVar('O')  # 输出数据类型
+I = TypeVar('I')
+O = TypeVar('O')
+
+logger = logging.getLogger(__name__)
 
 
 class Chain(ABC, Generic[I, O]):
@@ -71,7 +73,29 @@ class Chain(ABC, Generic[I, O]):
             >>> result = chain.execute(context)
             >>> print(result.data)
         """
+        logger.info(f"[Chain.execute] Chain开始执行: chain_class={self.__class__.__name__}, session_id={getattr(chain_context, 'session_id', 'N/A')}")
         pass
+
+    def execute_stream(self, chain_context: 'ChainContext[I]') -> Generator[str, None, 'ChainResult[O]']:
+        """
+        流式执行chain策略
+
+        可选实现，支持流式输出中间结果。默认实现回退到execute()。
+        子类如需流式支持应重写此方法。
+
+        Args:
+            chain_context: chain策略的输入数据容器
+
+        Yields:
+            str: 流式输出的中间文本片段
+
+        Returns:
+            ChainResult[O]: chain策略的最终输出数据容器
+        """
+        logger.info(f"[Chain.execute_stream] Chain回退到同步执行: chain_class={self.__class__.__name__}")
+        result = self.execute(chain_context)
+        yield ""
+        return result
 
     def __repr__(self) -> str:
         """返回Chain的字符串表示"""

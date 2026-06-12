@@ -5,12 +5,16 @@ MCP代理层工厂类
 该模块定义了MCPProxyFactory类，负责管理、缓存所有MCP代理tool。
 """
 
+import logging
 from typing import Dict, Optional, TYPE_CHECKING
 
-from src.mcp.factory.config import ProxyType, ToolProxyConfig
+from src.mcp.factory.tool_proxy_config import ProxyType, ToolProxyConfig
+from src.utils.logger import log_arch_event
 
 if TYPE_CHECKING:
     from src.mcp.proxy.interfaces import MCPTool
+
+logger = logging.getLogger(__name__)
 
 
 class MCPProxyFactory:
@@ -64,6 +68,7 @@ class MCPProxyFactory:
         self._proxy_cache: Dict[str, 'MCPTool'] = {}
         self._configs: Dict[str, 'ToolProxyConfig'] = {}
         MCPProxyFactory._initialized = True
+        logger.info("[MCPProxyFactory.__init__] MCP代理工厂初始化完成")
 
     @classmethod
     def get_instance(cls) -> 'MCPProxyFactory':
@@ -89,8 +94,8 @@ class MCPProxyFactory:
             for proxy in cls._instance._proxy_cache.values():
                 try:
                     proxy.release_tool(None)
-                except Exception:
-                    pass  # 忽略释放错误
+                except Exception as e:
+                    logger.debug(f"[MCPProxyFactory] 释放代理实例资源失败: {e}")
 
             cls._instance._proxy_cache.clear()
             cls._instance._configs.clear()
@@ -118,6 +123,10 @@ class MCPProxyFactory:
         """
         return self._configs.copy()
 
+    def initialize(self, configs: Dict[str, 'ToolProxyConfig']) -> None:
+        """初始化MCP代理工厂 — 公共接口，替代_init_factory私有方法"""
+        self._init_factory(configs)
+
     def _init_factory(self, configs: Dict[str, 'ToolProxyConfig']) -> None:
         """
         初始化MCP代理工厂
@@ -144,6 +153,8 @@ class MCPProxyFactory:
         if not configs:
             raise ValueError("配置字典不能为空")
 
+        logger.info(f"[MCPProxyFactory._init_factory] 开始初始化MCP代理工厂: config_count={len(configs)}")
+
         for tool_proxy_instance_id, config in configs.items():
             if not tool_proxy_instance_id:
                 raise ValueError("tool_proxy_instance_id不能为空")
@@ -151,6 +162,8 @@ class MCPProxyFactory:
                 raise ValueError(f"配置必须是ToolProxyConfig类型，当前类型为: {type(config)}")
 
         self._configs = configs.copy()
+        log_arch_event(logger, component="MCPProxyFactory", stage="MCP", event="init_factory", status="success", design_id="ARCH-4.1", config_count=len(configs))
+        logger.info(f"[MCPProxyFactory._init_factory] MCP代理工厂初始化完成: config_ids={list(self._configs.keys())}")
 
     def get_tool_proxy_instance(self, tool_proxy_instance_id: str) -> 'MCPTool':
         """
@@ -175,11 +188,14 @@ class MCPProxyFactory:
         if not tool_proxy_instance_id:
             raise ValueError("tool_proxy_instance_id不能为空")
 
-        # 如果缓存中存在，直接返回
         if tool_proxy_instance_id in self._proxy_cache:
+            log_arch_event(logger, component="MCPProxyFactory", stage="MCP", event="get_proxy_cache_hit", status="success", design_id="ARCH-4.1", instance_id=tool_proxy_instance_id)
+            logger.debug(f"[MCPProxyFactory.get_tool_proxy_instance] 从缓存获取代理实例: id={tool_proxy_instance_id}")
+            logger.info(f"[MCP_FACTORY_GET] instance_id={tool_proxy_instance_id}, cache_hit=True")
             return self._proxy_cache[tool_proxy_instance_id]
 
-        # 否则创建新实例
+        logger.info(f"[MCPProxyFactory.get_tool_proxy_instance] 缓存未命中，创建新代理实例: id={tool_proxy_instance_id}")
+        logger.info(f"[MCP_FACTORY_GET] instance_id={tool_proxy_instance_id}, cache_hit=False")
         return self.create_tool_proxy_instance(tool_proxy_instance_id)
 
     def create_tool_proxy_instance(self, tool_proxy_name: str) -> 'MCPTool':
@@ -209,49 +225,59 @@ class MCPProxyFactory:
         if not tool_proxy_name:
             raise ValueError("tool_proxy_name不能为空")
 
-        # 检查是否已存在
         if tool_proxy_name in self._proxy_cache:
             raise ValueError(f"MCP代理tool实例 '{tool_proxy_name}' 已存在")
 
-        # 获取配置
         config = self._get_config(tool_proxy_name)
+        logger.info(f"[PROXY_TYPE] tool_name={tool_proxy_name}, proxy_type={config.proxy_type}")
+        logger.info(f"[MCPProxyFactory.create_tool_proxy_instance] 创建代理实例: name={tool_proxy_name}, proxy_type={config.proxy_type}")
 
-        # 根据代理类型创建实例
         proxy_instance = None
 
         if config.proxy_type == ProxyType.FAKE:
             from src.mcp.proxy.Impl.neo4j_medical_proxy import Neo4jMedicalProxy
-            from src.mcp.proxy.Impl.milvus_medical_proxy import MilvusMedicalProxy
+            from src.mcp.proxy.Impl.vector_retrieval_proxy import VectorRetrievalProxy
             from src.mcp.proxy.Impl.intent_classification_proxy import IntentClassificationProxy
+            from src.mcp.proxy.Impl.ner_model_proxy import NerModelProxy
 
             tool_name = config.connection_info.get("tool_name", tool_proxy_name)
 
             if tool_name == "neo4j_medical":
                 proxy_instance = Neo4jMedicalProxy(config.connection_info)
-            elif tool_name == "milvus_medical":
-                proxy_instance = MilvusMedicalProxy(config.connection_info)
+                logger.debug(f"[MCPProxyFactory.create_tool_proxy_instance] Neo4jMedicalProxy创建: tool_name={tool_name}")
+            elif tool_name == "vector_retrieval":
+                proxy_instance = VectorRetrievalProxy(config.connection_info)
+                logger.debug(f"[MCPProxyFactory.create_tool_proxy_instance] VectorRetrievalProxy创建: tool_name={tool_name}")
             elif tool_name == "intent_classification":
                 proxy_instance = IntentClassificationProxy(config.connection_info)
+                logger.debug(f"[MCPProxyFactory.create_tool_proxy_instance] IntentClassificationProxy创建: tool_name={tool_name}")
+            elif tool_name == "ner_model":
+                proxy_instance = NerModelProxy(config.connection_info)
+                logger.debug(f"[MCPProxyFactory.create_tool_proxy_instance] NerModelProxy创建: tool_name={tool_name}")
             else:
+                logger.error(f"[MCPProxyFactory.create_tool_proxy_instance] 未知的FAKE代理工具名称: {tool_name}")
                 raise ValueError(
                     f"未知的FAKE代理工具名称: {tool_name}。"
-                    f"支持的工具名称: neo4j_medical, milvus_medical, intent_classification"
+                    f"支持的工具名称: neo4j_medical, vector_retrieval, intent_classification, ner_model"
                 )
 
             proxy_instance._init_tool()
 
         elif config.proxy_type == ProxyType.STANDARD:
-            raise NotImplementedError(
-                f"暂未实现STANDARD代理类型的创建逻辑。"
-                f"请在 mcp/proxy/Impl/ 中实现具体的MCPStandardProxy代理类。"
-            )
+            from src.mcp.proxy.Impl.mcp_standard_proxy import MCPStandardProxy
+            proxy_instance = MCPStandardProxy(config.connection_info)
+            logger.debug(f"[MCPProxyFactory.create_tool_proxy_instance] MCPStandardProxy创建: tool_name={config.connection_info.get('tool_name', tool_proxy_name)}")
+            proxy_instance._init_tool()
         else:
+            logger.error(f"[MCPProxyFactory.create_tool_proxy_instance] 未知的代理类型: {config.proxy_type}")
             raise ValueError(
                 f"未知的代理类型: {config.proxy_type}。"
                 f"支持的代理类型: STANDARD, FAKE"
             )
 
         self._proxy_cache[tool_proxy_name] = proxy_instance
+        log_arch_event(logger, component="MCPProxyFactory", stage="MCP", event="create_proxy_instance", status="success", design_id="ARCH-4.1", name=tool_proxy_name, proxy_type=str(config.proxy_type))
+        logger.info(f"[MCPProxyFactory.create_tool_proxy_instance] 代理实例创建并缓存成功: name={tool_proxy_name}, proxy_class={type(proxy_instance).__name__}")
         return proxy_instance
 
     def delete_tool_proxy_instance(self, tool_proxy_instance_id: str) -> None:
@@ -276,18 +302,16 @@ class MCPProxyFactory:
         if tool_proxy_instance_id not in self._proxy_cache:
             raise ValueError(f"MCP代理tool实例 '{tool_proxy_instance_id}' 不存在")
 
-        # 获取实例
         proxy_instance = self._proxy_cache[tool_proxy_instance_id]
+        logger.info(f"[MCPProxyFactory.delete_tool_proxy_instance] 删除代理实例: id={tool_proxy_instance_id}")
 
-        # 释放资源
         try:
             proxy_instance.release_tool(None)
         except Exception as e:
-            # 记录错误但继续删除
-            pass
+            logger.warning(f"[MCPProxyFactory.delete_tool_proxy_instance] 释放代理实例资源时出错: id={tool_proxy_instance_id}, error={e}")
 
-        # 从缓存中删除
         del self._proxy_cache[tool_proxy_instance_id]
+        logger.info(f"[MCPProxyFactory.delete_tool_proxy_instance] 代理实例已删除: id={tool_proxy_instance_id}")
 
     def _get_config(self, tool_proxy_instance_id: str) -> 'ToolProxyConfig':
         """
@@ -367,8 +391,8 @@ class MCPProxyFactory:
         for proxy_instance in self._proxy_cache.values():
             try:
                 proxy_instance.release_tool(None)
-            except Exception:
-                pass  # 忽略释放错误
+            except Exception as e:
+                logger.debug(f"[MCPProxyFactory] 释放代理实例资源失败: {e}")
 
         # 清空缓存
         self._proxy_cache.clear()

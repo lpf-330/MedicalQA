@@ -6,115 +6,51 @@
 """
 
 import logging
+import statistics
 import time
-from dataclasses import dataclass, field
-from typing import Any, AsyncGenerator, Dict, Generator, List, Optional
-
+from datetime import datetime
+from typing import AsyncGenerator, Dict, List
+from src.config.business.report_service_config import get_runtime_config
 from src.orchestration.chain.chain import Chain
 from src.orchestration.chain.data_classes import ChainContext, ChainResult
+from src.orchestration.chain.report_generation_chain.report_generation_context import ReportGenerationContextBody
+from src.orchestration.chain.report_generation_chain.report_generation_result import ReportGenerationResultData
+from src.orchestration.chain.report_generation_chain.report_generation_resource import ReportGenerationResource
+from src.utils.logger import log_arch_event
 
 logger = logging.getLogger(__name__)
+
+# 报告业务配置（延迟加载代理，确保运行期获取YAML配置值）
+class _LazyReportConfig:
+    """延迟加载配置代理，每次属性访问时从ConfigManager获取真实配置"""
+    def __getattr__(self, name):
+        return getattr(get_runtime_config(), name)
+
+_report_config = _LazyReportConfig()
 
 # 免责声明
 DISCLAIMER = "以上信息仅供参考，不构成医疗建议。如有健康问题，请及时就医。"
 
-# 报告长度控制常量
-MIN_WORDS = 2000
-MAX_WORDS = 4000
+# 报告长度控制常量（从配置读取）
+MIN_WORDS = _report_config.report_min_length
+MAX_WORDS = _report_config.report_max_length
 
 # Prompt长度控制常量（避免超过模型上下文长度）
-MAX_PROMPT_CHARS = 16000  # 约4000 tokens，留出空间给system prompt和output
-MAX_KNOWLEDGE_CHARS = 12000  # 知识素材最大字符数
+MAX_PROMPT_CHARS = _report_config.max_prompt_chars
+MAX_KNOWLEDGE_CHARS = _report_config.max_knowledge_chars
 
 # 最大重试次数
-MAX_RETRY_COUNT = 2
+MAX_RETRY_COUNT = _report_config.max_report_retries
 
 
-@dataclass
-class ReportGenerationContextBody:
-    """
-    报告生成Chain策略专属输入数据类
-
-    Attributes:
-        report_materials: 报告素材
-        health_score: 健康评分
-        health_level: 健康等级
-        risk_level: 风险等级
-        risk_diseases: 风险疾病
-        user_profile: 用户档案
-        monitoring_data: 监测数据
-    """
-    report_materials: Dict = field(default_factory=dict)
-    health_score: int = 0
-    health_level: str = ""
-    risk_level: str = ""
-    risk_diseases: List[Dict] = field(default_factory=list)
-    user_profile: Dict = field(default_factory=dict)
-    monitoring_data: Dict = field(default_factory=dict)
-
-    def to_dict(self) -> Dict[str, Any]:
-        """转换为字典"""
-        return {
-            "report_materials": self.report_materials,
-            "health_score": self.health_score,
-            "health_level": self.health_level,
-            "risk_level": self.risk_level,
-            "risk_diseases": self.risk_diseases,
-            "user_profile": self.user_profile,
-            "monitoring_data": self.monitoring_data
-        }
-
-
-@dataclass
-class ReportGenerationResultData:
-    """
-    报告生成Chain策略专属输出数据类
-
-    Attributes:
-        report_content: 报告内容（Markdown格式）
-        word_count: 报告字数
-        has_disclaimer: 是否包含免责声明
-        sources: 知识来源
-    """
-    report_content: str = ""
-    word_count: int = 0
-    has_disclaimer: bool = False
-    sources: List[str] = field(default_factory=list)
-
-    def to_dict(self) -> Dict[str, Any]:
-        """转换为字典"""
-        return {
-            "report_content": self.report_content,
-            "word_count": self.word_count,
-            "has_disclaimer": self.has_disclaimer,
-            "sources": self.sources
-        }
-
-
-@dataclass
-class ReportGenerationResource:
-    """
-    报告生成Chain策略专属资源类
-
-    Attributes:
-        model_service: 报告模型服务（将在后续实现ReportModelService）
-    """
-    model_service: Optional[Any] = None
-
-    def get_model_result(self, messages: List[Dict[str, str]]) -> str:
-        """
-        获取模型生成结果
-
-        Args:
-            messages: 消息列表
-
-        Returns:
-            模型生成的回复
-        """
-        if self.model_service is None:
-            return "模型服务未初始化"
-        return self.model_service.call_model(messages)
-
+def _refresh_report_config():
+    """刷新report_generation_chain模块级常量，从ConfigManager获取正确配置值。"""
+    global MIN_WORDS, MAX_WORDS, MAX_PROMPT_CHARS, MAX_KNOWLEDGE_CHARS, MAX_RETRY_COUNT
+    MIN_WORDS = _report_config.report_min_length
+    MAX_WORDS = _report_config.report_max_length
+    MAX_PROMPT_CHARS = _report_config.max_prompt_chars
+    MAX_KNOWLEDGE_CHARS = _report_config.max_knowledge_chars
+    MAX_RETRY_COUNT = _report_config.max_report_retries
 
 class ReportGenerationChain(Chain[ChainContext[ReportGenerationContextBody], ChainResult[ReportGenerationResultData]]):
     """
@@ -148,7 +84,16 @@ class ReportGenerationChain(Chain[ChainContext[ReportGenerationContextBody], Cha
             ChainResult: Chain输出数据容器
         """
         start_time = time.time()
+        _refresh_report_config()
         logger.info(f"[ReportGenerationChain] 开始执行Chain: session_id={chain_context.session_id}")
+        log_arch_event(
+            logger,
+            component="ReportGenerationChain",
+            stage="CHAIN",
+            event="execute",
+            status="start",
+            design_id="BIZ-4.4",
+        )
 
         body = chain_context.body
         if body is None:
@@ -176,6 +121,10 @@ class ReportGenerationChain(Chain[ChainContext[ReportGenerationContextBody], Cha
             logger.info(f"[ReportGenerationChain] 开始构建提示词: health_score={body.health_score}")
             prompt = self._build_prompt(body)
 
+            # [TOKEN_BUDGET] 日志
+            prompt_total_chars = len(prompt["system_message"]) + len(prompt["user_message"])
+            logger.info(f"[ReportGenerationChain] [TOKEN_BUDGET] prompt_total_chars={prompt_total_chars}, MAX_PROMPT_CHARS={MAX_PROMPT_CHARS}, estimated_tokens={prompt_total_chars//4}")
+
             messages = [
                 {"role": "system", "content": prompt["system_message"]},
                 {"role": "user", "content": prompt["user_message"]}
@@ -183,19 +132,35 @@ class ReportGenerationChain(Chain[ChainContext[ReportGenerationContextBody], Cha
 
             # 调用LLM生成报告
             logger.info(f"[ReportGenerationChain] 开始调用LLM: messages_count={len(messages)}")
+            prompt_total_chars = sum(len(msg.get('content', '')) for msg in messages)
+            logger.info(f"[ReportGenerationChain] [LLM_INPUT] messages_count={len(messages)}, total_chars={prompt_total_chars}")
+            for i, msg in enumerate(messages):
+                logger.info(f"[ReportGenerationChain] [LLM_INPUT] Message[{i}] role={msg.get('role')}: {msg.get('content', '')}")
+            llm_start_time = time.time()
             try:
-                report_content = self._resource.get_model_result(messages)
-                logger.info(f"[ReportGenerationChain] LLM调用完成: report_len={len(report_content)}")
+                report_content = self._resource.get_model_result(
+                    messages,
+                    temperature=_report_config.report_generation_temperature,
+                    max_tokens=_report_config.report_generation_max_tokens
+                )
+                llm_duration = time.time() - llm_start_time
+                logger.info(f"[ReportGenerationChain] [LLM_OUTPUT] report_len={len(report_content)}")
+                logger.info(f"[ReportGenerationChain] [LLM_OUTPUT] {report_content}")
+                logger.info(f"[ReportGenerationChain] [LLM_DURATION] duration={llm_duration:.2f}s")
+                logger.info(f"[ReportGenerationChain] LLM调用完成: report_len={len(report_content)}, duration={llm_duration:.2f}s")
             except Exception as e:
                 logger.error(f"[ReportGenerationChain] LLM调用异常: {e}")
+                llm_duration = time.time() - llm_start_time
+                logger.info(f"[ReportGenerationChain] [LLM_DURATION] duration={llm_duration:.2f}s (failed)")
                 # 启用降级策略
                 self._is_degraded = True
                 report_content = self._generate_degraded_report(body)
+                logger.info(f"[ReportGenerationChain] [LLM_DEGRADED] reason=LLM调用异常({e}), report_len={len(report_content)}")
                 logger.info(f"[ReportGenerationChain] 使用降级策略生成报告: report_len={len(report_content)}")
                 break
 
             # 内容校验
-            quality_passed = self._check_quality(report_content, body)
+            quality_passed, quality_fail_reason = self._check_quality(report_content, body)
             logger.info(f"[ReportGenerationChain] 内容校验结果: passed={quality_passed}")
 
             if quality_passed:
@@ -203,7 +168,7 @@ class ReportGenerationChain(Chain[ChainContext[ReportGenerationContextBody], Cha
 
             retry_count += 1
             if retry_count <= MAX_RETRY_COUNT:
-                logger.warning(f"[ReportGenerationChain] 报告不符合要求，准备重试: retry_count={retry_count}")
+                logger.warning(f"[ReportGenerationChain] 报告不符合要求，准备重试: retry_count={retry_count}, fail_reason={quality_fail_reason}")
 
         # 提取知识来源
         sources = self._extract_sources(body.report_materials)
@@ -228,6 +193,7 @@ class ReportGenerationChain(Chain[ChainContext[ReportGenerationContextBody], Cha
         return ChainResult(session_id=chain_context.session_id, data=result_data)
 
     async def execute_stream(self, chain_context) -> AsyncGenerator[str, None]:
+        _refresh_report_config()
         context_body = chain_context.body
         if context_body is None:
             yield "抱歉，无法生成健康报告。"
@@ -240,8 +206,6 @@ class ReportGenerationChain(Chain[ChainContext[ReportGenerationContextBody], Cha
             return
 
         model_service = self._resource.model_service
-        if hasattr(model_service, 'get_model_result'):
-            model_service = model_service.get_model_result()
 
         if model_service is None:
             yield "抱歉，模型服务不可用。"
@@ -254,13 +218,21 @@ class ReportGenerationChain(Chain[ChainContext[ReportGenerationContextBody], Cha
                 {"role": "system", "content": prompt["system_message"]},
                 {"role": "user", "content": prompt["user_message"]}
             ]
-            
+
+            prompt_total_chars = sum(len(msg.get('content', '')) for msg in messages)
+            logger.info(f"[ReportGenerationChain] [LLM_INPUT] messages_count={len(messages)}, total_chars={prompt_total_chars}")
+            for i, msg in enumerate(messages):
+                logger.info(f"[ReportGenerationChain] [LLM_INPUT] Message[{i}] role={msg.get('role')}: {msg.get('content', '')}")
+
+            llm_start_time = time.time()
             async for token in model_service.async_stream_generate(messages):
                 full_response.append(token)
                 yield token
 
+            llm_duration = time.time() - llm_start_time
+
             complete_report = ''.join(full_response)
-            
+
             if DISCLAIMER not in complete_report:
                 disclaimer = "\n\n" + DISCLAIMER
                 for char in disclaimer:
@@ -268,14 +240,22 @@ class ReportGenerationChain(Chain[ChainContext[ReportGenerationContextBody], Cha
                     yield char
                 complete_report += disclaimer
 
-            logger.info(f"[ReportGenerationChain] ========== LLM完整输出 ==========")
-            logger.info(f"[ReportGenerationChain] 完整报告 (长度={len(complete_report)}):")
-            logger.info(f"{complete_report}")
-            logger.info(f"[ReportGenerationChain] ==============================")
+            logger.info(f"[ReportGenerationChain] [LLM_OUTPUT] report_len={len(complete_report)}")
+            logger.info(f"[ReportGenerationChain] [LLM_OUTPUT] {complete_report}")
+            logger.info(f"[ReportGenerationChain] [LLM_DURATION] duration={llm_duration:.2f}s")
 
         except Exception as e:
             logger.error(f"[ReportGenerationChain] 流式生成异常: {str(e)}")
-            yield f"\n\n抱歉，报告生成过程中出现错误。"
+            self._is_degraded = True
+            logger.info(f"[ReportGenerationChain] [LLM_DEGRADED] reason=流式生成异常({str(e)})")
+            logger.warning("[ReportGenerationChain] 流式生成失败，降级为规则引擎生成报告")
+            try:
+                degraded_content = self._generate_degraded_report(context_body)
+                logger.info(f"[ReportGenerationChain] [LLM_DEGRADED] degraded_report_len={len(degraded_content)}")
+                yield degraded_content
+            except Exception as de:
+                logger.error(f"[ReportGenerationChain] 降级报告生成也失败: {de}")
+                yield "\n\n抱歉，报告生成过程中出现错误。"
 
     def _build_prompt(self, context_body: ReportGenerationContextBody) -> Dict[str, str]:
         """
@@ -313,10 +293,20 @@ class ReportGenerationChain(Chain[ChainContext[ReportGenerationContextBody], Cha
         # 构建用户消息（包含报告结构模板和用户数据）
         user_message = self._build_user_message(context_body)
 
-        return {
+        # [PROMPT_CONSTRUCTION] 日志：方法入口
+        logger.info(f"[ReportGenerationChain] [PROMPT_CONSTRUCTION] 开始构建Prompt: system_message_len={len(system_message)}, user_data_len={len(user_message)}")
+
+        prompt = {
             "system_message": system_message,
             "user_message": user_message
         }
+
+        # [PROMPT_CONSTRUCTION] 日志：方法返回
+        knowledge_len = len(knowledge_context) if knowledge_context else 0
+        total_len = len(system_message) + len(user_message)
+        logger.info(f"[ReportGenerationChain] [PROMPT_CONSTRUCTION] Prompt构建完成: total_len={total_len}, knowledge_len={knowledge_len}")
+
+        return prompt
 
     def _build_knowledge_context(self, report_materials: Dict) -> str:
         """
@@ -343,7 +333,8 @@ class ReportGenerationChain(Chain[ChainContext[ReportGenerationContextBody], Cha
             
             for item in merged_results:
                 if total_chars >= MAX_KNOWLEDGE_CHARS:
-                    logger.warning(f"[ReportGenerationChain] 知识素材长度达到上限，截断merged_results")
+                    logger.warning("[ReportGenerationChain] 知识素材长度达到上限，截断merged_results")
+                    logger.warning(f"[ReportGenerationChain] [KNOWLEDGE_TRUNCATION] 截断知识素材: key=merged_results, original_len={total_chars}, truncated_len={MAX_KNOWLEDGE_CHARS}")
                     break
                 
                 if isinstance(item, dict):
@@ -360,8 +351,8 @@ class ReportGenerationChain(Chain[ChainContext[ReportGenerationContextBody], Cha
                                     if total_chars >= MAX_KNOWLEDGE_CHARS:
                                         break
                                     value_text = f"  {key}：{value}"
-                                    if len(value_text) > 500:
-                                        value_text = value_text[:500] + "..."
+                                    if len(value_text) > _report_config.value_text_max_chars:
+                                        value_text = value_text[:_report_config.value_text_max_chars] + "..."
                                     context_parts.append(value_text)
                                     total_chars += len(value_text)
                         else:
@@ -374,59 +365,52 @@ class ReportGenerationChain(Chain[ChainContext[ReportGenerationContextBody], Cha
         
         dimension_results = report_materials.get("dimension_results", {})
         if dimension_results:
-            dim_header = "\n=== 8维度评估结果 ==="
+            # Check if dimension_summaries has _degraded marker
+            is_degraded = any(
+                dim_data.get('_degraded', False)
+                for dim_data in dimension_results.values()
+                if isinstance(dim_data, dict)
+            )
+            if is_degraded:
+                partial_note = "\n注意：以下知识数据因超时降级可能不完整（部分数据），仅供参考。"
+                context_parts.append(partial_note)
+                total_chars += len(partial_note)
+
+            dim_header = "\n=== 8维度知识检索 ==="
             context_parts.append(dim_header)
             total_chars += len(dim_header)
             
             dimension_names = {
-                "dimension_1": "疾病风险评估",
-                "dimension_2": "用药建议",
-                "dimension_3": "治疗方案",
-                "dimension_4": "饮食建议",
-                "dimension_5": "检查建议",
-                "dimension_6": "并发症预警",
-                "dimension_7": "预防措施",
-                "dimension_8": "易感人群"
+                "disease_risk": "疾病风险评估",
+                "medication": "用药建议",
+                "treatment": "治疗方案",
+                "dietary": "饮食建议",
+                "checkup": "检查建议",
+                "complication": "并发症预警",
+                "prevention": "预防措施",
+                "susceptible": "易感人群"
             }
             
             for dim_key, dim_result in dimension_results.items():
                 if total_chars >= MAX_KNOWLEDGE_CHARS:
-                    logger.warning(f"[ReportGenerationChain] 知识素材长度达到上限，截断dimension_results")
+                    logger.warning("[ReportGenerationChain] 知识素材长度达到上限，截断dimension_results")
+                    logger.warning(f"[ReportGenerationChain] [KNOWLEDGE_TRUNCATION] 截断知识素材: key=dimension_results, original_len={total_chars}, truncated_len={MAX_KNOWLEDGE_CHARS}")
                     break
                 
                 dim_name = dimension_names.get(dim_key, dim_key)
                 if isinstance(dim_result, dict):
-                    score = dim_result.get("score", dim_result.get("confidence", "未知"))
-                    level = dim_result.get("level", "未知")
-                    analysis = dim_result.get("analysis", dim_result.get("evaluation_result", ""))
-                    
+                    summary = dim_result.get("summary", "")
+
                     dim_text = f"\n【{dim_name}】"
                     context_parts.append(dim_text)
                     total_chars += len(dim_text)
                     
-                    if isinstance(score, (int, float)):
-                        score_text = f"  置信度：{score:.2f}"
-                    else:
-                        score_text = f"  置信度：{score}"
-                    context_parts.append(score_text)
-                    total_chars += len(score_text)
-                    
-                    if analysis and isinstance(analysis, dict):
-                        for key, value in analysis.items():
-                            if value:
-                                if total_chars >= MAX_KNOWLEDGE_CHARS:
-                                    break
-                                value_text = f"  {key}：{value}"
-                                if len(value_text) > 300:
-                                    value_text = value_text[:300] + "..."
-                                context_parts.append(value_text)
-                                total_chars += len(value_text)
-                    elif analysis:
-                        analysis_text = f"  详情：{analysis}"
-                        if len(analysis_text) > 300:
-                            analysis_text = analysis_text[:300] + "..."
-                        context_parts.append(analysis_text)
-                        total_chars += len(analysis_text)
+                    if summary:
+                        summary_text = f"  摘要：{summary}"
+                        if len(summary_text) > _report_config.summary_text_max_chars:
+                            summary_text = summary_text[:_report_config.summary_text_max_chars] + "..."
+                        context_parts.append(summary_text)
+                        total_chars += len(summary_text)
         
         if total_chars >= MAX_KNOWLEDGE_CHARS:
             return "\n".join(context_parts)
@@ -439,18 +423,22 @@ class ReportGenerationChain(Chain[ChainContext[ReportGenerationContextBody], Cha
             
             for anomaly in anomalies:
                 if total_chars >= MAX_KNOWLEDGE_CHARS:
-                    logger.warning(f"[ReportGenerationChain] 知识素材长度达到上限，截断anomalies")
+                    logger.warning("[ReportGenerationChain] 知识素材长度达到上限，截断anomalies")
+                    logger.warning(f"[ReportGenerationChain] [KNOWLEDGE_TRUNCATION] 截断知识素材: key=anomalies, original_len={total_chars}, truncated_len={MAX_KNOWLEDGE_CHARS}")
                     break
                 
                 if isinstance(anomaly, dict):
-                    indicator = anomaly.get("indicator", anomaly.get("name", "未知指标"))
-                    value = anomaly.get("value", "")
-                    reference = anomaly.get("reference", "")
+                    indicator = anomaly.get("indicator", anomaly.get("indicator_name", anomaly.get("name", "未知指标")))
+                    anomaly_type = anomaly.get("anomaly_type", "")
+                    anomaly_value = anomaly.get("anomaly_value", anomaly.get("value", ""))
+                    reference = anomaly.get("reference", anomaly.get("reference_range", ""))
                     severity = anomaly.get("severity", "")
-                    
-                    indicator_text = f"- {indicator}：{value}"
-                    context_parts.append(indicator_text)
-                    total_chars += len(indicator_text)
+
+                    parts = [p for p in [indicator, anomaly_type, anomaly_value] if p]
+                    indicator_text = f"- {'：'.join(parts)}" if len(parts) > 1 else f"- {parts[0]}" if parts else ""
+                    if indicator_text:
+                        context_parts.append(indicator_text)
+                        total_chars += len(indicator_text)
                     
                     if reference:
                         ref_text = f"  参考范围：{reference}"
@@ -473,7 +461,8 @@ class ReportGenerationChain(Chain[ChainContext[ReportGenerationContextBody], Cha
             
             for factor in risk_factors:
                 if total_chars >= MAX_KNOWLEDGE_CHARS:
-                    logger.warning(f"[ReportGenerationChain] 知识素材长度达到上限，截断risk_factors")
+                    logger.warning("[ReportGenerationChain] 知识素材长度达到上限，截断risk_factors")
+                    logger.warning(f"[ReportGenerationChain] [KNOWLEDGE_TRUNCATION] 截断知识素材: key=risk_factors, original_len={total_chars}, truncated_len={MAX_KNOWLEDGE_CHARS}")
                     break
                 
                 if isinstance(factor, dict):
@@ -492,8 +481,8 @@ class ReportGenerationChain(Chain[ChainContext[ReportGenerationContextBody], Cha
                     
                     if basis:
                         basis_text = f"  依据：{basis}"
-                        if len(basis_text) > 200:
-                            basis_text = basis_text[:200] + "..."
+                        if len(basis_text) > _report_config.basis_text_max_chars:
+                            basis_text = basis_text[:_report_config.basis_text_max_chars] + "..."
                         context_parts.append(basis_text)
                         total_chars += len(basis_text)
         
@@ -523,36 +512,45 @@ class ReportGenerationChain(Chain[ChainContext[ReportGenerationContextBody], Cha
         birth_date = user_profile.get('birth_date') if user_profile else None
         if birth_date:
             try:
-                from datetime import datetime
                 birth = datetime.strptime(birth_date, "%Y-%m-%d")
                 today = datetime.now()
                 age = today.year - birth.year - ((today.month, today.day) < (birth.month, birth.day))
             except (ValueError, TypeError):
-                pass
+                profile_age = user_profile.get('age') if user_profile else None
+                age = str(int(profile_age)) if isinstance(profile_age, (int, float)) and profile_age > 0 else "未知"
+        elif user_profile:
+            profile_age = user_profile.get('age')
+            age = str(int(profile_age)) if isinstance(profile_age, (int, float)) and profile_age > 0 else "未知"
 
-        gender = user_profile.get('gender', '未知') if user_profile else '未知'
-        height = user_profile.get('height', '未知') if user_profile else '未知'
-        weight = user_profile.get('weight', '未知') if user_profile else '未知'
+        gender = user_profile.get('gender', '未知') or '未知' if user_profile else '未知'
+        height = user_profile.get('height') or '未知' if user_profile else '未知'
+        weight = user_profile.get('weight') or '未知' if user_profile else '未知'
 
         # 病史字段（字符串类型）
-        past_medical_history = user_profile.get('past_medical_history', '') if user_profile else ''
-        family_history = user_profile.get('family_history', '') if user_profile else ''
-        allergy_history = user_profile.get('allergy_history', '') if user_profile else ''
-        surgical_history = user_profile.get('surgical_history', '') if user_profile else ''
-        medical_compliance = user_profile.get('medical_compliance', '') if user_profile else ''
+        past_medical_history = user_profile.get('past_medical_history', '') or '' if user_profile else ''
+        family_history = user_profile.get('family_history', '') or '' if user_profile else ''
+        allergy_history = user_profile.get('allergy_history', '') or '' if user_profile else ''
+        surgical_history = user_profile.get('surgical_history', '') or '' if user_profile else ''
+        medical_compliance = user_profile.get('medical_compliance', '') or '' if user_profile else ''
 
-        user_info = f"""
-用户基本信息：
-- 年龄：{age}岁
-- 性别：{gender}
-- 身高：{height} cm
-- 体重：{weight} kg
-- 既往病史：{past_medical_history if past_medical_history else '无'}
-- 家族病史：{family_history if family_history else '无'}
-- 过敏史：{allergy_history if allergy_history else '无'}
-- 手术史：{surgical_history if surgical_history else '无'}
-- 用药医嘱：{medical_compliance if medical_compliance else '无'}
-"""
+        # 构建用户信息，跳过未提供的数值型字段
+        user_info_lines = [
+            f"- 年龄：{age}岁",
+            f"- 性别：{gender}",
+        ]
+        if height != '未知':
+            user_info_lines.append(f"- 身高：{height} cm")
+        if weight != '未知':
+            user_info_lines.append(f"- 体重：{weight} kg")
+        user_info_lines.extend([
+            f"- 既往病史：{past_medical_history if past_medical_history else '无'}",
+            f"- 家族病史：{family_history if family_history else '无'}",
+            f"- 过敏史：{allergy_history if allergy_history else '无'}",
+            f"- 手术史：{surgical_history if surgical_history else '无'}",
+            f"- 用药医嘱：{medical_compliance if medical_compliance else '无'}",
+        ])
+
+        user_info = "用户基本信息：\n" + "\n".join(user_info_lines) + "\n"
 
         monitoring_data_text = ""
         report_materials = context_body.report_materials or {}
@@ -599,7 +597,7 @@ class ReportGenerationChain(Chain[ChainContext[ReportGenerationContextBody], Cha
 
 ## 一、健康综合评分
 
-**评分：{context_body.health_score}分（{context_body.health_level}）**
+**评分：{context_body.health_score:.2f}分（{context_body.health_level}）**
 
 [详细说明评分依据、评分等级含义、与用户健康状况的对应关系]
 
@@ -721,7 +719,6 @@ class ReportGenerationChain(Chain[ChainContext[ReportGenerationContextBody], Cha
         Returns:
             格式化的统计特征文本
         """
-        import statistics
 
         stats_parts = [f"\n【{indicator_name}】"]
 
@@ -797,7 +794,6 @@ class ReportGenerationChain(Chain[ChainContext[ReportGenerationContextBody], Cha
         Returns:
             格式化的血压统计特征文本
         """
-        import statistics
 
         stats_parts = ["\n【血压】"]
 
@@ -872,7 +868,7 @@ class ReportGenerationChain(Chain[ChainContext[ReportGenerationContextBody], Cha
 
         return "\n".join(stats_parts) if len(stats_parts) > 1 else ""
 
-    def _check_quality(self, report_content: str, context_body: ReportGenerationContextBody) -> bool:
+    def _check_quality(self, report_content: str, context_body: ReportGenerationContextBody) -> tuple:
         """
         内容校验（长度、格式、免责声明）
 
@@ -881,26 +877,25 @@ class ReportGenerationChain(Chain[ChainContext[ReportGenerationContextBody], Cha
             context_body: 报告生成专属输入数据
 
         Returns:
-            质量检查是否通过
+            (质量检查是否通过, 失败原因)
         """
         # 长度检查
         report_len = len(report_content)
-        if report_len < MIN_WORDS or report_len > MAX_WORDS:
-            logger.warning(f"[ReportGenerationChain] 质量检查未通过: 报告长度={report_len}, 要求{MIN_WORDS}-{MAX_WORDS}字")
-            return False
+        if report_len < MIN_WORDS:
+            return False, f"报告长度={report_len}, 低于最低要求{MIN_WORDS}字"
+        if report_len > MAX_WORDS:
+            return False, f"报告长度={report_len}, 超过最高限制{MAX_WORDS}字"
 
         # 免责声明检查
         if DISCLAIMER not in report_content:
-            logger.warning("[ReportGenerationChain] 质量检查未通过: 缺少免责声明")
-            return False
+            return False, "缺少免责声明"
 
         # 健康评分检查
-        if str(context_body.health_score) not in report_content:
-            logger.warning(f"[ReportGenerationChain] 质量检查未通过: 缺少健康评分{context_body.health_score}")
-            return False
+        if f"{context_body.health_score:.2f}" not in report_content:
+            return False, f"缺少健康评分{context_body.health_score:.2f}"
 
         logger.info(f"[ReportGenerationChain] 质量检查通过: report_len={report_len}")
-        return True
+        return True, ""
 
     def _extract_sources(self, report_materials: Dict) -> List[str]:
         """
@@ -941,6 +936,7 @@ class ReportGenerationChain(Chain[ChainContext[ReportGenerationContextBody], Cha
             简化报告内容
         """
         logger.info("[ReportGenerationChain] 使用降级策略生成简化报告")
+        logger.info(f"[ReportGenerationChain] [LLM_DEGRADED] method=_generate_degraded_report, health_score={context_body.health_score}, risk_level={context_body.risk_level}")
 
         # 用户信息
         user_profile = context_body.user_profile
@@ -950,12 +946,15 @@ class ReportGenerationChain(Chain[ChainContext[ReportGenerationContextBody], Cha
         birth_date = user_profile.get('birth_date') if user_profile else None
         if birth_date:
             try:
-                from datetime import datetime
                 birth = datetime.strptime(birth_date, "%Y-%m-%d")
                 today = datetime.now()
                 age = today.year - birth.year - ((today.month, today.day) < (birth.month, birth.day))
             except (ValueError, TypeError):
-                pass
+                profile_age = user_profile.get('age') if user_profile else None
+                age = str(int(profile_age)) if isinstance(profile_age, (int, float)) and profile_age > 0 else "未知"
+        elif user_profile:
+            profile_age = user_profile.get('age')
+            age = str(int(profile_age)) if isinstance(profile_age, (int, float)) and profile_age > 0 else "未知"
 
         gender = user_profile.get('gender', '未知') if user_profile else '未知'
 

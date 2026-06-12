@@ -1,0 +1,102 @@
+# ==============================================================================
+# 临床标准值配置文件
+# ==============================================================================
+#
+# 一般不需要调整，修改前请咨询临床专家。
+# 由 ConfigManager 统一加载，代码通过 ConfigManager.clinical_standards 访问。
+#
+# 加载方式：ConfigManager 自动扫描 config/ 目录下的 yaml 文件
+# ==============================================================================
+
+# 血压标准 (mmHg)
+blood_pressure:
+  hypertension_systolic: 140
+  hypertension_diastolic: 90
+  hypotension_systolic: 90
+  hypotension_diastolic: 60
+
+# 血糖标准 (mmol/L)
+blood_glucose:
+  fasting_high: 7.0
+  fasting_low: 3.9
+  postprandial_high: 11.1
+
+# 心率标准 (次/分)
+heart_rate:
+  tachycardia: 100
+  bradycardia: 60
+
+# 血氧标准 (%)
+blood_oxygen:
+  hypoxemia: 95
+
+# 灌注指数
+perfusion_index:
+  low: 1.0
+
+# 睡眠标准 (小时)
+sleep:
+  insufficient: 6
+  excessive: 9
+
+# 风险评估阈值
+risk_assessment:
+  elderly_age: 65
+  multi_disease_count: 3
+
+# 规则引擎评分标准
+rule_engine_scores:
+  # 维度评估评分（生理指标异常严重度）
+  normal: 1.0
+  mild_abnormal: 0.7
+  moderate_abnormal: 0.4
+  severe_abnormal: 0.3
+
+  # 生活方式评分
+  no_smoking: 1.0
+  quit_smoking: 0.8
+  smoking: 0.3
+  no_drinking: 1.0
+  moderate_drinking: 0.8
+  heavy_drinking: 0.4
+  regular_exercise: 1.0
+  occasional_exercise: 0.6
+  no_exercise: 0.3
+
+  # 病史评分
+  few_history: 0.7
+  many_history: 0.4
+  no_family_history: 1.0
+  has_family_history: 0.6
+  few_medication: 0.7
+  many_medication: 0.4
+
+  # 心理状态评分
+  good_mental: 1.0
+  moderate_stress: 0.7
+  high_stress: 0.4
+  good_emotion: 1.0
+  moderate_emotion: 0.7
+  poor_emotion: 0.4
+
+  # 预防措施评分
+  good_prevention: 0.7
+
+  # 疾病风险因子评分
+  few_anomaly_indicators: 0.3
+  moderate_anomaly_indicators: 0.6
+  many_anomaly_indicators: 0.9
+  few_medical_history: 0.4
+  many_medical_history: 0.8
+  no_family_risk: 0.1
+  has_family_risk: 0.5
+  few_bad_habits: 0.1
+  moderate_bad_habits: 0.4
+  many_bad_habits: 0.7
+  young_age_risk: 0.1
+  middle_age_risk: 0.3
+  senior_age_risk: 0.6
+  elderly_age_risk: 0.9
+  few_complications: 0.1
+  some_complications: 0.3
+  many_complications: 0.7

@@ -10,7 +10,7 @@
 
 from .resource import Resource
 from .resource_config import ResourceConfig
-from .resource_client import ResourceClient
+from .resource_client import ResourceClient, ModelResourceClient
 from .resource_factory import ResourceFactory
 from .resource_registry import ResourceRegistry
 from .resource_pool import ResourcePool
@@ -22,6 +22,7 @@ __all__ = [
     'Resource',
     'ResourceConfig',
     'ResourceClient',
+    'ModelResourceClient',
     'ResourceFactory',
     'ResourceRegistry',
     'ResourcePool',

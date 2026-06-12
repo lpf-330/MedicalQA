@@ -1,0 +1,39 @@
+# Git
+.git/
+.gitignore
+
+# IDE / Claude
+.claude/
+.trae/
+.vscode/
+
+# Logs
+logs/
+
+# Python cache
+__pycache__/
+*.pyc
+*.pyo
+*.egg-info/
+
+# Documentation
+doc/
+
+# Old compiled wheels (cu12 versions, not needed for cu13)
+resources/whl/
+
+# Unquantized large models (not used at runtime)
+base_models/MedPsy-4B/
+base_models/Qwen3-4B-Instruct-2507/
+
+# Docker output itself
+*.tar.gz
+
+# Test / temp
+tests/
+tmp/
+
+# Docker build files (not needed in image)
+docker/
+# 但允许自编译 whl 进入镜像（构建时 COPY 用）
+!docker/wheels/

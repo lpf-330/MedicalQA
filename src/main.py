@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+# ruff: noqa: E402
 """
 MedicalQA项目启动文件
 
@@ -14,14 +15,14 @@ from datetime import datetime
 project_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.insert(0, project_root)
 
-# 防止vllm子进程重复创建日志文件
+# 防止子进程重复创建日志文件
 _LOG_INITIALIZED = os.environ.get('MEDICALQA_LOG_INITIALIZED', '')
 
 log_format = '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
 
 if not _LOG_INITIALIZED:
     os.environ['MEDICALQA_LOG_INITIALIZED'] = 'true'
-    
+
     log_dir = os.path.join(project_root, "logs")
     os.makedirs(log_dir, exist_ok=True)
 
@@ -41,7 +42,13 @@ if not _LOG_INITIALIZED:
     root_logger.addHandler(file_handler)
     root_logger.addHandler(console_handler)
 
-    logging.getLogger('vllm').setLevel(logging.WARNING)
+    # G-1: 注册 ContextVarFilter，将 session_id/task_id 注入所有日志记录
+    from src.utils.logger import ContextVarFilter
+    context_var_filter = ContextVarFilter()
+    root_logger.addFilter(context_var_filter)
+    business_logger_ref = logging.getLogger('Business')
+    business_logger_ref.addFilter(context_var_filter)
+
     logging.getLogger('neo4j').setLevel(logging.WARNING)
 
 from src.utils.logger import get_logger
@@ -60,178 +67,52 @@ logger = get_logger(
     log_file=None,
     console_output=False
 )
-# logger.info(f"日志文件创建: {log_file}")
-from src.config.config_manager import get_config_manager, ConfigManager
-from src.config import load_global_config
-from src.resource_manager import GlobalResourceManager
-from src.controller.consult_controller import ConsultController
-from src.service.consult_service import ConsultService
-from src.schemas.consult_request import ConsultRequest, ConsultRequestBody
-from src.orchestration.agent.consult_strategy import ConsultStrategy
-from src.orchestration.chain.knowledge_retrieval_chain import KnowledgeRetrievalChain, KnowledgeRetrievalResource
-from src.orchestration.chain.answer_generation_chain import AnswerGenerationChain, AnswerGenerationResource
-from src.orchestration.tool_call_handler.Impl.neo4j_medical_handler import Neo4jMedicalHandler
-from src.orchestration.tool_call_handler.Impl.vector_retrieval_handler import VectorRetrievalHandler
-from src.orchestration.model_business_service.Impl.consult_model_service import ConsultModelService
-from src.orchestration.agent.agent_resource import AgentResource
-from src.orchestration.agent.agent import Agent
-from src.orchestration.state_machine.state_machine import StateMachine
-from src.mcp.proxy.Impl.neo4j_medical_proxy import Neo4jMedicalProxy
-from src.mcp.proxy.Impl.milvus_medical_proxy import MilvusMedicalProxy
-from src.mcp.proxy.Impl.intent_classification_proxy import IntentClassificationProxy
-from src.mcp.factory.mcp_proxy_factory import MCPProxyFactory
-from src.mcp.factory.config import ProxyType, ToolProxyConfig
-from src.orchestration.tool_call_handler.Impl.intent_classification_handler import IntentClassificationHandler
 
-from src.controller.report_controller import ReportController
+from src.config.config_manager import ConfigManager
+from src.resource_manager import GlobalResourceManager
+from src.service.consult_service import ConsultService
 from src.service.report_service import ReportService
-from src.schemas.report_request import ReportRequest, ReportRequestBody
-from src.orchestration.agent.report_strategy.report_strategy import ReportStrategy
-from src.orchestration.chain.data_prepare_chain.data_prepare_chain import DataPrepareChain, DataPrepareResource
-from src.orchestration.chain.multi_analysis_chain.multi_analysis_chain import MultiAnalysisChain, MultiAnalysisResource
-from src.orchestration.chain.dimension_evaluation_chain.dimension_evaluation_chain import DimensionEvaluationChain, DimensionEvaluationResource
-from src.orchestration.chain.report_knowledge_retrieval_chain.report_knowledge_retrieval_chain import ReportKnowledgeRetrievalChain, ReportKnowledgeRetrievalResource
-from src.orchestration.chain.integration_chain.integration_chain import IntegrationChain, IntegrationResource
-from src.orchestration.chain.report_generation_chain.report_generation_chain import ReportGenerationChain, ReportGenerationResource
-from src.orchestration.model_business_service.Impl.report_model_service import ReportModelService
+from src.controller.consult_controller import ConsultController
+from src.controller.report_controller import ReportController
 from fastapi import FastAPI
 from contextlib import asynccontextmanager
 import uvicorn
 
 
-def _init_business_components(config_manager: ConfigManager):
-    neo4j_resource_config = config_manager.get_resource_config("neo4j_config")
-    vllm_resource_config = config_manager.get_resource_config("vllm_config")
-    milvus_resource_config = config_manager.get_resource_config("milvus_config")
-    vector_model_resource_config = config_manager.get_resource_config("vector_model_config")
+def _check_gpu_vram(vram_sufficient_gb: float = 8.0) -> None:
+    """
+    系统启动前显存检查
 
-    neo4j_proxy = Neo4jMedicalProxy({
-        "uri": neo4j_resource_config.uri,
-        "user": neo4j_resource_config.user,
-        "password": neo4j_resource_config.password
-    })
+    检查GPU可用显存情况，在显存可能不足时输出警告。
+    - 可用显存充足：输出INFO日志，正常启动
+    - 可用显存不足：输出WARNING日志，提示显存可能不足
+    - CUDA不可用或torch未安装：输出INFO日志，跳过检查
+    """
+    try:
+        import torch
+        if not torch.cuda.is_available():
+            logger.info("[显存检查] CUDA不可用，跳过显存检查")
+            return
 
-    milvus_proxy = MilvusMedicalProxy({
-        "milvus_uri": milvus_resource_config.uri,
-        "milvus_user": milvus_resource_config.user,
-        "milvus_password": milvus_resource_config.password,
-        "milvus_token": milvus_resource_config.token,
-        "vector_model_path": vector_model_resource_config.model_path,
-        "vector_device": vector_model_resource_config.device,
-        "vector_dimension": vector_model_resource_config.dimension
-    })
+        gpu_id = 0
+        total_vram = torch.cuda.get_device_properties(gpu_id).total_memory
+        allocated_vram = torch.cuda.memory_allocated(gpu_id)
+        available_vram = total_vram - allocated_vram
+        available_gb = available_vram / (1024 ** 3)
+        total_gb = total_vram / (1024 ** 3)
+        total_mb = total_vram / (1024 ** 2)
+        available_mb = available_vram / (1024 ** 2)
+        sufficient = available_gb > vram_sufficient_gb
+        logger.info(f"[GPU_CHECK] GPU显存检查: total={total_mb:.0f}MB, available={available_mb:.0f}MB, sufficient={sufficient}")
 
-    neo4j_handler = Neo4jMedicalHandler()
-    neo4j_handler._init_tool(neo4j_proxy)
-
-    vector_handler = VectorRetrievalHandler()
-    vector_handler._init_tool(milvus_proxy)
-
-    consult_model_service = ConsultModelService()
-    logger.info("咨询模型服务创建完成")
-
-    knowledge_retrieval_resource = KnowledgeRetrievalResource(
-        vector_handler=vector_handler,
-        neo4j_handler=neo4j_handler
-    )
-    knowledge_retrieval_chain = KnowledgeRetrievalChain(knowledge_retrieval_resource)
-
-    answer_generation_resource = AnswerGenerationResource(
-        model_service=consult_model_service
-    )
-    answer_generation_chain = AnswerGenerationChain(answer_generation_resource)
-
-    agent_resource = AgentResource()
-    agent_resource.register_chain("knowledge_retrieval_chain", knowledge_retrieval_chain)
-    agent_resource.register_chain("answer_generation_chain", answer_generation_chain)
-    agent_resource.register_tool_handler("neo4j_medical", neo4j_handler)
-    agent_resource.register_tool_handler("vector_retrieval", vector_handler)
-    agent_resource.model_service = consult_model_service
-
-    consult_strategy = ConsultStrategy()
-
-    agent = Agent(
-        strategy=consult_strategy,
-        resources=agent_resource
-    )
-
-    consult_service = ConsultService(agent=agent)
-    consult_controller = ConsultController(consult_service=consult_service)
-
-    report_model_service = ReportModelService()
-    logger.info("报告模型服务创建完成")
-
-    intent_handler = None
-    intent_model_resource_config = config_manager.get_resource_config("intent_model_config")
-    if intent_model_resource_config is not None:
-        try:
-            intent_classification_proxy = IntentClassificationProxy({
-                "model_path": intent_model_resource_config.model_path,
-                "device": intent_model_resource_config.device,
-                "max_length": intent_model_resource_config.max_length
-            })
-            intent_classification_proxy._init_tool()
-            logger.info("意图分类代理创建完成")
-
-            intent_handler = IntentClassificationHandler()
-            intent_handler._init_tool(intent_classification_proxy)
-            logger.info("意图分类Handler创建完成")
-        except Exception as e:
-            logger.warning(f"意图分类Handler创建失败，将使用规则引擎降级: {str(e)}")
-            intent_handler = None
-    else:
-        logger.info("未配置intent_model_config，MultiAnalysisChain将使用规则引擎降级")
-
-    data_prepare_resource = DataPrepareResource()
-    data_prepare_chain = DataPrepareChain(resource=data_prepare_resource)
-
-    multi_analysis_resource = MultiAnalysisResource(intent_handler=intent_handler)
-    multi_analysis_chain = MultiAnalysisChain(resource=multi_analysis_resource)
-
-    dimension_evaluation_resource = DimensionEvaluationResource(
-        vector_handler=vector_handler,
-        neo4j_handler=neo4j_handler
-    )
-    dimension_evaluation_chain = DimensionEvaluationChain(resource=dimension_evaluation_resource)
-
-    report_knowledge_retrieval_resource = ReportKnowledgeRetrievalResource(
-        vector_handler=vector_handler,
-        neo4j_handler=neo4j_handler
-    )
-    report_knowledge_retrieval_chain = ReportKnowledgeRetrievalChain(resource=report_knowledge_retrieval_resource)
-
-    integration_resource = IntegrationResource()
-    integration_chain = IntegrationChain(resource=integration_resource)
-
-    report_generation_resource = ReportGenerationResource(
-        model_service=report_model_service
-    )
-    report_generation_chain = ReportGenerationChain(resource=report_generation_resource)
-
-    report_strategy = ReportStrategy()
-
-    report_agent_resource = AgentResource(
-        model_service=report_model_service,
-        chain_registry={
-            "data_prepare_chain": data_prepare_chain,
-            "multi_analysis_chain": multi_analysis_chain,
-            "dimension_evaluation_chain": dimension_evaluation_chain,
-            "report_knowledge_retrieval_chain": report_knowledge_retrieval_chain,
-            "integration_chain": integration_chain,
-            "report_generation_chain": report_generation_chain
-        },
-        tool_handlers={
-            "neo4j_tool": neo4j_handler,
-            "vector_tool": vector_handler
-        }
-    )
-
-    report_agent = Agent(strategy=report_strategy, resources=report_agent_resource)
-
-    report_service = ReportService(agent=report_agent)
-    report_controller = ReportController(report_service=report_service)
-
-    return consult_controller, neo4j_handler, vector_handler, consult_model_service, report_controller, report_model_service
+        if sufficient:
+            logger.info(f"[显存检查] GPU显存充足: 总计={total_gb:.1f}GB, 可用={available_gb:.1f}GB")
+        else:
+            logger.warning(f"[显存检查] GPU显存可能不足: 总计={total_gb:.1f}GB, 可用={available_gb:.1f}GB (建议 > {vram_sufficient_gb:.0f}GB)")
+    except ImportError:
+        logger.info("[显存检查] torch未安装，跳过显存检查")
+    except Exception as e:
+        logger.warning(f"[显存检查] 显存检查异常: {e}")
 
 
 @asynccontextmanager
@@ -240,47 +121,120 @@ async def lifespan(app: FastAPI):
     logger.info("=" * 60)
     logger.info("初始化健康咨询服务...")
     logger.info("=" * 60)
-    
+
     try:
+        logger.info("[STARTUP_SEQUENCE] Step 1: 加载配置")
+        logger.info("[STARTUP_SEQUENCE] Step 2: 初始化GlobalResourceManager")
         config_manager = GlobalResourceManager.initialize()
-        
-        logger.info("步骤4: 初始化业务组件...")
-        consult_controller, neo4j_handler, vector_handler, consult_model_service, report_controller, report_model_service = _init_business_components(config_manager)
+        global_config = config_manager.to_global_config()
+
+        # 注册子进程异常退出保护
+        from src.resource_manager.process_manager import ProcessManager
+        ProcessManager.setup_signal_handlers()
+        ProcessManager.register_atexit()
+
+        # 启动前显存检查
+        _check_gpu_vram(global_config.vram_sufficient_gb)
+
+        logger.info("[STARTUP_SEQUENCE] Step 3: 创建初始资源实例")
+
+        # 初始化MCPProxyFactory — 设计依据：2.4.2节工厂使用约定 + 6.1节系统启动流程
+        # MCPProxyFactory属于MCP代理层，由main.py在GlobalResourceManager之后、Service创建之前初始化
+        from src.mcp.factory.mcp_proxy_factory import MCPProxyFactory
+        from src.mcp.factory.tool_proxy_config import ToolProxyConfig, ProxyType
+
+        tool_proxy_configs = {
+            "neo4j_medical": ToolProxyConfig(
+                proxy_type=ProxyType.FAKE,
+                connection_info={"tool_name": "neo4j_medical"}
+            ),
+            "vector_retrieval": ToolProxyConfig(
+                proxy_type=ProxyType.FAKE,
+                connection_info={"tool_name": "vector_retrieval"}
+            ),
+        }
+
+        # 可选工具：intent_classification（配置驱动）
+        intent_model_resource_config = config_manager.resource_configs.get("intent_model_config")
+        if intent_model_resource_config is not None:
+            tool_proxy_configs["intent_classification"] = ToolProxyConfig(
+                proxy_type=ProxyType.FAKE,
+                connection_info={
+                    "tool_name": "intent_classification",
+                    "model_path": intent_model_resource_config.model_path,
+                    "device": intent_model_resource_config.device,
+                    "max_length": intent_model_resource_config.max_length,
+                }
+            )
+
+        # 可选工具：ner_model（配置驱动）
+        ner_model_resource_config = config_manager.resource_configs.get("ner_model_config")
+        if ner_model_resource_config is not None:
+            tool_proxy_configs["ner_model"] = ToolProxyConfig(
+                proxy_type=ProxyType.FAKE,
+                connection_info={
+                    "tool_name": "ner_model",
+                    "model_path": ner_model_resource_config.model_path,
+                    "device": ner_model_resource_config.device,
+                    "max_length": ner_model_resource_config.max_length,
+                }
+            )
+
+        factory = MCPProxyFactory.get_instance()
+        factory.initialize(tool_proxy_configs)
+        logger.info("[STARTUP_SEQUENCE] MCPProxyFactory 初始化完成")
+
+        logger.info("[STARTUP_SEQUENCE] Step 4: 初始化业务组件")
+        consult_service = ConsultService(config_manager=config_manager)
+        report_service = ReportService(config_manager=config_manager)
+
+        consult_controller = ConsultController(consult_service=consult_service)
+        logger.info("[COMPONENT_CREATE] 创建组件: ConsultController, type=ConsultController")
+
+        report_controller = ReportController(report_service=report_service)
+        logger.info("[COMPONENT_CREATE] 创建组件: ReportController, type=ReportController")
+
         app.state.consult_controller = consult_controller
-        app.state.neo4j_handler = neo4j_handler
-        app.state.vector_handler = vector_handler
-        app.state.model_service = consult_model_service
         app.state.report_controller = report_controller
-        app.state.report_model_service = report_model_service
-        
+
+        logger.info("[STARTUP_SEQUENCE] Step 5: 启动服务")
+        try:
+            warmup_messages = [
+                {"role": "system", "content": "你是一个健康咨询助手。"},
+                {"role": "user", "content": "你好"}
+            ]
+            warmup_result = consult_service.consult_model_service.call_model(warmup_messages, timeout=global_config.warmup_timeout)
+            logger.info(f"模型预热完成: response_length={len(warmup_result)}")
+        except Exception as e:
+            logger.warning(f"模型预热失败（不影响服务启动）: {str(e)}")
+
         logger.info("=" * 60)
         logger.info("健康咨询服务初始化完成")
         logger.info("=" * 60)
-        
-        yield
-        
-        logger.info("=" * 60)
-        logger.info("正在关闭服务...")
-        logger.info("=" * 60)
-        
-        model_service = getattr(app.state, 'model_service', None)
-        if model_service:
-            model_service.release()
-        report_model_service = getattr(app.state, 'report_model_service', None)
-        if report_model_service:
-            report_model_service.release()
-        vector_handler = getattr(app.state, 'vector_handler', None)
-        if vector_handler:
-            vector_handler.release()
-        neo4j_handler = getattr(app.state, 'neo4j_handler', None)
-        if neo4j_handler:
-            neo4j_handler.release()
-        GlobalResourceManager.INSTANCE.shutdown()
-        
-        logger.info("服务已关闭")
-        
+
+        try:
+            yield
+        finally:
+            logger.info("=" * 60)
+            logger.info("正在关闭服务...")
+            logger.info("=" * 60)
+            logger.info("[SHUTDOWN] 系统开始关闭")
+
+            try:
+                logger.info("[SHUTDOWN] 执行 GlobalResourceManager.shutdown()")
+                GlobalResourceManager.INSTANCE.shutdown()
+            except Exception as shutdown_error:
+                logger.error(f"[SHUTDOWN] GlobalResourceManager.shutdown() 失败: error_type={type(shutdown_error).__name__}")
+
+            logger.info("[SHUTDOWN] 系统关闭完成")
+
     except Exception as e:
-        logger.error(f"初始化服务失败: {str(e)}", exc_info=True)
+        logger.error(f"服务生命周期异常: error_type={type(e).__name__}")
+        try:
+            if GlobalResourceManager.INSTANCE is not None:
+                GlobalResourceManager.INSTANCE.shutdown()
+        except Exception as shutdown_error:
+            logger.error(f"[SHUTDOWN] 初始化失败后关闭异常: error_type={type(shutdown_error).__name__}")
         raise
 
 
@@ -290,6 +244,13 @@ app = FastAPI(
     version="1.0.0",
     lifespan=lifespan
 )
+
+# 注册 Controller 层路由
+from src.controller.consult_controller import router as consult_router
+from src.controller.report_controller import router as report_router
+
+app.include_router(consult_router)
+app.include_router(report_router)
 
 
 @app.get("/")
@@ -308,61 +269,24 @@ async def health_check():
     }
 
 
-@app.post("/api/v1/consult")
-async def consult(body: ConsultRequestBody, request_id: str = "default", user_id: str = None):
-    """
-    健康咨询API
-    
-    Args:
-        body: 咨询请求体（包含task_id, question, chat_history等）
-        request_id: 请求ID（可选）
-        user_id: 用户ID（可选）
-        
-    Returns:
-        咨询结果
-    """
-    consult_request = ConsultRequest(
-        request_id=request_id,
-        user_id=user_id,
-        body=body
-    )
-    controller = app.state.consult_controller
-    return controller.consult(consult_request)
-
-
-@app.post("/api/v1/report")
-async def generate_report(body: ReportRequestBody, request_id: str = "default", user_id: str = None):
-    """
-    健康报告生成API
-    
-    Args:
-        body: 报告请求体（包含task_id, monitoring_data, user_profile等）
-        request_id: 请求ID（可选）
-        user_id: 用户ID（可选）
-        
-    Returns:
-        健康报告生成结果
-    """
-    report_request = ReportRequest(
-        request_id=request_id,
-        user_id=user_id,
-        body=body
-    )
-    controller = app.state.report_controller
-    return controller.generate_report(report_request)
-
-
 def main():
     """启动服务"""
     logger.info("启动MedicalQA服务...")
-    
-    uvicorn.run(
-        app,
-        host="0.0.0.0",
-        port=8001,
-        log_level="info",
-        timeout_keep_alive=60
-    )
+
+    try:
+        from src.config.config_manager import get_config_manager
+        config_manager = get_config_manager()
+        global_config = config_manager.to_global_config()
+
+        uvicorn.run(
+            app,
+            host="0.0.0.0",
+            port=global_config.server_port,
+            log_level="info",
+            timeout_keep_alive=global_config.timeout_keep_alive
+        )
+    except KeyboardInterrupt:
+        logger.info("收到中断信号，服务已停止")
 
 
 if __name__ == "__main__":

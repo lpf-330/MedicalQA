@@ -1,0 +1,802 @@
+[
+  {
+    "type": "medpsy_dimension",
+    "dimension_id": "D1",
+    "dimension_name": "生理指标",
+    "messages": [
+      {
+        "role": "system",
+        "content": "你是一位全科医生，擅长精炼评估。请在3秒内、不超过50字完成思考，然后直接输出JSON。"
+      },
+      {
+        "role": "user",
+        "content": "你是健康评估专家。评估维度: 生理指标(权重0.3)\n子指标: 血压水平, 血糖水平, 血脂水平, BMI指数, 心率\n\n严格按以下JSON格式输出，不要输出任何其他内容:\n{\"dimension_score\":0.72,\"sub_indicator_scores\":{\"指标名\":0.65},\"dimension_reasoning\":\"总体评估\"}\n\n对每个子指标评分(0-1)。\n\n以下是评估依据:\n用户={\"age\": 68, \"gender\": \"男\", \"chronic_diseases\": [\"高血压\", \"糖尿病\"], \"medications\": [\"降压药\", \"二甲双胍\"]} 异常=[{\"item\": \"血肌酐\", \"value\": \"180μmol/L\", \"status\": \"偏高\"}, {\"item\": \"eGFR\", \"value\": \"38\", \"status\": \"偏低\"}] 风险={}\n知识={\"summary\": \"糖尿病患者需定期监测血糖和糖化血红蛋白\", \"refined_knowledge\": [\"空腹血糖目标4.4-7.0mmol/L\"]}"
+      }
+    ],
+    "text": "你是健康评估专家。评估维度: 生理指标(权重0.3)\n子指标: 血压水平, 血糖水平, 血脂水平, BMI指数, 心率\n\n严格按以下JSON格式输出，不要输出任何其他内容:\n{\"dimension_score\":0.72,\"sub_indicator_scores\":{\"指标名\":0.65},\"dimension_reasoning\":\"总体评估\"}\n\n对每个子指标评分(0-1)。\n\n以下是评估依据:\n用户={\"age\": 68, \"gender\": \"男\", \"chronic_diseases\": [\"高血压\", \"糖尿病\"], \"medications\": [\"降压药\", \"二甲双胍\"]} 异常=[{\"item\": \"血肌酐\", \"value\": \"180μmol/L\", \"status\": \"偏高\"}, {\"item\": \"eGFR\", \"value\": \"38\", \"status\": \"偏低\"}] 风险={}\n知识={\"summary\": \"糖尿病患者需定期监测血糖和糖化血红蛋白\", \"refined_knowledge\": [\"空腹血糖目标4.4-7.0mmol/L\"]}"
+  },
+  {
+    "type": "medpsy_dimension",
+    "dimension_id": "D2",
+    "dimension_name": "用药情况",
+    "messages": [
+      {
+        "role": "system",
+        "content": "你是一位全科医生，擅长精炼评估。请在3秒内、不超过50字完成思考，然后直接输出JSON。"
+      },
+      {
+        "role": "user",
+        "content": "你是健康评估专家。评估维度: 用药情况(权重0.2)\n子指标: 用药依从性, 药物副作用, 药物相互作用\n\n严格按以下JSON格式输出，不要输出任何其他内容:\n{\"dimension_score\":0.72,\"sub_indicator_scores\":{\"指标名\":0.65},\"dimension_reasoning\":\"总体评估\"}\n\n对每个子指标评分(0-1)。\n\n以下是评估依据:\n用户={\"age\": 65, \"gender\": \"男\", \"chronic_diseases\": [\"慢性肾病\"], \"medications\": [\"ACEI\", \"利尿剂\"]} 异常=[{\"item\": \"收缩压\", \"value\": \"165mmHg\", \"status\": \"偏高\"}, {\"item\": \"空腹血糖\", \"value\": \"8.2mmol/L\", \"status\": \"偏高\"}] 风险={}\n知识={\"summary\": \"骨质疏松需补充钙和维生素D，预防跌倒\", \"refined_knowledge\": [\"T值<-2.5为骨质疏松\"]}"
+      }
+    ],
+    "text": "你是健康评估专家。评估维度: 用药情况(权重0.2)\n子指标: 用药依从性, 药物副作用, 药物相互作用\n\n严格按以下JSON格式输出，不要输出任何其他内容:\n{\"dimension_score\":0.72,\"sub_indicator_scores\":{\"指标名\":0.65},\"dimension_reasoning\":\"总体评估\"}\n\n对每个子指标评分(0-1)。\n\n以下是评估依据:\n用户={\"age\": 65, \"gender\": \"男\", \"chronic_diseases\": [\"慢性肾病\"], \"medications\": [\"ACEI\", \"利尿剂\"]} 异常=[{\"item\": \"收缩压\", \"value\": \"165mmHg\", \"status\": \"偏高\"}, {\"item\": \"空腹血糖\", \"value\": \"8.2mmol/L\", \"status\": \"偏高\"}] 风险={}\n知识={\"summary\": \"骨质疏松需补充钙和维生素D，预防跌倒\", \"refined_knowledge\": [\"T值<-2.5为骨质疏松\"]}"
+  },
+  {
+    "type": "medpsy_dimension",
+    "dimension_id": "D1",
+    "dimension_name": "生理指标",
+    "messages": [
+      {
+        "role": "system",
+        "content": "你是一位全科医生，擅长精炼评估。请在3秒内、不超过50字完成思考，然后直接输出JSON。"
+      },
+      {
+        "role": "user",
+        "content": "你是健康评估专家。评估维度: 生理指标(权重0.3)\n子指标: 血压水平, 血糖水平, 血脂水平, BMI指数, 心率\n\n严格按以下JSON格式输出，不要输出任何其他内容:\n{\"dimension_score\":0.72,\"sub_indicator_scores\":{\"指标名\":0.65},\"dimension_reasoning\":\"总体评估\"}\n\n对每个子指标评分(0-1)。\n\n以下是评估依据:\n用户={\"age\": 63, \"gender\": \"男\", \"chronic_diseases\": [\"痛风\", \"高血脂\"], \"medications\": [\"别嘌醇\", \"非诺贝特\"]} 异常=[{\"item\": \"收缩压\", \"value\": \"165mmHg\", \"status\": \"偏高\"}, {\"item\": \"空腹血糖\", \"value\": \"8.2mmol/L\", \"status\": \"偏高\"}] 风险={}\n知识={\"summary\": \"高血压患者应控制钠盐摄入，每日不超过5g\", \"refined_knowledge\": [\"高血压需长期服药控制\", \"血压目标<140/90mmHg\"]}"
+      }
+    ],
+    "text": "你是健康评估专家。评估维度: 生理指标(权重0.3)\n子指标: 血压水平, 血糖水平, 血脂水平, BMI指数, 心率\n\n严格按以下JSON格式输出，不要输出任何其他内容:\n{\"dimension_score\":0.72,\"sub_indicator_scores\":{\"指标名\":0.65},\"dimension_reasoning\":\"总体评估\"}\n\n对每个子指标评分(0-1)。\n\n以下是评估依据:\n用户={\"age\": 63, \"gender\": \"男\", \"chronic_diseases\": [\"痛风\", \"高血脂\"], \"medications\": [\"别嘌醇\", \"非诺贝特\"]} 异常=[{\"item\": \"收缩压\", \"value\": \"165mmHg\", \"status\": \"偏高\"}, {\"item\": \"空腹血糖\", \"value\": \"8.2mmol/L\", \"status\": \"偏高\"}] 风险={}\n知识={\"summary\": \"高血压患者应控制钠盐摄入，每日不超过5g\", \"refined_knowledge\": [\"高血压需长期服药控制\", \"血压目标<140/90mmHg\"]}"
+  },
+  {
+    "type": "medpsy_dimension",
+    "dimension_id": "D1",
+    "dimension_name": "生理指标",
+    "messages": [
+      {
+        "role": "system",
+        "content": "你是一位全科医生，擅长精炼评估。请在3秒内、不超过50字完成思考，然后直接输出JSON。"
+      },
+      {
+        "role": "user",
+        "content": "你是健康评估专家。评估维度: 生理指标(权重0.3)\n子指标: 血压水平, 血糖水平, 血脂水平, BMI指数, 心率\n\n严格按以下JSON格式输出，不要输出任何其他内容:\n{\"dimension_score\":0.72,\"sub_indicator_scores\":{\"指标名\":0.65},\"dimension_reasoning\":\"总体评估\"}\n\n对每个子指标评分(0-1)。\n\n以下是评估依据:\n用户={\"age\": 75, \"gender\": \"女\", \"chronic_diseases\": [\"骨质疏松\", \"高血压\"], \"medications\": [\"钙片\", \"ARB类\"]} 异常=[{\"item\": \"LDL-C\", \"value\": \"4.1mmol/L\", \"status\": \"偏高\"}, {\"item\": \"BMI\", \"value\": \"28.5\", \"status\": \"超重\"}] 风险={}\n知识={\"summary\": \"骨质疏松需补充钙和维生素D，预防跌倒\", \"refined_knowledge\": [\"T值<-2.5为骨质疏松\"]}"
+      }
+    ],
+    "text": "你是健康评估专家。评估维度: 生理指标(权重0.3)\n子指标: 血压水平, 血糖水平, 血脂水平, BMI指数, 心率\n\n严格按以下JSON格式输出，不要输出任何其他内容:\n{\"dimension_score\":0.72,\"sub_indicator_scores\":{\"指标名\":0.65},\"dimension_reasoning\":\"总体评估\"}\n\n对每个子指标评分(0-1)。\n\n以下是评估依据:\n用户={\"age\": 75, \"gender\": \"女\", \"chronic_diseases\": [\"骨质疏松\", \"高血压\"], \"medications\": [\"钙片\", \"ARB类\"]} 异常=[{\"item\": \"LDL-C\", \"value\": \"4.1mmol/L\", \"status\": \"偏高\"}, {\"item\": \"BMI\", \"value\": \"28.5\", \"status\": \"超重\"}] 风险={}\n知识={\"summary\": \"骨质疏松需补充钙和维生素D，预防跌倒\", \"refined_knowledge\": [\"T值<-2.5为骨质疏松\"]}"
+  },
+  {
+    "type": "medpsy_dimension",
+    "dimension_id": "D5",
+    "dimension_name": "检查情况",
+    "messages": [
+      {
+        "role": "system",
+        "content": "你是一位全科医生，擅长精炼评估。请在3秒内、不超过50字完成思考，然后直接输出JSON。"
+      },
+      {
+        "role": "user",
+        "content": "你是健康评估专家。评估维度: 检查情况(权重0.15)\n子指标: 检查完整性, 指标异常追踪, 复查及时性\n\n严格按以下JSON格式输出，不要输出任何其他内容:\n{\"dimension_score\":0.72,\"sub_indicator_scores\":{\"指标名\":0.65},\"dimension_reasoning\":\"总体评估\"}\n\n对每个子指标评分(0-1)。\n\n以下是评估依据:\n用户={\"age\": 68, \"gender\": \"男\", \"chronic_diseases\": [\"高血压\", \"糖尿病\"], \"medications\": [\"降压药\", \"二甲双胍\"]} 异常=[{\"item\": \"骨密度T值\", \"value\": \"-3.0\", \"status\": \"偏低\"}, {\"item\": \"维生素D\", \"value\": \"15ng/mL\", \"status\": \"不足\"}] 风险={}\n知识={\"summary\": \"糖尿病患者需定期监测血糖和糖化血红蛋白\", \"refined_knowledge\": [\"空腹血糖目标4.4-7.0mmol/L\"]}"
+      }
+    ],
+    "text": "你是健康评估专家。评估维度: 检查情况(权重0.15)\n子指标: 检查完整性, 指标异常追踪, 复查及时性\n\n严格按以下JSON格式输出，不要输出任何其他内容:\n{\"dimension_score\":0.72,\"sub_indicator_scores\":{\"指标名\":0.65},\"dimension_reasoning\":\"总体评估\"}\n\n对每个子指标评分(0-1)。\n\n以下是评估依据:\n用户={\"age\": 68, \"gender\": \"男\", \"chronic_diseases\": [\"高血压\", \"糖尿病\"], \"medications\": [\"降压药\", \"二甲双胍\"]} 异常=[{\"item\": \"骨密度T值\", \"value\": \"-3.0\", \"status\": \"偏低\"}, {\"item\": \"维生素D\", \"value\": \"15ng/mL\", \"status\": \"不足\"}] 风险={}\n知识={\"summary\": \"糖尿病患者需定期监测血糖和糖化血红蛋白\", \"refined_knowledge\": [\"空腹血糖目标4.4-7.0mmol/L\"]}"
+  },
+  {
+    "type": "medpsy_dimension",
+    "dimension_id": "D5",
+    "dimension_name": "检查情况",
+    "messages": [
+      {
+        "role": "system",
+        "content": "你是一位全科医生，擅长精炼评估。请在3秒内、不超过50字完成思考，然后直接输出JSON。"
+      },
+      {
+        "role": "user",
+        "content": "你是健康评估专家。评估维度: 检查情况(权重0.15)\n子指标: 检查完整性, 指标异常追踪, 复查及时性\n\n严格按以下JSON格式输出，不要输出任何其他内容:\n{\"dimension_score\":0.72,\"sub_indicator_scores\":{\"指标名\":0.65},\"dimension_reasoning\":\"总体评估\"}\n\n对每个子指标评分(0-1)。\n\n以下是评估依据:\n用户={\"age\": 63, \"gender\": \"男\", \"chronic_diseases\": [\"痛风\", \"高血脂\"], \"medications\": [\"别嘌醇\", \"非诺贝特\"]} 异常=[{\"item\": \"LDL-C\", \"value\": \"4.1mmol/L\", \"status\": \"偏高\"}, {\"item\": \"BMI\", \"value\": \"28.5\", \"status\": \"超重\"}] 风险={}\n知识={\"summary\": \"慢性肾病需限制蛋白质摄入并监测肾功能\", \"refined_knowledge\": [\"eGFR<60需积极干预\"]}"
+      }
+    ],
+    "text": "你是健康评估专家。评估维度: 检查情况(权重0.15)\n子指标: 检查完整性, 指标异常追踪, 复查及时性\n\n严格按以下JSON格式输出，不要输出任何其他内容:\n{\"dimension_score\":0.72,\"sub_indicator_scores\":{\"指标名\":0.65},\"dimension_reasoning\":\"总体评估\"}\n\n对每个子指标评分(0-1)。\n\n以下是评估依据:\n用户={\"age\": 63, \"gender\": \"男\", \"chronic_diseases\": [\"痛风\", \"高血脂\"], \"medications\": [\"别嘌醇\", \"非诺贝特\"]} 异常=[{\"item\": \"LDL-C\", \"value\": \"4.1mmol/L\", \"status\": \"偏高\"}, {\"item\": \"BMI\", \"value\": \"28.5\", \"status\": \"超重\"}] 风险={}\n知识={\"summary\": \"慢性肾病需限制蛋白质摄入并监测肾功能\", \"refined_knowledge\": [\"eGFR<60需积极干预\"]}"
+  },
+  {
+    "type": "medpsy_dimension",
+    "dimension_id": "D5",
+    "dimension_name": "检查情况",
+    "messages": [
+      {
+        "role": "system",
+        "content": "你是一位全科医生，擅长精炼评估。请在3秒内、不超过50字完成思考，然后直接输出JSON。"
+      },
+      {
+        "role": "user",
+        "content": "你是健康评估专家。评估维度: 检查情况(权重0.15)\n子指标: 检查完整性, 指标异常追踪, 复查及时性\n\n严格按以下JSON格式输出，不要输出任何其他内容:\n{\"dimension_score\":0.72,\"sub_indicator_scores\":{\"指标名\":0.65},\"dimension_reasoning\":\"总体评估\"}\n\n对每个子指标评分(0-1)。\n\n以下是评估依据:\n用户={\"age\": 70, \"gender\": \"男\", \"chronic_diseases\": [\"COPD\", \"高血压\"], \"medications\": [\"支气管扩张剂\", \"氨氯地平\"]} 异常=[{\"item\": \"收缩压\", \"value\": \"165mmHg\", \"status\": \"偏高\"}, {\"item\": \"空腹血糖\", \"value\": \"8.2mmol/L\", \"status\": \"偏高\"}] 风险={}\n知识={\"summary\": \"糖尿病患者需定期监测血糖和糖化血红蛋白\", \"refined_knowledge\": [\"空腹血糖目标4.4-7.0mmol/L\"]}"
+      }
+    ],
+    "text": "你是健康评估专家。评估维度: 检查情况(权重0.15)\n子指标: 检查完整性, 指标异常追踪, 复查及时性\n\n严格按以下JSON格式输出，不要输出任何其他内容:\n{\"dimension_score\":0.72,\"sub_indicator_scores\":{\"指标名\":0.65},\"dimension_reasoning\":\"总体评估\"}\n\n对每个子指标评分(0-1)。\n\n以下是评估依据:\n用户={\"age\": 70, \"gender\": \"男\", \"chronic_diseases\": [\"COPD\", \"高血压\"], \"medications\": [\"支气管扩张剂\", \"氨氯地平\"]} 异常=[{\"item\": \"收缩压\", \"value\": \"165mmHg\", \"status\": \"偏高\"}, {\"item\": \"空腹血糖\", \"value\": \"8.2mmol/L\", \"status\": \"偏高\"}] 风险={}\n知识={\"summary\": \"糖尿病患者需定期监测血糖和糖化血红蛋白\", \"refined_knowledge\": [\"空腹血糖目标4.4-7.0mmol/L\"]}"
+  },
+  {
+    "type": "medpsy_dimension",
+    "dimension_id": "D4",
+    "dimension_name": "饮食状况",
+    "messages": [
+      {
+        "role": "system",
+        "content": "你是一位全科医生，擅长精炼评估。请在3秒内、不超过50字完成思考，然后直接输出JSON。"
+      },
+      {
+        "role": "user",
+        "content": "你是健康评估专家。评估维度: 饮食状况(权重0.15)\n子指标: 饮食均衡性, 营养摄入, 饮食禁忌遵守\n\n严格按以下JSON格式输出，不要输出任何其他内容:\n{\"dimension_score\":0.72,\"sub_indicator_scores\":{\"指标名\":0.65},\"dimension_reasoning\":\"总体评估\"}\n\n对每个子指标评分(0-1)。\n\n以下是评估依据:\n用户={\"age\": 80, \"gender\": \"女\", \"chronic_diseases\": [\"心房颤动\", \"糖尿病\"], \"medications\": [\"华法林\", \"胰岛素\"]} 异常=[{\"item\": \"血肌酐\", \"value\": \"180μmol/L\", \"status\": \"偏高\"}, {\"item\": \"eGFR\", \"value\": \"38\", \"status\": \"偏低\"}] 风险={}\n知识={\"summary\": \"糖尿病患者需定期监测血糖和糖化血红蛋白\", \"refined_knowledge\": [\"空腹血糖目标4.4-7.0mmol/L\"]}"
+      }
+    ],
+    "text": "你是健康评估专家。评估维度: 饮食状况(权重0.15)\n子指标: 饮食均衡性, 营养摄入, 饮食禁忌遵守\n\n严格按以下JSON格式输出，不要输出任何其他内容:\n{\"dimension_score\":0.72,\"sub_indicator_scores\":{\"指标名\":0.65},\"dimension_reasoning\":\"总体评估\"}\n\n对每个子指标评分(0-1)。\n\n以下是评估依据:\n用户={\"age\": 80, \"gender\": \"女\", \"chronic_diseases\": [\"心房颤动\", \"糖尿病\"], \"medications\": [\"华法林\", \"胰岛素\"]} 异常=[{\"item\": \"血肌酐\", \"value\": \"180μmol/L\", \"status\": \"偏高\"}, {\"item\": \"eGFR\", \"value\": \"38\", \"status\": \"偏低\"}] 风险={}\n知识={\"summary\": \"糖尿病患者需定期监测血糖和糖化血红蛋白\", \"refined_knowledge\": [\"空腹血糖目标4.4-7.0mmol/L\"]}"
+  },
+  {
+    "type": "medpsy_dimension",
+    "dimension_id": "D2",
+    "dimension_name": "用药情况",
+    "messages": [
+      {
+        "role": "system",
+        "content": "你是一位全科医生，擅长精炼评估。请在3秒内、不超过50字完成思考，然后直接输出JSON。"
+      },
+      {
+        "role": "user",
+        "content": "你是健康评估专家。评估维度: 用药情况(权重0.2)\n子指标: 用药依从性, 药物副作用, 药物相互作用\n\n严格按以下JSON格式输出，不要输出任何其他内容:\n{\"dimension_score\":0.72,\"sub_indicator_scores\":{\"指标名\":0.65},\"dimension_reasoning\":\"总体评估\"}\n\n对每个子指标评分(0-1)。\n\n以下是评估依据:\n用户={\"age\": 80, \"gender\": \"女\", \"chronic_diseases\": [\"心房颤动\", \"糖尿病\"], \"medications\": [\"华法林\", \"胰岛素\"]} 异常=[{\"item\": \"收缩压\", \"value\": \"165mmHg\", \"status\": \"偏高\"}, {\"item\": \"空腹血糖\", \"value\": \"8.2mmol/L\", \"status\": \"偏高\"}] 风险={}\n知识={\"summary\": \"高血压患者应控制钠盐摄入，每日不超过5g\", \"refined_knowledge\": [\"高血压需长期服药控制\", \"血压目标<140/90mmHg\"]}"
+      }
+    ],
+    "text": "你是健康评估专家。评估维度: 用药情况(权重0.2)\n子指标: 用药依从性, 药物副作用, 药物相互作用\n\n严格按以下JSON格式输出，不要输出任何其他内容:\n{\"dimension_score\":0.72,\"sub_indicator_scores\":{\"指标名\":0.65},\"dimension_reasoning\":\"总体评估\"}\n\n对每个子指标评分(0-1)。\n\n以下是评估依据:\n用户={\"age\": 80, \"gender\": \"女\", \"chronic_diseases\": [\"心房颤动\", \"糖尿病\"], \"medications\": [\"华法林\", \"胰岛素\"]} 异常=[{\"item\": \"收缩压\", \"value\": \"165mmHg\", \"status\": \"偏高\"}, {\"item\": \"空腹血糖\", \"value\": \"8.2mmol/L\", \"status\": \"偏高\"}] 风险={}\n知识={\"summary\": \"高血压患者应控制钠盐摄入，每日不超过5g\", \"refined_knowledge\": [\"高血压需长期服药控制\", \"血压目标<140/90mmHg\"]}"
+  },
+  {
+    "type": "medpsy_dimension",
+    "dimension_id": "D4",
+    "dimension_name": "饮食状况",
+    "messages": [
+      {
+        "role": "system",
+        "content": "你是一位全科医生，擅长精炼评估。请在3秒内、不超过50字完成思考，然后直接输出JSON。"
+      },
+      {
+        "role": "user",
+        "content": "你是健康评估专家。评估维度: 饮食状况(权重0.15)\n子指标: 饮食均衡性, 营养摄入, 饮食禁忌遵守\n\n严格按以下JSON格式输出，不要输出任何其他内容:\n{\"dimension_score\":0.72,\"sub_indicator_scores\":{\"指标名\":0.65},\"dimension_reasoning\":\"总体评估\"}\n\n对每个子指标评分(0-1)。\n\n以下是评估依据:\n用户={\"age\": 72, \"gender\": \"女\", \"chronic_diseases\": [\"冠心病\", \"高血脂\"], \"medications\": [\"他汀类\", \"阿司匹林\"]} 异常=[{\"item\": \"血肌酐\", \"value\": \"180μmol/L\", \"status\": \"偏高\"}, {\"item\": \"eGFR\", \"value\": \"38\", \"status\": \"偏低\"}] 风险={}\n知识={\"summary\": \"他汀类药物需监测肝功能和肌酸激酶\", \"refined_knowledge\": [\"LDL-C目标<2.6mmol/L\"]}"
+      }
+    ],
+    "text": "你是健康评估专家。评估维度: 饮食状况(权重0.15)\n子指标: 饮食均衡性, 营养摄入, 饮食禁忌遵守\n\n严格按以下JSON格式输出，不要输出任何其他内容:\n{\"dimension_score\":0.72,\"sub_indicator_scores\":{\"指标名\":0.65},\"dimension_reasoning\":\"总体评估\"}\n\n对每个子指标评分(0-1)。\n\n以下是评估依据:\n用户={\"age\": 72, \"gender\": \"女\", \"chronic_diseases\": [\"冠心病\", \"高血脂\"], \"medications\": [\"他汀类\", \"阿司匹林\"]} 异常=[{\"item\": \"血肌酐\", \"value\": \"180μmol/L\", \"status\": \"偏高\"}, {\"item\": \"eGFR\", \"value\": \"38\", \"status\": \"偏低\"}] 风险={}\n知识={\"summary\": \"他汀类药物需监测肝功能和肌酸激酶\", \"refined_knowledge\": [\"LDL-C目标<2.6mmol/L\"]}"
+  },
+  {
+    "type": "medpsy_dimension",
+    "dimension_id": "D5",
+    "dimension_name": "检查情况",
+    "messages": [
+      {
+        "role": "system",
+        "content": "你是一位全科医生，擅长精炼评估。请在3秒内、不超过50字完成思考，然后直接输出JSON。"
+      },
+      {
+        "role": "user",
+        "content": "你是健康评估专家。评估维度: 检查情况(权重0.15)\n子指标: 检查完整性, 指标异常追踪, 复查及时性\n\n严格按以下JSON格式输出，不要输出任何其他内容:\n{\"dimension_score\":0.72,\"sub_indicator_scores\":{\"指标名\":0.65},\"dimension_reasoning\":\"总体评估\"}\n\n对每个子指标评分(0-1)。\n\n以下是评估依据:\n用户={\"age\": 70, \"gender\": \"男\", \"chronic_diseases\": [\"COPD\", \"高血压\"], \"medications\": [\"支气管扩张剂\", \"氨氯地平\"]} 异常=[{\"item\": \"收缩压\", \"value\": \"165mmHg\", \"status\": \"偏高\"}, {\"item\": \"空腹血糖\", \"value\": \"8.2mmol/L\", \"status\": \"偏高\"}] 风险={}\n知识={\"summary\": \"慢性肾病需限制蛋白质摄入并监测肾功能\", \"refined_knowledge\": [\"eGFR<60需积极干预\"]}"
+      }
+    ],
+    "text": "你是健康评估专家。评估维度: 检查情况(权重0.15)\n子指标: 检查完整性, 指标异常追踪, 复查及时性\n\n严格按以下JSON格式输出，不要输出任何其他内容:\n{\"dimension_score\":0.72,\"sub_indicator_scores\":{\"指标名\":0.65},\"dimension_reasoning\":\"总体评估\"}\n\n对每个子指标评分(0-1)。\n\n以下是评估依据:\n用户={\"age\": 70, \"gender\": \"男\", \"chronic_diseases\": [\"COPD\", \"高血压\"], \"medications\": [\"支气管扩张剂\", \"氨氯地平\"]} 异常=[{\"item\": \"收缩压\", \"value\": \"165mmHg\", \"status\": \"偏高\"}, {\"item\": \"空腹血糖\", \"value\": \"8.2mmol/L\", \"status\": \"偏高\"}] 风险={}\n知识={\"summary\": \"慢性肾病需限制蛋白质摄入并监测肾功能\", \"refined_knowledge\": [\"eGFR<60需积极干预\"]}"
+  },
+  {
+    "type": "medpsy_dimension",
+    "dimension_id": "D5",
+    "dimension_name": "检查情况",
+    "messages": [
+      {
+        "role": "system",
+        "content": "你是一位全科医生，擅长精炼评估。请在3秒内、不超过50字完成思考，然后直接输出JSON。"
+      },
+      {
+        "role": "user",
+        "content": "你是健康评估专家。评估维度: 检查情况(权重0.15)\n子指标: 检查完整性, 指标异常追踪, 复查及时性\n\n严格按以下JSON格式输出，不要输出任何其他内容:\n{\"dimension_score\":0.72,\"sub_indicator_scores\":{\"指标名\":0.65},\"dimension_reasoning\":\"总体评估\"}\n\n对每个子指标评分(0-1)。\n\n以下是评估依据:\n用户={\"age\": 72, \"gender\": \"女\", \"chronic_diseases\": [\"冠心病\", \"高血脂\"], \"medications\": [\"他汀类\", \"阿司匹林\"]} 异常=[{\"item\": \"糖化血红蛋白\", \"value\": \"8.5%\", \"status\": \"偏高\"}, {\"item\": \"尿蛋白\", \"value\": \"++\", \"status\": \"阳性\"}] 风险={}\n知识={\"summary\": \"高血压患者应控制钠盐摄入，每日不超过5g\", \"refined_knowledge\": [\"高血压需长期服药控制\", \"血压目标<140/90mmHg\"]}"
+      }
+    ],
+    "text": "你是健康评估专家。评估维度: 检查情况(权重0.15)\n子指标: 检查完整性, 指标异常追踪, 复查及时性\n\n严格按以下JSON格式输出，不要输出任何其他内容:\n{\"dimension_score\":0.72,\"sub_indicator_scores\":{\"指标名\":0.65},\"dimension_reasoning\":\"总体评估\"}\n\n对每个子指标评分(0-1)。\n\n以下是评估依据:\n用户={\"age\": 72, \"gender\": \"女\", \"chronic_diseases\": [\"冠心病\", \"高血脂\"], \"medications\": [\"他汀类\", \"阿司匹林\"]} 异常=[{\"item\": \"糖化血红蛋白\", \"value\": \"8.5%\", \"status\": \"偏高\"}, {\"item\": \"尿蛋白\", \"value\": \"++\", \"status\": \"阳性\"}] 风险={}\n知识={\"summary\": \"高血压患者应控制钠盐摄入，每日不超过5g\", \"refined_knowledge\": [\"高血压需长期服药控制\", \"血压目标<140/90mmHg\"]}"
+  },
+  {
+    "type": "medpsy_dimension",
+    "dimension_id": "D5",
+    "dimension_name": "检查情况",
+    "messages": [
+      {
+        "role": "system",
+        "content": "你是一位全科医生，擅长精炼评估。请在3秒内、不超过50字完成思考，然后直接输出JSON。"
+      },
+      {
+        "role": "user",
+        "content": "你是健康评估专家。评估维度: 检查情况(权重0.15)\n子指标: 检查完整性, 指标异常追踪, 复查及时性\n\n严格按以下JSON格式输出，不要输出任何其他内容:\n{\"dimension_score\":0.72,\"sub_indicator_scores\":{\"指标名\":0.65},\"dimension_reasoning\":\"总体评估\"}\n\n对每个子指标评分(0-1)。\n\n以下是评估依据:\n用户={\"age\": 70, \"gender\": \"男\", \"chronic_diseases\": [\"COPD\", \"高血压\"], \"medications\": [\"支气管扩张剂\", \"氨氯地平\"]} 异常=[{\"item\": \"骨密度T值\", \"value\": \"-3.0\", \"status\": \"偏低\"}, {\"item\": \"维生素D\", \"value\": \"15ng/mL\", \"status\": \"不足\"}] 风险={}\n知识={\"summary\": \"他汀类药物需监测肝功能和肌酸激酶\", \"refined_knowledge\": [\"LDL-C目标<2.6mmol/L\"]}"
+      }
+    ],
+    "text": "你是健康评估专家。评估维度: 检查情况(权重0.15)\n子指标: 检查完整性, 指标异常追踪, 复查及时性\n\n严格按以下JSON格式输出，不要输出任何其他内容:\n{\"dimension_score\":0.72,\"sub_indicator_scores\":{\"指标名\":0.65},\"dimension_reasoning\":\"总体评估\"}\n\n对每个子指标评分(0-1)。\n\n以下是评估依据:\n用户={\"age\": 70, \"gender\": \"男\", \"chronic_diseases\": [\"COPD\", \"高血压\"], \"medications\": [\"支气管扩张剂\", \"氨氯地平\"]} 异常=[{\"item\": \"骨密度T值\", \"value\": \"-3.0\", \"status\": \"偏低\"}, {\"item\": \"维生素D\", \"value\": \"15ng/mL\", \"status\": \"不足\"}] 风险={}\n知识={\"summary\": \"他汀类药物需监测肝功能和肌酸激酶\", \"refined_knowledge\": [\"LDL-C目标<2.6mmol/L\"]}"
+  },
+  {
+    "type": "medpsy_dimension",
+    "dimension_id": "D5",
+    "dimension_name": "检查情况",
+    "messages": [
+      {
+        "role": "system",
+        "content": "你是一位全科医生，擅长精炼评估。请在3秒内、不超过50字完成思考，然后直接输出JSON。"
+      },
+      {
+        "role": "user",
+        "content": "你是健康评估专家。评估维度: 检查情况(权重0.15)\n子指标: 检查完整性, 指标异常追踪, 复查及时性\n\n严格按以下JSON格式输出，不要输出任何其他内容:\n{\"dimension_score\":0.72,\"sub_indicator_scores\":{\"指标名\":0.65},\"dimension_reasoning\":\"总体评估\"}\n\n对每个子指标评分(0-1)。\n\n以下是评估依据:\n用户={\"age\": 75, \"gender\": \"女\", \"chronic_diseases\": [\"骨质疏松\", \"高血压\"], \"medications\": [\"钙片\", \"ARB类\"]} 异常=[{\"item\": \"收缩压\", \"value\": \"165mmHg\", \"status\": \"偏高\"}, {\"item\": \"空腹血糖\", \"value\": \"8.2mmol/L\", \"status\": \"偏高\"}] 风险={}\n知识={\"summary\": \"高血压患者应控制钠盐摄入，每日不超过5g\", \"refined_knowledge\": [\"高血压需长期服药控制\", \"血压目标<140/90mmHg\"]}"
+      }
+    ],
+    "text": "你是健康评估专家。评估维度: 检查情况(权重0.15)\n子指标: 检查完整性, 指标异常追踪, 复查及时性\n\n严格按以下JSON格式输出，不要输出任何其他内容:\n{\"dimension_score\":0.72,\"sub_indicator_scores\":{\"指标名\":0.65},\"dimension_reasoning\":\"总体评估\"}\n\n对每个子指标评分(0-1)。\n\n以下是评估依据:\n用户={\"age\": 75, \"gender\": \"女\", \"chronic_diseases\": [\"骨质疏松\", \"高血压\"], \"medications\": [\"钙片\", \"ARB类\"]} 异常=[{\"item\": \"收缩压\", \"value\": \"165mmHg\", \"status\": \"偏高\"}, {\"item\": \"空腹血糖\", \"value\": \"8.2mmol/L\", \"status\": \"偏高\"}] 风险={}\n知识={\"summary\": \"高血压患者应控制钠盐摄入，每日不超过5g\", \"refined_knowledge\": [\"高血压需长期服药控制\", \"血压目标<140/90mmHg\"]}"
+  },
+  {
+    "type": "medpsy_dimension",
+    "dimension_id": "D2",
+    "dimension_name": "用药情况",
+    "messages": [
+      {
+        "role": "system",
+        "content": "你是一位全科医生，擅长精炼评估。请在3秒内、不超过50字完成思考，然后直接输出JSON。"
+      },
+      {
+        "role": "user",
+        "content": "你是健康评估专家。评估维度: 用药情况(权重0.2)\n子指标: 用药依从性, 药物副作用, 药物相互作用\n\n严格按以下JSON格式输出，不要输出任何其他内容:\n{\"dimension_score\":0.72,\"sub_indicator_scores\":{\"指标名\":0.65},\"dimension_reasoning\":\"总体评估\"}\n\n对每个子指标评分(0-1)。\n\n以下是评估依据:\n用户={\"age\": 70, \"gender\": \"男\", \"chronic_diseases\": [\"COPD\", \"高血压\"], \"medications\": [\"支气管扩张剂\", \"氨氯地平\"]} 异常=[{\"item\": \"收缩压\", \"value\": \"165mmHg\", \"status\": \"偏高\"}, {\"item\": \"空腹血糖\", \"value\": \"8.2mmol/L\", \"status\": \"偏高\"}] 风险={}\n知识={\"summary\": \"糖尿病患者需定期监测血糖和糖化血红蛋白\", \"refined_knowledge\": [\"空腹血糖目标4.4-7.0mmol/L\"]}"
+      }
+    ],
+    "text": "你是健康评估专家。评估维度: 用药情况(权重0.2)\n子指标: 用药依从性, 药物副作用, 药物相互作用\n\n严格按以下JSON格式输出，不要输出任何其他内容:\n{\"dimension_score\":0.72,\"sub_indicator_scores\":{\"指标名\":0.65},\"dimension_reasoning\":\"总体评估\"}\n\n对每个子指标评分(0-1)。\n\n以下是评估依据:\n用户={\"age\": 70, \"gender\": \"男\", \"chronic_diseases\": [\"COPD\", \"高血压\"], \"medications\": [\"支气管扩张剂\", \"氨氯地平\"]} 异常=[{\"item\": \"收缩压\", \"value\": \"165mmHg\", \"status\": \"偏高\"}, {\"item\": \"空腹血糖\", \"value\": \"8.2mmol/L\", \"status\": \"偏高\"}] 风险={}\n知识={\"summary\": \"糖尿病患者需定期监测血糖和糖化血红蛋白\", \"refined_knowledge\": [\"空腹血糖目标4.4-7.0mmol/L\"]}"
+  },
+  {
+    "type": "medpsy_dimension",
+    "dimension_id": "D1",
+    "dimension_name": "生理指标",
+    "messages": [
+      {
+        "role": "system",
+        "content": "你是一位全科医生，擅长精炼评估。请在3秒内、不超过50字完成思考，然后直接输出JSON。"
+      },
+      {
+        "role": "user",
+        "content": "你是健康评估专家。评估维度: 生理指标(权重0.3)\n子指标: 血压水平, 血糖水平, 血脂水平, BMI指数, 心率\n\n严格按以下JSON格式输出，不要输出任何其他内容:\n{\"dimension_score\":0.72,\"sub_indicator_scores\":{\"指标名\":0.65},\"dimension_reasoning\":\"总体评估\"}\n\n对每个子指标评分(0-1)。\n\n以下是评估依据:\n用户={\"age\": 63, \"gender\": \"男\", \"chronic_diseases\": [\"痛风\", \"高血脂\"], \"medications\": [\"别嘌醇\", \"非诺贝特\"]} 异常=[{\"item\": \"血肌酐\", \"value\": \"180μmol/L\", \"status\": \"偏高\"}, {\"item\": \"eGFR\", \"value\": \"38\", \"status\": \"偏低\"}] 风险={}\n知识={\"summary\": \"慢性肾病需限制蛋白质摄入并监测肾功能\", \"refined_knowledge\": [\"eGFR<60需积极干预\"]}"
+      }
+    ],
+    "text": "你是健康评估专家。评估维度: 生理指标(权重0.3)\n子指标: 血压水平, 血糖水平, 血脂水平, BMI指数, 心率\n\n严格按以下JSON格式输出，不要输出任何其他内容:\n{\"dimension_score\":0.72,\"sub_indicator_scores\":{\"指标名\":0.65},\"dimension_reasoning\":\"总体评估\"}\n\n对每个子指标评分(0-1)。\n\n以下是评估依据:\n用户={\"age\": 63, \"gender\": \"男\", \"chronic_diseases\": [\"痛风\", \"高血脂\"], \"medications\": [\"别嘌醇\", \"非诺贝特\"]} 异常=[{\"item\": \"血肌酐\", \"value\": \"180μmol/L\", \"status\": \"偏高\"}, {\"item\": \"eGFR\", \"value\": \"38\", \"status\": \"偏低\"}] 风险={}\n知识={\"summary\": \"慢性肾病需限制蛋白质摄入并监测肾功能\", \"refined_knowledge\": [\"eGFR<60需积极干预\"]}"
+  },
+  {
+    "type": "medpsy_dimension",
+    "dimension_id": "D3",
+    "dimension_name": "治疗状况",
+    "messages": [
+      {
+        "role": "system",
+        "content": "你是一位全科医生，擅长精炼评估。请在3秒内、不超过50字完成思考，然后直接输出JSON。"
+      },
+      {
+        "role": "user",
+        "content": "你是健康评估专家。评估维度: 治疗状况(权重0.2)\n子指标: 治疗效果, 康复进度, 并发症控制\n\n严格按以下JSON格式输出，不要输出任何其他内容:\n{\"dimension_score\":0.72,\"sub_indicator_scores\":{\"指标名\":0.65},\"dimension_reasoning\":\"总体评估\"}\n\n对每个子指标评分(0-1)。\n\n以下是评估依据:\n用户={\"age\": 65, \"gender\": \"男\", \"chronic_diseases\": [\"慢性肾病\"], \"medications\": [\"ACEI\", \"利尿剂\"]} 异常=[{\"item\": \"血肌酐\", \"value\": \"180μmol/L\", \"status\": \"偏高\"}, {\"item\": \"eGFR\", \"value\": \"38\", \"status\": \"偏低\"}] 风险={}\n知识={\"summary\": \"他汀类药物需监测肝功能和肌酸激酶\", \"refined_knowledge\": [\"LDL-C目标<2.6mmol/L\"]}"
+      }
+    ],
+    "text": "你是健康评估专家。评估维度: 治疗状况(权重0.2)\n子指标: 治疗效果, 康复进度, 并发症控制\n\n严格按以下JSON格式输出，不要输出任何其他内容:\n{\"dimension_score\":0.72,\"sub_indicator_scores\":{\"指标名\":0.65},\"dimension_reasoning\":\"总体评估\"}\n\n对每个子指标评分(0-1)。\n\n以下是评估依据:\n用户={\"age\": 65, \"gender\": \"男\", \"chronic_diseases\": [\"慢性肾病\"], \"medications\": [\"ACEI\", \"利尿剂\"]} 异常=[{\"item\": \"血肌酐\", \"value\": \"180μmol/L\", \"status\": \"偏高\"}, {\"item\": \"eGFR\", \"value\": \"38\", \"status\": \"偏低\"}] 风险={}\n知识={\"summary\": \"他汀类药物需监测肝功能和肌酸激酶\", \"refined_knowledge\": [\"LDL-C目标<2.6mmol/L\"]}"
+  },
+  {
+    "type": "medpsy_dimension",
+    "dimension_id": "D2",
+    "dimension_name": "用药情况",
+    "messages": [
+      {
+        "role": "system",
+        "content": "你是一位全科医生，擅长精炼评估。请在3秒内、不超过50字完成思考，然后直接输出JSON。"
+      },
+      {
+        "role": "user",
+        "content": "你是健康评估专家。评估维度: 用药情况(权重0.2)\n子指标: 用药依从性, 药物副作用, 药物相互作用\n\n严格按以下JSON格式输出，不要输出任何其他内容:\n{\"dimension_score\":0.72,\"sub_indicator_scores\":{\"指标名\":0.65},\"dimension_reasoning\":\"总体评估\"}\n\n对每个子指标评分(0-1)。\n\n以下是评估依据:\n用户={\"age\": 70, \"gender\": \"男\", \"chronic_diseases\": [\"COPD\", \"高血压\"], \"medications\": [\"支气管扩张剂\", \"氨氯地平\"]} 异常=[{\"item\": \"收缩压\", \"value\": \"165mmHg\", \"status\": \"偏高\"}, {\"item\": \"空腹血糖\", \"value\": \"8.2mmol/L\", \"status\": \"偏高\"}] 风险={}\n知识={\"summary\": \"骨质疏松需补充钙和维生素D，预防跌倒\", \"refined_knowledge\": [\"T值<-2.5为骨质疏松\"]}"
+      }
+    ],
+    "text": "你是健康评估专家。评估维度: 用药情况(权重0.2)\n子指标: 用药依从性, 药物副作用, 药物相互作用\n\n严格按以下JSON格式输出，不要输出任何其他内容:\n{\"dimension_score\":0.72,\"sub_indicator_scores\":{\"指标名\":0.65},\"dimension_reasoning\":\"总体评估\"}\n\n对每个子指标评分(0-1)。\n\n以下是评估依据:\n用户={\"age\": 70, \"gender\": \"男\", \"chronic_diseases\": [\"COPD\", \"高血压\"], \"medications\": [\"支气管扩张剂\", \"氨氯地平\"]} 异常=[{\"item\": \"收缩压\", \"value\": \"165mmHg\", \"status\": \"偏高\"}, {\"item\": \"空腹血糖\", \"value\": \"8.2mmol/L\", \"status\": \"偏高\"}] 风险={}\n知识={\"summary\": \"骨质疏松需补充钙和维生素D，预防跌倒\", \"refined_knowledge\": [\"T值<-2.5为骨质疏松\"]}"
+  },
+  {
+    "type": "medpsy_dimension",
+    "dimension_id": "D2",
+    "dimension_name": "用药情况",
+    "messages": [
+      {
+        "role": "system",
+        "content": "你是一位全科医生，擅长精炼评估。请在3秒内、不超过50字完成思考，然后直接输出JSON。"
+      },
+      {
+        "role": "user",
+        "content": "你是健康评估专家。评估维度: 用药情况(权重0.2)\n子指标: 用药依从性, 药物副作用, 药物相互作用\n\n严格按以下JSON格式输出，不要输出任何其他内容:\n{\"dimension_score\":0.72,\"sub_indicator_scores\":{\"指标名\":0.65},\"dimension_reasoning\":\"总体评估\"}\n\n对每个子指标评分(0-1)。\n\n以下是评估依据:\n用户={\"age\": 75, \"gender\": \"女\", \"chronic_diseases\": [\"骨质疏松\", \"高血压\"], \"medications\": [\"钙片\", \"ARB类\"]} 异常=[{\"item\": \"LDL-C\", \"value\": \"4.1mmol/L\", \"status\": \"偏高\"}, {\"item\": \"BMI\", \"value\": \"28.5\", \"status\": \"超重\"}] 风险={}\n知识={\"summary\": \"慢性肾病需限制蛋白质摄入并监测肾功能\", \"refined_knowledge\": [\"eGFR<60需积极干预\"]}"
+      }
+    ],
+    "text": "你是健康评估专家。评估维度: 用药情况(权重0.2)\n子指标: 用药依从性, 药物副作用, 药物相互作用\n\n严格按以下JSON格式输出，不要输出任何其他内容:\n{\"dimension_score\":0.72,\"sub_indicator_scores\":{\"指标名\":0.65},\"dimension_reasoning\":\"总体评估\"}\n\n对每个子指标评分(0-1)。\n\n以下是评估依据:\n用户={\"age\": 75, \"gender\": \"女\", \"chronic_diseases\": [\"骨质疏松\", \"高血压\"], \"medications\": [\"钙片\", \"ARB类\"]} 异常=[{\"item\": \"LDL-C\", \"value\": \"4.1mmol/L\", \"status\": \"偏高\"}, {\"item\": \"BMI\", \"value\": \"28.5\", \"status\": \"超重\"}] 风险={}\n知识={\"summary\": \"慢性肾病需限制蛋白质摄入并监测肾功能\", \"refined_knowledge\": [\"eGFR<60需积极干预\"]}"
+  },
+  {
+    "type": "medpsy_dimension",
+    "dimension_id": "D4",
+    "dimension_name": "饮食状况",
+    "messages": [
+      {
+        "role": "system",
+        "content": "你是一位全科医生，擅长精炼评估。请在3秒内、不超过50字完成思考，然后直接输出JSON。"
+      },
+      {
+        "role": "user",
+        "content": "你是健康评估专家。评估维度: 饮食状况(权重0.15)\n子指标: 饮食均衡性, 营养摄入, 饮食禁忌遵守\n\n严格按以下JSON格式输出，不要输出任何其他内容:\n{\"dimension_score\":0.72,\"sub_indicator_scores\":{\"指标名\":0.65},\"dimension_reasoning\":\"总体评估\"}\n\n对每个子指标评分(0-1)。\n\n以下是评估依据:\n用户={\"age\": 70, \"gender\": \"男\", \"chronic_diseases\": [\"COPD\", \"高血压\"], \"medications\": [\"支气管扩张剂\", \"氨氯地平\"]} 异常=[{\"item\": \"骨密度T值\", \"value\": \"-3.0\", \"status\": \"偏低\"}, {\"item\": \"维生素D\", \"value\": \"15ng/mL\", \"status\": \"不足\"}] 风险={}\n知识={\"summary\": \"糖尿病患者需定期监测血糖和糖化血红蛋白\", \"refined_knowledge\": [\"空腹血糖目标4.4-7.0mmol/L\"]}"
+      }
+    ],
+    "text": "你是健康评估专家。评估维度: 饮食状况(权重0.15)\n子指标: 饮食均衡性, 营养摄入, 饮食禁忌遵守\n\n严格按以下JSON格式输出，不要输出任何其他内容:\n{\"dimension_score\":0.72,\"sub_indicator_scores\":{\"指标名\":0.65},\"dimension_reasoning\":\"总体评估\"}\n\n对每个子指标评分(0-1)。\n\n以下是评估依据:\n用户={\"age\": 70, \"gender\": \"男\", \"chronic_diseases\": [\"COPD\", \"高血压\"], \"medications\": [\"支气管扩张剂\", \"氨氯地平\"]} 异常=[{\"item\": \"骨密度T值\", \"value\": \"-3.0\", \"status\": \"偏低\"}, {\"item\": \"维生素D\", \"value\": \"15ng/mL\", \"status\": \"不足\"}] 风险={}\n知识={\"summary\": \"糖尿病患者需定期监测血糖和糖化血红蛋白\", \"refined_knowledge\": [\"空腹血糖目标4.4-7.0mmol/L\"]}"
+  },
+  {
+    "type": "medpsy_dimension",
+    "dimension_id": "D3",
+    "dimension_name": "治疗状况",
+    "messages": [
+      {
+        "role": "system",
+        "content": "你是一位全科医生，擅长精炼评估。请在3秒内、不超过50字完成思考，然后直接输出JSON。"
+      },
+      {
+        "role": "user",
+        "content": "你是健康评估专家。评估维度: 治疗状况(权重0.2)\n子指标: 治疗效果, 康复进度, 并发症控制\n\n严格按以下JSON格式输出，不要输出任何其他内容:\n{\"dimension_score\":0.72,\"sub_indicator_scores\":{\"指标名\":0.65},\"dimension_reasoning\":\"总体评估\"}\n\n对每个子指标评分(0-1)。\n\n以下是评估依据:\n用户={\"age\": 68, \"gender\": \"男\", \"chronic_diseases\": [\"高血压\", \"糖尿病\"], \"medications\": [\"降压药\", \"二甲双胍\"]} 异常=[{\"item\": \"LDL-C\", \"value\": \"4.1mmol/L\", \"status\": \"偏高\"}, {\"item\": \"BMI\", \"value\": \"28.5\", \"status\": \"超重\"}] 风险={}\n知识={\"summary\": \"高血压患者应控制钠盐摄入，每日不超过5g\", \"refined_knowledge\": [\"高血压需长期服药控制\", \"血压目标<140/90mmHg\"]}"
+      }
+    ],
+    "text": "你是健康评估专家。评估维度: 治疗状况(权重0.2)\n子指标: 治疗效果, 康复进度, 并发症控制\n\n严格按以下JSON格式输出，不要输出任何其他内容:\n{\"dimension_score\":0.72,\"sub_indicator_scores\":{\"指标名\":0.65},\"dimension_reasoning\":\"总体评估\"}\n\n对每个子指标评分(0-1)。\n\n以下是评估依据:\n用户={\"age\": 68, \"gender\": \"男\", \"chronic_diseases\": [\"高血压\", \"糖尿病\"], \"medications\": [\"降压药\", \"二甲双胍\"]} 异常=[{\"item\": \"LDL-C\", \"value\": \"4.1mmol/L\", \"status\": \"偏高\"}, {\"item\": \"BMI\", \"value\": \"28.5\", \"status\": \"超重\"}] 风险={}\n知识={\"summary\": \"高血压患者应控制钠盐摄入，每日不超过5g\", \"refined_knowledge\": [\"高血压需长期服药控制\", \"血压目标<140/90mmHg\"]}"
+  },
+  {
+    "type": "medpsy_dimension",
+    "dimension_id": "D3",
+    "dimension_name": "治疗状况",
+    "messages": [
+      {
+        "role": "system",
+        "content": "你是一位全科医生，擅长精炼评估。请在3秒内、不超过50字完成思考，然后直接输出JSON。"
+      },
+      {
+        "role": "user",
+        "content": "你是健康评估专家。评估维度: 治疗状况(权重0.2)\n子指标: 治疗效果, 康复进度, 并发症控制\n\n严格按以下JSON格式输出，不要输出任何其他内容:\n{\"dimension_score\":0.72,\"sub_indicator_scores\":{\"指标名\":0.65},\"dimension_reasoning\":\"总体评估\"}\n\n对每个子指标评分(0-1)。\n\n以下是评估依据:\n用户={\"age\": 63, \"gender\": \"男\", \"chronic_diseases\": [\"痛风\", \"高血脂\"], \"medications\": [\"别嘌醇\", \"非诺贝特\"]} 异常=[{\"item\": \"血肌酐\", \"value\": \"180μmol/L\", \"status\": \"偏高\"}, {\"item\": \"eGFR\", \"value\": \"38\", \"status\": \"偏低\"}] 风险={}\n知识={\"summary\": \"高血压患者应控制钠盐摄入，每日不超过5g\", \"refined_knowledge\": [\"高血压需长期服药控制\", \"血压目标<140/90mmHg\"]}"
+      }
+    ],
+    "text": "你是健康评估专家。评估维度: 治疗状况(权重0.2)\n子指标: 治疗效果, 康复进度, 并发症控制\n\n严格按以下JSON格式输出，不要输出任何其他内容:\n{\"dimension_score\":0.72,\"sub_indicator_scores\":{\"指标名\":0.65},\"dimension_reasoning\":\"总体评估\"}\n\n对每个子指标评分(0-1)。\n\n以下是评估依据:\n用户={\"age\": 63, \"gender\": \"男\", \"chronic_diseases\": [\"痛风\", \"高血脂\"], \"medications\": [\"别嘌醇\", \"非诺贝特\"]} 异常=[{\"item\": \"血肌酐\", \"value\": \"180μmol/L\", \"status\": \"偏高\"}, {\"item\": \"eGFR\", \"value\": \"38\", \"status\": \"偏低\"}] 风险={}\n知识={\"summary\": \"高血压患者应控制钠盐摄入，每日不超过5g\", \"refined_knowledge\": [\"高血压需长期服药控制\", \"血压目标<140/90mmHg\"]}"
+  },
+  {
+    "type": "medpsy_dimension",
+    "dimension_id": "D2",
+    "dimension_name": "用药情况",
+    "messages": [
+      {
+        "role": "system",
+        "content": "你是一位全科医生，擅长精炼评估。请在3秒内、不超过50字完成思考，然后直接输出JSON。"
+      },
+      {
+        "role": "user",
+        "content": "你是健康评估专家。评估维度: 用药情况(权重0.2)\n子指标: 用药依从性, 药物副作用, 药物相互作用\n\n严格按以下JSON格式输出，不要输出任何其他内容:\n{\"dimension_score\":0.72,\"sub_indicator_scores\":{\"指标名\":0.65},\"dimension_reasoning\":\"总体评估\"}\n\n对每个子指标评分(0-1)。\n\n以下是评估依据:\n用户={\"age\": 80, \"gender\": \"女\", \"chronic_diseases\": [\"心房颤动\", \"糖尿病\"], \"medications\": [\"华法林\", \"胰岛素\"]} 异常=[{\"item\": \"LDL-C\", \"value\": \"4.1mmol/L\", \"status\": \"偏高\"}, {\"item\": \"BMI\", \"value\": \"28.5\", \"status\": \"超重\"}] 风险={}\n知识={\"summary\": \"慢性肾病需限制蛋白质摄入并监测肾功能\", \"refined_knowledge\": [\"eGFR<60需积极干预\"]}"
+      }
+    ],
+    "text": "你是健康评估专家。评估维度: 用药情况(权重0.2)\n子指标: 用药依从性, 药物副作用, 药物相互作用\n\n严格按以下JSON格式输出，不要输出任何其他内容:\n{\"dimension_score\":0.72,\"sub_indicator_scores\":{\"指标名\":0.65},\"dimension_reasoning\":\"总体评估\"}\n\n对每个子指标评分(0-1)。\n\n以下是评估依据:\n用户={\"age\": 80, \"gender\": \"女\", \"chronic_diseases\": [\"心房颤动\", \"糖尿病\"], \"medications\": [\"华法林\", \"胰岛素\"]} 异常=[{\"item\": \"LDL-C\", \"value\": \"4.1mmol/L\", \"status\": \"偏高\"}, {\"item\": \"BMI\", \"value\": \"28.5\", \"status\": \"超重\"}] 风险={}\n知识={\"summary\": \"慢性肾病需限制蛋白质摄入并监测肾功能\", \"refined_knowledge\": [\"eGFR<60需积极干预\"]}"
+  },
+  {
+    "type": "medpsy_dimension",
+    "dimension_id": "D4",
+    "dimension_name": "饮食状况",
+    "messages": [
+      {
+        "role": "system",
+        "content": "你是一位全科医生，擅长精炼评估。请在3秒内、不超过50字完成思考，然后直接输出JSON。"
+      },
+      {
+        "role": "user",
+        "content": "你是健康评估专家。评估维度: 饮食状况(权重0.15)\n子指标: 饮食均衡性, 营养摄入, 饮食禁忌遵守\n\n严格按以下JSON格式输出，不要输出任何其他内容:\n{\"dimension_score\":0.72,\"sub_indicator_scores\":{\"指标名\":0.65},\"dimension_reasoning\":\"总体评估\"}\n\n对每个子指标评分(0-1)。\n\n以下是评估依据:\n用户={\"age\": 77, \"gender\": \"女\", \"chronic_diseases\": [\"类风湿\", \"骨质疏松\"], \"medications\": [\"甲氨蝶呤\", \"双膦酸盐\"]} 异常=[{\"item\": \"LDL-C\", \"value\": \"4.1mmol/L\", \"status\": \"偏高\"}, {\"item\": \"BMI\", \"value\": \"28.5\", \"status\": \"超重\"}] 风险={}\n知识={\"summary\": \"他汀类药物需监测肝功能和肌酸激酶\", \"refined_knowledge\": [\"LDL-C目标<2.6mmol/L\"]}"
+      }
+    ],
+    "text": "你是健康评估专家。评估维度: 饮食状况(权重0.15)\n子指标: 饮食均衡性, 营养摄入, 饮食禁忌遵守\n\n严格按以下JSON格式输出，不要输出任何其他内容:\n{\"dimension_score\":0.72,\"sub_indicator_scores\":{\"指标名\":0.65},\"dimension_reasoning\":\"总体评估\"}\n\n对每个子指标评分(0-1)。\n\n以下是评估依据:\n用户={\"age\": 77, \"gender\": \"女\", \"chronic_diseases\": [\"类风湿\", \"骨质疏松\"], \"medications\": [\"甲氨蝶呤\", \"双膦酸盐\"]} 异常=[{\"item\": \"LDL-C\", \"value\": \"4.1mmol/L\", \"status\": \"偏高\"}, {\"item\": \"BMI\", \"value\": \"28.5\", \"status\": \"超重\"}] 风险={}\n知识={\"summary\": \"他汀类药物需监测肝功能和肌酸激酶\", \"refined_knowledge\": [\"LDL-C目标<2.6mmol/L\"]}"
+  },
+  {
+    "type": "medpsy_dimension",
+    "dimension_id": "D2",
+    "dimension_name": "用药情况",
+    "messages": [
+      {
+        "role": "system",
+        "content": "你是一位全科医生，擅长精炼评估。请在3秒内、不超过50字完成思考，然后直接输出JSON。"
+      },
+      {
+        "role": "user",
+        "content": "你是健康评估专家。评估维度: 用药情况(权重0.2)\n子指标: 用药依从性, 药物副作用, 药物相互作用\n\n严格按以下JSON格式输出，不要输出任何其他内容:\n{\"dimension_score\":0.72,\"sub_indicator_scores\":{\"指标名\":0.65},\"dimension_reasoning\":\"总体评估\"}\n\n对每个子指标评分(0-1)。\n\n以下是评估依据:\n用户={\"age\": 75, \"gender\": \"女\", \"chronic_diseases\": [\"骨质疏松\", \"高血压\"], \"medications\": [\"钙片\", \"ARB类\"]} 异常=[{\"item\": \"骨密度T值\", \"value\": \"-3.0\", \"status\": \"偏低\"}, {\"item\": \"维生素D\", \"value\": \"15ng/mL\", \"status\": \"不足\"}] 风险={}\n知识={\"summary\": \"骨质疏松需补充钙和维生素D，预防跌倒\", \"refined_knowledge\": [\"T值<-2.5为骨质疏松\"]}"
+      }
+    ],
+    "text": "你是健康评估专家。评估维度: 用药情况(权重0.2)\n子指标: 用药依从性, 药物副作用, 药物相互作用\n\n严格按以下JSON格式输出，不要输出任何其他内容:\n{\"dimension_score\":0.72,\"sub_indicator_scores\":{\"指标名\":0.65},\"dimension_reasoning\":\"总体评估\"}\n\n对每个子指标评分(0-1)。\n\n以下是评估依据:\n用户={\"age\": 75, \"gender\": \"女\", \"chronic_diseases\": [\"骨质疏松\", \"高血压\"], \"medications\": [\"钙片\", \"ARB类\"]} 异常=[{\"item\": \"骨密度T值\", \"value\": \"-3.0\", \"status\": \"偏低\"}, {\"item\": \"维生素D\", \"value\": \"15ng/mL\", \"status\": \"不足\"}] 风险={}\n知识={\"summary\": \"骨质疏松需补充钙和维生素D，预防跌倒\", \"refined_knowledge\": [\"T值<-2.5为骨质疏松\"]}"
+  },
+  {
+    "type": "medpsy_dimension",
+    "dimension_id": "D3",
+    "dimension_name": "治疗状况",
+    "messages": [
+      {
+        "role": "system",
+        "content": "你是一位全科医生，擅长精炼评估。请在3秒内、不超过50字完成思考，然后直接输出JSON。"
+      },
+      {
+        "role": "user",
+        "content": "你是健康评估专家。评估维度: 治疗状况(权重0.2)\n子指标: 治疗效果, 康复进度, 并发症控制\n\n严格按以下JSON格式输出，不要输出任何其他内容:\n{\"dimension_score\":0.72,\"sub_indicator_scores\":{\"指标名\":0.65},\"dimension_reasoning\":\"总体评估\"}\n\n对每个子指标评分(0-1)。\n\n以下是评估依据:\n用户={\"age\": 63, \"gender\": \"男\", \"chronic_diseases\": [\"痛风\", \"高血脂\"], \"medications\": [\"别嘌醇\", \"非诺贝特\"]} 异常=[{\"item\": \"骨密度T值\", \"value\": \"-3.0\", \"status\": \"偏低\"}, {\"item\": \"维生素D\", \"value\": \"15ng/mL\", \"status\": \"不足\"}] 风险={}\n知识={\"summary\": \"慢性肾病需限制蛋白质摄入并监测肾功能\", \"refined_knowledge\": [\"eGFR<60需积极干预\"]}"
+      }
+    ],
+    "text": "你是健康评估专家。评估维度: 治疗状况(权重0.2)\n子指标: 治疗效果, 康复进度, 并发症控制\n\n严格按以下JSON格式输出，不要输出任何其他内容:\n{\"dimension_score\":0.72,\"sub_indicator_scores\":{\"指标名\":0.65},\"dimension_reasoning\":\"总体评估\"}\n\n对每个子指标评分(0-1)。\n\n以下是评估依据:\n用户={\"age\": 63, \"gender\": \"男\", \"chronic_diseases\": [\"痛风\", \"高血脂\"], \"medications\": [\"别嘌醇\", \"非诺贝特\"]} 异常=[{\"item\": \"骨密度T值\", \"value\": \"-3.0\", \"status\": \"偏低\"}, {\"item\": \"维生素D\", \"value\": \"15ng/mL\", \"status\": \"不足\"}] 风险={}\n知识={\"summary\": \"慢性肾病需限制蛋白质摄入并监测肾功能\", \"refined_knowledge\": [\"eGFR<60需积极干预\"]}"
+  },
+  {
+    "type": "medpsy_dimension",
+    "dimension_id": "D3",
+    "dimension_name": "治疗状况",
+    "messages": [
+      {
+        "role": "system",
+        "content": "你是一位全科医生，擅长精炼评估。请在3秒内、不超过50字完成思考，然后直接输出JSON。"
+      },
+      {
+        "role": "user",
+        "content": "你是健康评估专家。评估维度: 治疗状况(权重0.2)\n子指标: 治疗效果, 康复进度, 并发症控制\n\n严格按以下JSON格式输出，不要输出任何其他内容:\n{\"dimension_score\":0.72,\"sub_indicator_scores\":{\"指标名\":0.65},\"dimension_reasoning\":\"总体评估\"}\n\n对每个子指标评分(0-1)。\n\n以下是评估依据:\n用户={\"age\": 75, \"gender\": \"女\", \"chronic_diseases\": [\"骨质疏松\", \"高血压\"], \"medications\": [\"钙片\", \"ARB类\"]} 异常=[{\"item\": \"LDL-C\", \"value\": \"4.1mmol/L\", \"status\": \"偏高\"}, {\"item\": \"BMI\", \"value\": \"28.5\", \"status\": \"超重\"}] 风险={}\n知识={\"summary\": \"骨质疏松需补充钙和维生素D，预防跌倒\", \"refined_knowledge\": [\"T值<-2.5为骨质疏松\"]}"
+      }
+    ],
+    "text": "你是健康评估专家。评估维度: 治疗状况(权重0.2)\n子指标: 治疗效果, 康复进度, 并发症控制\n\n严格按以下JSON格式输出，不要输出任何其他内容:\n{\"dimension_score\":0.72,\"sub_indicator_scores\":{\"指标名\":0.65},\"dimension_reasoning\":\"总体评估\"}\n\n对每个子指标评分(0-1)。\n\n以下是评估依据:\n用户={\"age\": 75, \"gender\": \"女\", \"chronic_diseases\": [\"骨质疏松\", \"高血压\"], \"medications\": [\"钙片\", \"ARB类\"]} 异常=[{\"item\": \"LDL-C\", \"value\": \"4.1mmol/L\", \"status\": \"偏高\"}, {\"item\": \"BMI\", \"value\": \"28.5\", \"status\": \"超重\"}] 风险={}\n知识={\"summary\": \"骨质疏松需补充钙和维生素D，预防跌倒\", \"refined_knowledge\": [\"T值<-2.5为骨质疏松\"]}"
+  },
+  {
+    "type": "medpsy_dimension",
+    "dimension_id": "D4",
+    "dimension_name": "饮食状况",
+    "messages": [
+      {
+        "role": "system",
+        "content": "你是一位全科医生，擅长精炼评估。请在3秒内、不超过50字完成思考，然后直接输出JSON。"
+      },
+      {
+        "role": "user",
+        "content": "你是健康评估专家。评估维度: 饮食状况(权重0.15)\n子指标: 饮食均衡性, 营养摄入, 饮食禁忌遵守\n\n严格按以下JSON格式输出，不要输出任何其他内容:\n{\"dimension_score\":0.72,\"sub_indicator_scores\":{\"指标名\":0.65},\"dimension_reasoning\":\"总体评估\"}\n\n对每个子指标评分(0-1)。\n\n以下是评估依据:\n用户={\"age\": 72, \"gender\": \"女\", \"chronic_diseases\": [\"冠心病\", \"高血脂\"], \"medications\": [\"他汀类\", \"阿司匹林\"]} 异常=[{\"item\": \"收缩压\", \"value\": \"165mmHg\", \"status\": \"偏高\"}, {\"item\": \"空腹血糖\", \"value\": \"8.2mmol/L\", \"status\": \"偏高\"}] 风险={}\n知识={\"summary\": \"高血压患者应控制钠盐摄入，每日不超过5g\", \"refined_knowledge\": [\"高血压需长期服药控制\", \"血压目标<140/90mmHg\"]}"
+      }
+    ],
+    "text": "你是健康评估专家。评估维度: 饮食状况(权重0.15)\n子指标: 饮食均衡性, 营养摄入, 饮食禁忌遵守\n\n严格按以下JSON格式输出，不要输出任何其他内容:\n{\"dimension_score\":0.72,\"sub_indicator_scores\":{\"指标名\":0.65},\"dimension_reasoning\":\"总体评估\"}\n\n对每个子指标评分(0-1)。\n\n以下是评估依据:\n用户={\"age\": 72, \"gender\": \"女\", \"chronic_diseases\": [\"冠心病\", \"高血脂\"], \"medications\": [\"他汀类\", \"阿司匹林\"]} 异常=[{\"item\": \"收缩压\", \"value\": \"165mmHg\", \"status\": \"偏高\"}, {\"item\": \"空腹血糖\", \"value\": \"8.2mmol/L\", \"status\": \"偏高\"}] 风险={}\n知识={\"summary\": \"高血压患者应控制钠盐摄入，每日不超过5g\", \"refined_knowledge\": [\"高血压需长期服药控制\", \"血压目标<140/90mmHg\"]}"
+  },
+  {
+    "type": "medpsy_dimension",
+    "dimension_id": "D2",
+    "dimension_name": "用药情况",
+    "messages": [
+      {
+        "role": "system",
+        "content": "你是一位全科医生，擅长精炼评估。请在3秒内、不超过50字完成思考，然后直接输出JSON。"
+      },
+      {
+        "role": "user",
+        "content": "你是健康评估专家。评估维度: 用药情况(权重0.2)\n子指标: 用药依从性, 药物副作用, 药物相互作用\n\n严格按以下JSON格式输出，不要输出任何其他内容:\n{\"dimension_score\":0.72,\"sub_indicator_scores\":{\"指标名\":0.65},\"dimension_reasoning\":\"总体评估\"}\n\n对每个子指标评分(0-1)。\n\n以下是评估依据:\n用户={\"age\": 65, \"gender\": \"男\", \"chronic_diseases\": [\"慢性肾病\"], \"medications\": [\"ACEI\", \"利尿剂\"]} 异常=[{\"item\": \"糖化血红蛋白\", \"value\": \"8.5%\", \"status\": \"偏高\"}, {\"item\": \"尿蛋白\", \"value\": \"++\", \"status\": \"阳性\"}] 风险={}\n知识={\"summary\": \"骨质疏松需补充钙和维生素D，预防跌倒\", \"refined_knowledge\": [\"T值<-2.5为骨质疏松\"]}"
+      }
+    ],
+    "text": "你是健康评估专家。评估维度: 用药情况(权重0.2)\n子指标: 用药依从性, 药物副作用, 药物相互作用\n\n严格按以下JSON格式输出，不要输出任何其他内容:\n{\"dimension_score\":0.72,\"sub_indicator_scores\":{\"指标名\":0.65},\"dimension_reasoning\":\"总体评估\"}\n\n对每个子指标评分(0-1)。\n\n以下是评估依据:\n用户={\"age\": 65, \"gender\": \"男\", \"chronic_diseases\": [\"慢性肾病\"], \"medications\": [\"ACEI\", \"利尿剂\"]} 异常=[{\"item\": \"糖化血红蛋白\", \"value\": \"8.5%\", \"status\": \"偏高\"}, {\"item\": \"尿蛋白\", \"value\": \"++\", \"status\": \"阳性\"}] 风险={}\n知识={\"summary\": \"骨质疏松需补充钙和维生素D，预防跌倒\", \"refined_knowledge\": [\"T值<-2.5为骨质疏松\"]}"
+  },
+  {
+    "type": "medpsy_dimension",
+    "dimension_id": "D1",
+    "dimension_name": "生理指标",
+    "messages": [
+      {
+        "role": "system",
+        "content": "你是一位全科医生，擅长精炼评估。请在3秒内、不超过50字完成思考，然后直接输出JSON。"
+      },
+      {
+        "role": "user",
+        "content": "你是健康评估专家。评估维度: 生理指标(权重0.3)\n子指标: 血压水平, 血糖水平, 血脂水平, BMI指数, 心率\n\n严格按以下JSON格式输出，不要输出任何其他内容:\n{\"dimension_score\":0.72,\"sub_indicator_scores\":{\"指标名\":0.65},\"dimension_reasoning\":\"总体评估\"}\n\n对每个子指标评分(0-1)。\n\n以下是评估依据:\n用户={\"age\": 63, \"gender\": \"男\", \"chronic_diseases\": [\"痛风\", \"高血脂\"], \"medications\": [\"别嘌醇\", \"非诺贝特\"]} 异常=[{\"item\": \"糖化血红蛋白\", \"value\": \"8.5%\", \"status\": \"偏高\"}, {\"item\": \"尿蛋白\", \"value\": \"++\", \"status\": \"阳性\"}] 风险={}\n知识={\"summary\": \"骨质疏松需补充钙和维生素D，预防跌倒\", \"refined_knowledge\": [\"T值<-2.5为骨质疏松\"]}"
+      }
+    ],
+    "text": "你是健康评估专家。评估维度: 生理指标(权重0.3)\n子指标: 血压水平, 血糖水平, 血脂水平, BMI指数, 心率\n\n严格按以下JSON格式输出，不要输出任何其他内容:\n{\"dimension_score\":0.72,\"sub_indicator_scores\":{\"指标名\":0.65},\"dimension_reasoning\":\"总体评估\"}\n\n对每个子指标评分(0-1)。\n\n以下是评估依据:\n用户={\"age\": 63, \"gender\": \"男\", \"chronic_diseases\": [\"痛风\", \"高血脂\"], \"medications\": [\"别嘌醇\", \"非诺贝特\"]} 异常=[{\"item\": \"糖化血红蛋白\", \"value\": \"8.5%\", \"status\": \"偏高\"}, {\"item\": \"尿蛋白\", \"value\": \"++\", \"status\": \"阳性\"}] 风险={}\n知识={\"summary\": \"骨质疏松需补充钙和维生素D，预防跌倒\", \"refined_knowledge\": [\"T值<-2.5为骨质疏松\"]}"
+  },
+  {
+    "type": "medpsy_risk_factor",
+    "factor_id": "F4",
+    "factor_name": "生活习惯风险",
+    "messages": [
+      {
+        "role": "system",
+        "content": "你是一位全科医生，擅长精炼评估。请在3秒内、不超过50字完成思考，然后直接输出JSON。"
+      },
+      {
+        "role": "user",
+        "content": "你是健康评估专家。评估风险因子: 生活习惯风险(权重0.15)\n\n严格按以下JSON格式输出，不要输出任何其他内容:\n{\"factor_score\":45,\"factor_reasoning\":\"评估理由\",\"related_diseases\":[\"疾病1\"]}\n\n评估风险程度(0-100)并给简短理由(20字内)。\n\n以下是评估依据:\n用户={\"age\": 70, \"gender\": \"男\", \"chronic_diseases\": [\"COPD\", \"高血压\"], \"medications\": [\"支气管扩张剂\", \"氨氯地平\"]} 异常=[{\"item\": \"骨密度T值\", \"value\": \"-3.0\", \"status\": \"偏低\"}, {\"item\": \"维生素D\", \"value\": \"15ng/mL\", \"status\": \"不足\"}] 实体={\"Disease\": [\"高血压\", \"2型糖尿病\"], \"Drug\": [\"氨氯地平\", \"二甲双胍\"], \"Food\": [\"低盐饮食\", \"粗粮\"]}"
+      }
+    ],
+    "text": "你是健康评估专家。评估风险因子: 生活习惯风险(权重0.15)\n\n严格按以下JSON格式输出，不要输出任何其他内容:\n{\"factor_score\":45,\"factor_reasoning\":\"评估理由\",\"related_diseases\":[\"疾病1\"]}\n\n评估风险程度(0-100)并给简短理由(20字内)。\n\n以下是评估依据:\n用户={\"age\": 70, \"gender\": \"男\", \"chronic_diseases\": [\"COPD\", \"高血压\"], \"medications\": [\"支气管扩张剂\", \"氨氯地平\"]} 异常=[{\"item\": \"骨密度T值\", \"value\": \"-3.0\", \"status\": \"偏低\"}, {\"item\": \"维生素D\", \"value\": \"15ng/mL\", \"status\": \"不足\"}] 实体={\"Disease\": [\"高血压\", \"2型糖尿病\"], \"Drug\": [\"氨氯地平\", \"二甲双胍\"], \"Food\": [\"低盐饮食\", \"粗粮\"]}"
+  },
+  {
+    "type": "medpsy_risk_factor",
+    "factor_id": "F6",
+    "factor_name": "预防措施风险",
+    "messages": [
+      {
+        "role": "system",
+        "content": "你是一位全科医生，擅长精炼评估。请在3秒内、不超过50字完成思考，然后直接输出JSON。"
+      },
+      {
+        "role": "user",
+        "content": "你是健康评估专家。评估风险因子: 预防措施风险(权重0.1)\n\n严格按以下JSON格式输出，不要输出任何其他内容:\n{\"factor_score\":45,\"factor_reasoning\":\"评估理由\",\"related_diseases\":[\"疾病1\"]}\n\n评估风险程度(0-100)并给简短理由(20字内)。\n\n以下是评估依据:\n用户={\"age\": 72, \"gender\": \"女\", \"chronic_diseases\": [\"冠心病\", \"高血脂\"], \"medications\": [\"他汀类\", \"阿司匹林\"]} 异常=[{\"item\": \"骨密度T值\", \"value\": \"-3.0\", \"status\": \"偏低\"}, {\"item\": \"维生素D\", \"value\": \"15ng/mL\", \"status\": \"不足\"}] 实体={\"Disease\": [\"慢性肾病3期\"], \"Drug\": [\"依那普利\"], \"Food\": [\"低蛋白饮食\"]}"
+      }
+    ],
+    "text": "你是健康评估专家。评估风险因子: 预防措施风险(权重0.1)\n\n严格按以下JSON格式输出，不要输出任何其他内容:\n{\"factor_score\":45,\"factor_reasoning\":\"评估理由\",\"related_diseases\":[\"疾病1\"]}\n\n评估风险程度(0-100)并给简短理由(20字内)。\n\n以下是评估依据:\n用户={\"age\": 72, \"gender\": \"女\", \"chronic_diseases\": [\"冠心病\", \"高血脂\"], \"medications\": [\"他汀类\", \"阿司匹林\"]} 异常=[{\"item\": \"骨密度T值\", \"value\": \"-3.0\", \"status\": \"偏低\"}, {\"item\": \"维生素D\", \"value\": \"15ng/mL\", \"status\": \"不足\"}] 实体={\"Disease\": [\"慢性肾病3期\"], \"Drug\": [\"依那普利\"], \"Food\": [\"低蛋白饮食\"]}"
+  },
+  {
+    "type": "medpsy_risk_factor",
+    "factor_id": "F6",
+    "factor_name": "预防措施风险",
+    "messages": [
+      {
+        "role": "system",
+        "content": "你是一位全科医生，擅长精炼评估。请在3秒内、不超过50字完成思考，然后直接输出JSON。"
+      },
+      {
+        "role": "user",
+        "content": "你是健康评估专家。评估风险因子: 预防措施风险(权重0.1)\n\n严格按以下JSON格式输出，不要输出任何其他内容:\n{\"factor_score\":45,\"factor_reasoning\":\"评估理由\",\"related_diseases\":[\"疾病1\"]}\n\n评估风险程度(0-100)并给简短理由(20字内)。\n\n以下是评估依据:\n用户={\"age\": 80, \"gender\": \"女\", \"chronic_diseases\": [\"心房颤动\", \"糖尿病\"], \"medications\": [\"华法林\", \"胰岛素\"]} 异常=[{\"item\": \"收缩压\", \"value\": \"165mmHg\", \"status\": \"偏高\"}, {\"item\": \"空腹血糖\", \"value\": \"8.2mmol/L\", \"status\": \"偏高\"}] 实体={\"Disease\": [\"慢性肾病3期\"], \"Drug\": [\"依那普利\"], \"Food\": [\"低蛋白饮食\"]}"
+      }
+    ],
+    "text": "你是健康评估专家。评估风险因子: 预防措施风险(权重0.1)\n\n严格按以下JSON格式输出，不要输出任何其他内容:\n{\"factor_score\":45,\"factor_reasoning\":\"评估理由\",\"related_diseases\":[\"疾病1\"]}\n\n评估风险程度(0-100)并给简短理由(20字内)。\n\n以下是评估依据:\n用户={\"age\": 80, \"gender\": \"女\", \"chronic_diseases\": [\"心房颤动\", \"糖尿病\"], \"medications\": [\"华法林\", \"胰岛素\"]} 异常=[{\"item\": \"收缩压\", \"value\": \"165mmHg\", \"status\": \"偏高\"}, {\"item\": \"空腹血糖\", \"value\": \"8.2mmol/L\", \"status\": \"偏高\"}] 实体={\"Disease\": [\"慢性肾病3期\"], \"Drug\": [\"依那普利\"], \"Food\": [\"低蛋白饮食\"]}"
+  },
+  {
+    "type": "medpsy_risk_factor",
+    "factor_id": "F4",
+    "factor_name": "生活习惯风险",
+    "messages": [
+      {
+        "role": "system",
+        "content": "你是一位全科医生，擅长精炼评估。请在3秒内、不超过50字完成思考，然后直接输出JSON。"
+      },
+      {
+        "role": "user",
+        "content": "你是健康评估专家。评估风险因子: 生活习惯风险(权重0.15)\n\n严格按以下JSON格式输出，不要输出任何其他内容:\n{\"factor_score\":45,\"factor_reasoning\":\"评估理由\",\"related_diseases\":[\"疾病1\"]}\n\n评估风险程度(0-100)并给简短理由(20字内)。\n\n以下是评估依据:\n用户={\"age\": 65, \"gender\": \"男\", \"chronic_diseases\": [\"慢性肾病\"], \"medications\": [\"ACEI\", \"利尿剂\"]} 异常=[{\"item\": \"糖化血红蛋白\", \"value\": \"8.5%\", \"status\": \"偏高\"}, {\"item\": \"尿蛋白\", \"value\": \"++\", \"status\": \"阳性\"}] 实体={\"Disease\": [\"高血压\", \"2型糖尿病\"], \"Drug\": [\"氨氯地平\", \"二甲双胍\"], \"Food\": [\"低盐饮食\", \"粗粮\"]}"
+      }
+    ],
+    "text": "你是健康评估专家。评估风险因子: 生活习惯风险(权重0.15)\n\n严格按以下JSON格式输出，不要输出任何其他内容:\n{\"factor_score\":45,\"factor_reasoning\":\"评估理由\",\"related_diseases\":[\"疾病1\"]}\n\n评估风险程度(0-100)并给简短理由(20字内)。\n\n以下是评估依据:\n用户={\"age\": 65, \"gender\": \"男\", \"chronic_diseases\": [\"慢性肾病\"], \"medications\": [\"ACEI\", \"利尿剂\"]} 异常=[{\"item\": \"糖化血红蛋白\", \"value\": \"8.5%\", \"status\": \"偏高\"}, {\"item\": \"尿蛋白\", \"value\": \"++\", \"status\": \"阳性\"}] 实体={\"Disease\": [\"高血压\", \"2型糖尿病\"], \"Drug\": [\"氨氯地平\", \"二甲双胍\"], \"Food\": [\"低盐饮食\", \"粗粮\"]}"
+  },
+  {
+    "type": "medpsy_risk_factor",
+    "factor_id": "F6",
+    "factor_name": "预防措施风险",
+    "messages": [
+      {
+        "role": "system",
+        "content": "你是一位全科医生，擅长精炼评估。请在3秒内、不超过50字完成思考，然后直接输出JSON。"
+      },
+      {
+        "role": "user",
+        "content": "你是健康评估专家。评估风险因子: 预防措施风险(权重0.1)\n\n严格按以下JSON格式输出，不要输出任何其他内容:\n{\"factor_score\":45,\"factor_reasoning\":\"评估理由\",\"related_diseases\":[\"疾病1\"]}\n\n评估风险程度(0-100)并给简短理由(20字内)。\n\n以下是评估依据:\n用户={\"age\": 70, \"gender\": \"男\", \"chronic_diseases\": [\"COPD\", \"高血压\"], \"medications\": [\"支气管扩张剂\", \"氨氯地平\"]} 异常=[{\"item\": \"骨密度T值\", \"value\": \"-3.0\", \"status\": \"偏低\"}, {\"item\": \"维生素D\", \"value\": \"15ng/mL\", \"status\": \"不足\"}] 实体={\"Disease\": [\"冠心病\"], \"Drug\": [\"阿托伐他汀\", \"阿司匹林\"], \"Food\": [\"深海鱼\", \"坚果\"]}"
+      }
+    ],
+    "text": "你是健康评估专家。评估风险因子: 预防措施风险(权重0.1)\n\n严格按以下JSON格式输出，不要输出任何其他内容:\n{\"factor_score\":45,\"factor_reasoning\":\"评估理由\",\"related_diseases\":[\"疾病1\"]}\n\n评估风险程度(0-100)并给简短理由(20字内)。\n\n以下是评估依据:\n用户={\"age\": 70, \"gender\": \"男\", \"chronic_diseases\": [\"COPD\", \"高血压\"], \"medications\": [\"支气管扩张剂\", \"氨氯地平\"]} 异常=[{\"item\": \"骨密度T值\", \"value\": \"-3.0\", \"status\": \"偏低\"}, {\"item\": \"维生素D\", \"value\": \"15ng/mL\", \"status\": \"不足\"}] 实体={\"Disease\": [\"冠心病\"], \"Drug\": [\"阿托伐他汀\", \"阿司匹林\"], \"Food\": [\"深海鱼\", \"坚果\"]}"
+  },
+  {
+    "type": "medpsy_risk_factor",
+    "factor_id": "F5",
+    "factor_name": "复查监测风险",
+    "messages": [
+      {
+        "role": "system",
+        "content": "你是一位全科医生，擅长精炼评估。请在3秒内、不超过50字完成思考，然后直接输出JSON。"
+      },
+      {
+        "role": "user",
+        "content": "你是健康评估专家。评估风险因子: 复查监测风险(权重0.1)\n\n严格按以下JSON格式输出，不要输出任何其他内容:\n{\"factor_score\":45,\"factor_reasoning\":\"评估理由\",\"related_diseases\":[\"疾病1\"]}\n\n评估风险程度(0-100)并给简短理由(20字内)。\n\n以下是评估依据:\n用户={\"age\": 72, \"gender\": \"女\", \"chronic_diseases\": [\"冠心病\", \"高血脂\"], \"medications\": [\"他汀类\", \"阿司匹林\"]} 异常=[{\"item\": \"血肌酐\", \"value\": \"180μmol/L\", \"status\": \"偏高\"}, {\"item\": \"eGFR\", \"value\": \"38\", \"status\": \"偏低\"}] 实体={\"Disease\": [\"COPD\", \"肺气肿\"], \"Drug\": [\"沙美特罗\"], \"Food\": [\"梨\", \"百合\"]}"
+      }
+    ],
+    "text": "你是健康评估专家。评估风险因子: 复查监测风险(权重0.1)\n\n严格按以下JSON格式输出，不要输出任何其他内容:\n{\"factor_score\":45,\"factor_reasoning\":\"评估理由\",\"related_diseases\":[\"疾病1\"]}\n\n评估风险程度(0-100)并给简短理由(20字内)。\n\n以下是评估依据:\n用户={\"age\": 72, \"gender\": \"女\", \"chronic_diseases\": [\"冠心病\", \"高血脂\"], \"medications\": [\"他汀类\", \"阿司匹林\"]} 异常=[{\"item\": \"血肌酐\", \"value\": \"180μmol/L\", \"status\": \"偏高\"}, {\"item\": \"eGFR\", \"value\": \"38\", \"status\": \"偏低\"}] 实体={\"Disease\": [\"COPD\", \"肺气肿\"], \"Drug\": [\"沙美特罗\"], \"Food\": [\"梨\", \"百合\"]}"
+  },
+  {
+    "type": "medpsy_risk_factor",
+    "factor_id": "F5",
+    "factor_name": "复查监测风险",
+    "messages": [
+      {
+        "role": "system",
+        "content": "你是一位全科医生，擅长精炼评估。请在3秒内、不超过50字完成思考，然后直接输出JSON。"
+      },
+      {
+        "role": "user",
+        "content": "你是健康评估专家。评估风险因子: 复查监测风险(权重0.1)\n\n严格按以下JSON格式输出，不要输出任何其他内容:\n{\"factor_score\":45,\"factor_reasoning\":\"评估理由\",\"related_diseases\":[\"疾病1\"]}\n\n评估风险程度(0-100)并给简短理由(20字内)。\n\n以下是评估依据:\n用户={\"age\": 75, \"gender\": \"女\", \"chronic_diseases\": [\"骨质疏松\", \"高血压\"], \"medications\": [\"钙片\", \"ARB类\"]} 异常=[{\"item\": \"LDL-C\", \"value\": \"4.1mmol/L\", \"status\": \"偏高\"}, {\"item\": \"BMI\", \"value\": \"28.5\", \"status\": \"超重\"}] 实体={\"Disease\": [\"慢性肾病3期\"], \"Drug\": [\"依那普利\"], \"Food\": [\"低蛋白饮食\"]}"
+      }
+    ],
+    "text": "你是健康评估专家。评估风险因子: 复查监测风险(权重0.1)\n\n严格按以下JSON格式输出，不要输出任何其他内容:\n{\"factor_score\":45,\"factor_reasoning\":\"评估理由\",\"related_diseases\":[\"疾病1\"]}\n\n评估风险程度(0-100)并给简短理由(20字内)。\n\n以下是评估依据:\n用户={\"age\": 75, \"gender\": \"女\", \"chronic_diseases\": [\"骨质疏松\", \"高血压\"], \"medications\": [\"钙片\", \"ARB类\"]} 异常=[{\"item\": \"LDL-C\", \"value\": \"4.1mmol/L\", \"status\": \"偏高\"}, {\"item\": \"BMI\", \"value\": \"28.5\", \"status\": \"超重\"}] 实体={\"Disease\": [\"慢性肾病3期\"], \"Drug\": [\"依那普利\"], \"Food\": [\"低蛋白饮食\"]}"
+  },
+  {
+    "type": "medpsy_risk_factor",
+    "factor_id": "F2",
+    "factor_name": "并发症风险",
+    "messages": [
+      {
+        "role": "system",
+        "content": "你是一位全科医生，擅长精炼评估。请在3秒内、不超过50字完成思考，然后直接输出JSON。"
+      },
+      {
+        "role": "user",
+        "content": "你是健康评估专家。评估风险因子: 并发症风险(权重0.2)\n\n严格按以下JSON格式输出，不要输出任何其他内容:\n{\"factor_score\":45,\"factor_reasoning\":\"评估理由\",\"related_diseases\":[\"疾病1\"]}\n\n评估风险程度(0-100)并给简短理由(20字内)。\n\n以下是评估依据:\n用户={\"age\": 68, \"gender\": \"男\", \"chronic_diseases\": [\"高血压\", \"糖尿病\"], \"medications\": [\"降压药\", \"二甲双胍\"]} 异常=[{\"item\": \"骨密度T值\", \"value\": \"-3.0\", \"status\": \"偏低\"}, {\"item\": \"维生素D\", \"value\": \"15ng/mL\", \"status\": \"不足\"}] 实体={\"Disease\": [\"慢性肾病3期\"], \"Drug\": [\"依那普利\"], \"Food\": [\"低蛋白饮食\"]}"
+      }
+    ],
+    "text": "你是健康评估专家。评估风险因子: 并发症风险(权重0.2)\n\n严格按以下JSON格式输出，不要输出任何其他内容:\n{\"factor_score\":45,\"factor_reasoning\":\"评估理由\",\"related_diseases\":[\"疾病1\"]}\n\n评估风险程度(0-100)并给简短理由(20字内)。\n\n以下是评估依据:\n用户={\"age\": 68, \"gender\": \"男\", \"chronic_diseases\": [\"高血压\", \"糖尿病\"], \"medications\": [\"降压药\", \"二甲双胍\"]} 异常=[{\"item\": \"骨密度T值\", \"value\": \"-3.0\", \"status\": \"偏低\"}, {\"item\": \"维生素D\", \"value\": \"15ng/mL\", \"status\": \"不足\"}] 实体={\"Disease\": [\"慢性肾病3期\"], \"Drug\": [\"依那普利\"], \"Food\": [\"低蛋白饮食\"]}"
+  },
+  {
+    "type": "medpsy_risk_factor",
+    "factor_id": "F4",
+    "factor_name": "生活习惯风险",
+    "messages": [
+      {
+        "role": "system",
+        "content": "你是一位全科医生，擅长精炼评估。请在3秒内、不超过50字完成思考，然后直接输出JSON。"
+      },
+      {
+        "role": "user",
+        "content": "你是健康评估专家。评估风险因子: 生活习惯风险(权重0.15)\n\n严格按以下JSON格式输出，不要输出任何其他内容:\n{\"factor_score\":45,\"factor_reasoning\":\"评估理由\",\"related_diseases\":[\"疾病1\"]}\n\n评估风险程度(0-100)并给简短理由(20字内)。\n\n以下是评估依据:\n用户={\"age\": 68, \"gender\": \"男\", \"chronic_diseases\": [\"高血压\", \"糖尿病\"], \"medications\": [\"降压药\", \"二甲双胍\"]} 异常=[{\"item\": \"收缩压\", \"value\": \"165mmHg\", \"status\": \"偏高\"}, {\"item\": \"空腹血糖\", \"value\": \"8.2mmol/L\", \"status\": \"偏高\"}] 实体={\"Disease\": [\"慢性肾病3期\"], \"Drug\": [\"依那普利\"], \"Food\": [\"低蛋白饮食\"]}"
+      }
+    ],
+    "text": "你是健康评估专家。评估风险因子: 生活习惯风险(权重0.15)\n\n严格按以下JSON格式输出，不要输出任何其他内容:\n{\"factor_score\":45,\"factor_reasoning\":\"评估理由\",\"related_diseases\":[\"疾病1\"]}\n\n评估风险程度(0-100)并给简短理由(20字内)。\n\n以下是评估依据:\n用户={\"age\": 68, \"gender\": \"男\", \"chronic_diseases\": [\"高血压\", \"糖尿病\"], \"medications\": [\"降压药\", \"二甲双胍\"]} 异常=[{\"item\": \"收缩压\", \"value\": \"165mmHg\", \"status\": \"偏高\"}, {\"item\": \"空腹血糖\", \"value\": \"8.2mmol/L\", \"status\": \"偏高\"}] 实体={\"Disease\": [\"慢性肾病3期\"], \"Drug\": [\"依那普利\"], \"Food\": [\"低蛋白饮食\"]}"
+  },
+  {
+    "type": "medpsy_risk_factor",
+    "factor_id": "F3",
+    "factor_name": "用药风险",
+    "messages": [
+      {
+        "role": "system",
+        "content": "你是一位全科医生，擅长精炼评估。请在3秒内、不超过50字完成思考，然后直接输出JSON。"
+      },
+      {
+        "role": "user",
+        "content": "你是健康评估专家。评估风险因子: 用药风险(权重0.2)\n\n严格按以下JSON格式输出，不要输出任何其他内容:\n{\"factor_score\":45,\"factor_reasoning\":\"评估理由\",\"related_diseases\":[\"疾病1\"]}\n\n评估风险程度(0-100)并给简短理由(20字内)。\n\n以下是评估依据:\n用户={\"age\": 75, \"gender\": \"女\", \"chronic_diseases\": [\"骨质疏松\", \"高血压\"], \"medications\": [\"钙片\", \"ARB类\"]} 异常=[{\"item\": \"收缩压\", \"value\": \"165mmHg\", \"status\": \"偏高\"}, {\"item\": \"空腹血糖\", \"value\": \"8.2mmol/L\", \"status\": \"偏高\"}] 实体={\"Disease\": [\"冠心病\"], \"Drug\": [\"阿托伐他汀\", \"阿司匹林\"], \"Food\": [\"深海鱼\", \"坚果\"]}"
+      }
+    ],
+    "text": "你是健康评估专家。评估风险因子: 用药风险(权重0.2)\n\n严格按以下JSON格式输出，不要输出任何其他内容:\n{\"factor_score\":45,\"factor_reasoning\":\"评估理由\",\"related_diseases\":[\"疾病1\"]}\n\n评估风险程度(0-100)并给简短理由(20字内)。\n\n以下是评估依据:\n用户={\"age\": 75, \"gender\": \"女\", \"chronic_diseases\": [\"骨质疏松\", \"高血压\"], \"medications\": [\"钙片\", \"ARB类\"]} 异常=[{\"item\": \"收缩压\", \"value\": \"165mmHg\", \"status\": \"偏高\"}, {\"item\": \"空腹血糖\", \"value\": \"8.2mmol/L\", \"status\": \"偏高\"}] 实体={\"Disease\": [\"冠心病\"], \"Drug\": [\"阿托伐他汀\", \"阿司匹林\"], \"Food\": [\"深海鱼\", \"坚果\"]}"
+  },
+  {
+    "type": "medpsy_risk_factor",
+    "factor_id": "F5",
+    "factor_name": "复查监测风险",
+    "messages": [
+      {
+        "role": "system",
+        "content": "你是一位全科医生，擅长精炼评估。请在3秒内、不超过50字完成思考，然后直接输出JSON。"
+      },
+      {
+        "role": "user",
+        "content": "你是健康评估专家。评估风险因子: 复查监测风险(权重0.1)\n\n严格按以下JSON格式输出，不要输出任何其他内容:\n{\"factor_score\":45,\"factor_reasoning\":\"评估理由\",\"related_diseases\":[\"疾病1\"]}\n\n评估风险程度(0-100)并给简短理由(20字内)。\n\n以下是评估依据:\n用户={\"age\": 72, \"gender\": \"女\", \"chronic_diseases\": [\"冠心病\", \"高血脂\"], \"medications\": [\"他汀类\", \"阿司匹林\"]} 异常=[{\"item\": \"收缩压\", \"value\": \"165mmHg\", \"status\": \"偏高\"}, {\"item\": \"空腹血糖\", \"value\": \"8.2mmol/L\", \"status\": \"偏高\"}] 实体={\"Disease\": [\"骨质疏松\"], \"Drug\": [\"阿仑膦酸钠\", \"钙尔奇\"], \"Food\": [\"牛奶\", \"豆制品\"]}"
+      }
+    ],
+    "text": "你是健康评估专家。评估风险因子: 复查监测风险(权重0.1)\n\n严格按以下JSON格式输出，不要输出任何其他内容:\n{\"factor_score\":45,\"factor_reasoning\":\"评估理由\",\"related_diseases\":[\"疾病1\"]}\n\n评估风险程度(0-100)并给简短理由(20字内)。\n\n以下是评估依据:\n用户={\"age\": 72, \"gender\": \"女\", \"chronic_diseases\": [\"冠心病\", \"高血脂\"], \"medications\": [\"他汀类\", \"阿司匹林\"]} 异常=[{\"item\": \"收缩压\", \"value\": \"165mmHg\", \"status\": \"偏高\"}, {\"item\": \"空腹血糖\", \"value\": \"8.2mmol/L\", \"status\": \"偏高\"}] 实体={\"Disease\": [\"骨质疏松\"], \"Drug\": [\"阿仑膦酸钠\", \"钙尔奇\"], \"Food\": [\"牛奶\", \"豆制品\"]}"
+  },
+  {
+    "type": "medpsy_risk_factor",
+    "factor_id": "F1",
+    "factor_name": "疾病严重程度",
+    "messages": [
+      {
+        "role": "system",
+        "content": "你是一位全科医生，擅长精炼评估。请在3秒内、不超过50字完成思考，然后直接输出JSON。"
+      },
+      {
+        "role": "user",
+        "content": "你是健康评估专家。评估风险因子: 疾病严重程度(权重0.25)\n\n严格按以下JSON格式输出，不要输出任何其他内容:\n{\"factor_score\":45,\"factor_reasoning\":\"评估理由\",\"related_diseases\":[\"疾病1\"]}\n\n评估风险程度(0-100)并给简短理由(20字内)。\n\n以下是评估依据:\n用户={\"age\": 65, \"gender\": \"男\", \"chronic_diseases\": [\"慢性肾病\"], \"medications\": [\"ACEI\", \"利尿剂\"]} 异常=[{\"item\": \"LDL-C\", \"value\": \"4.1mmol/L\", \"status\": \"偏高\"}, {\"item\": \"BMI\", \"value\": \"28.5\", \"status\": \"超重\"}] 实体={\"Disease\": [\"骨质疏松\"], \"Drug\": [\"阿仑膦酸钠\", \"钙尔奇\"], \"Food\": [\"牛奶\", \"豆制品\"]}"
+      }
+    ],
+    "text": "你是健康评估专家。评估风险因子: 疾病严重程度(权重0.25)\n\n严格按以下JSON格式输出，不要输出任何其他内容:\n{\"factor_score\":45,\"factor_reasoning\":\"评估理由\",\"related_diseases\":[\"疾病1\"]}\n\n评估风险程度(0-100)并给简短理由(20字内)。\n\n以下是评估依据:\n用户={\"age\": 65, \"gender\": \"男\", \"chronic_diseases\": [\"慢性肾病\"], \"medications\": [\"ACEI\", \"利尿剂\"]} 异常=[{\"item\": \"LDL-C\", \"value\": \"4.1mmol/L\", \"status\": \"偏高\"}, {\"item\": \"BMI\", \"value\": \"28.5\", \"status\": \"超重\"}] 实体={\"Disease\": [\"骨质疏松\"], \"Drug\": [\"阿仑膦酸钠\", \"钙尔奇\"], \"Food\": [\"牛奶\", \"豆制品\"]}"
+  },
+  {
+    "type": "medpsy_risk_factor",
+    "factor_id": "F5",
+    "factor_name": "复查监测风险",
+    "messages": [
+      {
+        "role": "system",
+        "content": "你是一位全科医生，擅长精炼评估。请在3秒内、不超过50字完成思考，然后直接输出JSON。"
+      },
+      {
+        "role": "user",
+        "content": "你是健康评估专家。评估风险因子: 复查监测风险(权重0.1)\n\n严格按以下JSON格式输出，不要输出任何其他内容:\n{\"factor_score\":45,\"factor_reasoning\":\"评估理由\",\"related_diseases\":[\"疾病1\"]}\n\n评估风险程度(0-100)并给简短理由(20字内)。\n\n以下是评估依据:\n用户={\"age\": 65, \"gender\": \"男\", \"chronic_diseases\": [\"慢性肾病\"], \"medications\": [\"ACEI\", \"利尿剂\"]} 异常=[{\"item\": \"血肌酐\", \"value\": \"180μmol/L\", \"status\": \"偏高\"}, {\"item\": \"eGFR\", \"value\": \"38\", \"status\": \"偏低\"}] 实体={\"Disease\": [\"COPD\", \"肺气肿\"], \"Drug\": [\"沙美特罗\"], \"Food\": [\"梨\", \"百合\"]}"
+      }
+    ],
+    "text": "你是健康评估专家。评估风险因子: 复查监测风险(权重0.1)\n\n严格按以下JSON格式输出，不要输出任何其他内容:\n{\"factor_score\":45,\"factor_reasoning\":\"评估理由\",\"related_diseases\":[\"疾病1\"]}\n\n评估风险程度(0-100)并给简短理由(20字内)。\n\n以下是评估依据:\n用户={\"age\": 65, \"gender\": \"男\", \"chronic_diseases\": [\"慢性肾病\"], \"medications\": [\"ACEI\", \"利尿剂\"]} 异常=[{\"item\": \"血肌酐\", \"value\": \"180μmol/L\", \"status\": \"偏高\"}, {\"item\": \"eGFR\", \"value\": \"38\", \"status\": \"偏低\"}] 实体={\"Disease\": [\"COPD\", \"肺气肿\"], \"Drug\": [\"沙美特罗\"], \"Food\": [\"梨\", \"百合\"]}"
+  },
+  {
+    "type": "medpsy_risk_factor",
+    "factor_id": "F5",
+    "factor_name": "复查监测风险",
+    "messages": [
+      {
+        "role": "system",
+        "content": "你是一位全科医生，擅长精炼评估。请在3秒内、不超过50字完成思考，然后直接输出JSON。"
+      },
+      {
+        "role": "user",
+        "content": "你是健康评估专家。评估风险因子: 复查监测风险(权重0.1)\n\n严格按以下JSON格式输出，不要输出任何其他内容:\n{\"factor_score\":45,\"factor_reasoning\":\"评估理由\",\"related_diseases\":[\"疾病1\"]}\n\n评估风险程度(0-100)并给简短理由(20字内)。\n\n以下是评估依据:\n用户={\"age\": 63, \"gender\": \"男\", \"chronic_diseases\": [\"痛风\", \"高血脂\"], \"medications\": [\"别嘌醇\", \"非诺贝特\"]} 异常=[{\"item\": \"LDL-C\", \"value\": \"4.1mmol/L\", \"status\": \"偏高\"}, {\"item\": \"BMI\", \"value\": \"28.5\", \"status\": \"超重\"}] 实体={\"Disease\": [\"COPD\", \"肺气肿\"], \"Drug\": [\"沙美特罗\"], \"Food\": [\"梨\", \"百合\"]}"
+      }
+    ],
+    "text": "你是健康评估专家。评估风险因子: 复查监测风险(权重0.1)\n\n严格按以下JSON格式输出，不要输出任何其他内容:\n{\"factor_score\":45,\"factor_reasoning\":\"评估理由\",\"related_diseases\":[\"疾病1\"]}\n\n评估风险程度(0-100)并给简短理由(20字内)。\n\n以下是评估依据:\n用户={\"age\": 63, \"gender\": \"男\", \"chronic_diseases\": [\"痛风\", \"高血脂\"], \"medications\": [\"别嘌醇\", \"非诺贝特\"]} 异常=[{\"item\": \"LDL-C\", \"value\": \"4.1mmol/L\", \"status\": \"偏高\"}, {\"item\": \"BMI\", \"value\": \"28.5\", \"status\": \"超重\"}] 实体={\"Disease\": [\"COPD\", \"肺气肿\"], \"Drug\": [\"沙美特罗\"], \"Food\": [\"梨\", \"百合\"]}"
+  },
+  {
+    "type": "medpsy_risk_factor",
+    "factor_id": "F6",
+    "factor_name": "预防措施风险",
+    "messages": [
+      {
+        "role": "system",
+        "content": "你是一位全科医生，擅长精炼评估。请在3秒内、不超过50字完成思考，然后直接输出JSON。"
+      },
+      {
+        "role": "user",
+        "content": "你是健康评估专家。评估风险因子: 预防措施风险(权重0.1)\n\n严格按以下JSON格式输出，不要输出任何其他内容:\n{\"factor_score\":45,\"factor_reasoning\":\"评估理由\",\"related_diseases\":[\"疾病1\"]}\n\n评估风险程度(0-100)并给简短理由(20字内)。\n\n以下是评估依据:\n用户={\"age\": 75, \"gender\": \"女\", \"chronic_diseases\": [\"骨质疏松\", \"高血压\"], \"medications\": [\"钙片\", \"ARB类\"]} 异常=[{\"item\": \"血肌酐\", \"value\": \"180μmol/L\", \"status\": \"偏高\"}, {\"item\": \"eGFR\", \"value\": \"38\", \"status\": \"偏低\"}] 实体={\"Disease\": [\"骨质疏松\"], \"Drug\": [\"阿仑膦酸钠\", \"钙尔奇\"], \"Food\": [\"牛奶\", \"豆制品\"]}"
+      }
+    ],
+    "text": "你是健康评估专家。评估风险因子: 预防措施风险(权重0.1)\n\n严格按以下JSON格式输出，不要输出任何其他内容:\n{\"factor_score\":45,\"factor_reasoning\":\"评估理由\",\"related_diseases\":[\"疾病1\"]}\n\n评估风险程度(0-100)并给简短理由(20字内)。\n\n以下是评估依据:\n用户={\"age\": 75, \"gender\": \"女\", \"chronic_diseases\": [\"骨质疏松\", \"高血压\"], \"medications\": [\"钙片\", \"ARB类\"]} 异常=[{\"item\": \"血肌酐\", \"value\": \"180μmol/L\", \"status\": \"偏高\"}, {\"item\": \"eGFR\", \"value\": \"38\", \"status\": \"偏低\"}] 实体={\"Disease\": [\"骨质疏松\"], \"Drug\": [\"阿仑膦酸钠\", \"钙尔奇\"], \"Food\": [\"牛奶\", \"豆制品\"]}"
+  },
+  {
+    "type": "medpsy_risk_factor",
+    "factor_id": "F6",
+    "factor_name": "预防措施风险",
+    "messages": [
+      {
+        "role": "system",
+        "content": "你是一位全科医生，擅长精炼评估。请在3秒内、不超过50字完成思考，然后直接输出JSON。"
+      },
+      {
+        "role": "user",
+        "content": "你是健康评估专家。评估风险因子: 预防措施风险(权重0.1)\n\n严格按以下JSON格式输出，不要输出任何其他内容:\n{\"factor_score\":45,\"factor_reasoning\":\"评估理由\",\"related_diseases\":[\"疾病1\"]}\n\n评估风险程度(0-100)并给简短理由(20字内)。\n\n以下是评估依据:\n用户={\"age\": 80, \"gender\": \"女\", \"chronic_diseases\": [\"心房颤动\", \"糖尿病\"], \"medications\": [\"华法林\", \"胰岛素\"]} 异常=[{\"item\": \"糖化血红蛋白\", \"value\": \"8.5%\", \"status\": \"偏高\"}, {\"item\": \"尿蛋白\", \"value\": \"++\", \"status\": \"阳性\"}] 实体={\"Disease\": [\"COPD\", \"肺气肿\"], \"Drug\": [\"沙美特罗\"], \"Food\": [\"梨\", \"百合\"]}"
+      }
+    ],
+    "text": "你是健康评估专家。评估风险因子: 预防措施风险(权重0.1)\n\n严格按以下JSON格式输出，不要输出任何其他内容:\n{\"factor_score\":45,\"factor_reasoning\":\"评估理由\",\"related_diseases\":[\"疾病1\"]}\n\n评估风险程度(0-100)并给简短理由(20字内)。\n\n以下是评估依据:\n用户={\"age\": 80, \"gender\": \"女\", \"chronic_diseases\": [\"心房颤动\", \"糖尿病\"], \"medications\": [\"华法林\", \"胰岛素\"]} 异常=[{\"item\": \"糖化血红蛋白\", \"value\": \"8.5%\", \"status\": \"偏高\"}, {\"item\": \"尿蛋白\", \"value\": \"++\", \"status\": \"阳性\"}] 实体={\"Disease\": [\"COPD\", \"肺气肿\"], \"Drug\": [\"沙美特罗\"], \"Food\": [\"梨\", \"百合\"]}"
+  },
+  {
+    "type": "medpsy_risk_factor",
+    "factor_id": "F4",
+    "factor_name": "生活习惯风险",
+    "messages": [
+      {
+        "role": "system",
+        "content": "你是一位全科医生，擅长精炼评估。请在3秒内、不超过50字完成思考，然后直接输出JSON。"
+      },
+      {
+        "role": "user",
+        "content": "你是健康评估专家。评估风险因子: 生活习惯风险(权重0.15)\n\n严格按以下JSON格式输出，不要输出任何其他内容:\n{\"factor_score\":45,\"factor_reasoning\":\"评估理由\",\"related_diseases\":[\"疾病1\"]}\n\n评估风险程度(0-100)并给简短理由(20字内)。\n\n以下是评估依据:\n用户={\"age\": 72, \"gender\": \"女\", \"chronic_diseases\": [\"冠心病\", \"高血脂\"], \"medications\": [\"他汀类\", \"阿司匹林\"]} 异常=[{\"item\": \"LDL-C\", \"value\": \"4.1mmol/L\", \"status\": \"偏高\"}, {\"item\": \"BMI\", \"value\": \"28.5\", \"status\": \"超重\"}] 实体={\"Disease\": [\"冠心病\"], \"Drug\": [\"阿托伐他汀\", \"阿司匹林\"], \"Food\": [\"深海鱼\", \"坚果\"]}"
+      }
+    ],
+    "text": "你是健康评估专家。评估风险因子: 生活习惯风险(权重0.15)\n\n严格按以下JSON格式输出，不要输出任何其他内容:\n{\"factor_score\":45,\"factor_reasoning\":\"评估理由\",\"related_diseases\":[\"疾病1\"]}\n\n评估风险程度(0-100)并给简短理由(20字内)。\n\n以下是评估依据:\n用户={\"age\": 72, \"gender\": \"女\", \"chronic_diseases\": [\"冠心病\", \"高血脂\"], \"medications\": [\"他汀类\", \"阿司匹林\"]} 异常=[{\"item\": \"LDL-C\", \"value\": \"4.1mmol/L\", \"status\": \"偏高\"}, {\"item\": \"BMI\", \"value\": \"28.5\", \"status\": \"超重\"}] 实体={\"Disease\": [\"冠心病\"], \"Drug\": [\"阿托伐他汀\", \"阿司匹林\"], \"Food\": [\"深海鱼\", \"坚果\"]}"
+  },
+  {
+    "type": "medpsy_risk_factor",
+    "factor_id": "F1",
+    "factor_name": "疾病严重程度",
+    "messages": [
+      {
+        "role": "system",
+        "content": "你是一位全科医生，擅长精炼评估。请在3秒内、不超过50字完成思考，然后直接输出JSON。"
+      },
+      {
+        "role": "user",
+        "content": "你是健康评估专家。评估风险因子: 疾病严重程度(权重0.25)\n\n严格按以下JSON格式输出，不要输出任何其他内容:\n{\"factor_score\":45,\"factor_reasoning\":\"评估理由\",\"related_diseases\":[\"疾病1\"]}\n\n评估风险程度(0-100)并给简短理由(20字内)。\n\n以下是评估依据:\n用户={\"age\": 80, \"gender\": \"女\", \"chronic_diseases\": [\"心房颤动\", \"糖尿病\"], \"medications\": [\"华法林\", \"胰岛素\"]} 异常=[{\"item\": \"收缩压\", \"value\": \"165mmHg\", \"status\": \"偏高\"}, {\"item\": \"空腹血糖\", \"value\": \"8.2mmol/L\", \"status\": \"偏高\"}] 实体={\"Disease\": [\"COPD\", \"肺气肿\"], \"Drug\": [\"沙美特罗\"], \"Food\": [\"梨\", \"百合\"]}"
+      }
+    ],
+    "text": "你是健康评估专家。评估风险因子: 疾病严重程度(权重0.25)\n\n严格按以下JSON格式输出，不要输出任何其他内容:\n{\"factor_score\":45,\"factor_reasoning\":\"评估理由\",\"related_diseases\":[\"疾病1\"]}\n\n评估风险程度(0-100)并给简短理由(20字内)。\n\n以下是评估依据:\n用户={\"age\": 80, \"gender\": \"女\", \"chronic_diseases\": [\"心房颤动\", \"糖尿病\"], \"medications\": [\"华法林\", \"胰岛素\"]} 异常=[{\"item\": \"收缩压\", \"value\": \"165mmHg\", \"status\": \"偏高\"}, {\"item\": \"空腹血糖\", \"value\": \"8.2mmol/L\", \"status\": \"偏高\"}] 实体={\"Disease\": [\"COPD\", \"肺气肿\"], \"Drug\": [\"沙美特罗\"], \"Food\": [\"梨\", \"百合\"]}"
+  },
+  {
+    "type": "medpsy_risk_factor",
+    "factor_id": "F5",
+    "factor_name": "复查监测风险",
+    "messages": [
+      {
+        "role": "system",
+        "content": "你是一位全科医生，擅长精炼评估。请在3秒内、不超过50字完成思考，然后直接输出JSON。"
+      },
+      {
+        "role": "user",
+        "content": "你是健康评估专家。评估风险因子: 复查监测风险(权重0.1)\n\n严格按以下JSON格式输出，不要输出任何其他内容:\n{\"factor_score\":45,\"factor_reasoning\":\"评估理由\",\"related_diseases\":[\"疾病1\"]}\n\n评估风险程度(0-100)并给简短理由(20字内)。\n\n以下是评估依据:\n用户={\"age\": 75, \"gender\": \"女\", \"chronic_diseases\": [\"骨质疏松\", \"高血压\"], \"medications\": [\"钙片\", \"ARB类\"]} 异常=[{\"item\": \"骨密度T值\", \"value\": \"-3.0\", \"status\": \"偏低\"}, {\"item\": \"维生素D\", \"value\": \"15ng/mL\", \"status\": \"不足\"}] 实体={\"Disease\": [\"冠心病\"], \"Drug\": [\"阿托伐他汀\", \"阿司匹林\"], \"Food\": [\"深海鱼\", \"坚果\"]}"
+      }
+    ],
+    "text": "你是健康评估专家。评估风险因子: 复查监测风险(权重0.1)\n\n严格按以下JSON格式输出，不要输出任何其他内容:\n{\"factor_score\":45,\"factor_reasoning\":\"评估理由\",\"related_diseases\":[\"疾病1\"]}\n\n评估风险程度(0-100)并给简短理由(20字内)。\n\n以下是评估依据:\n用户={\"age\": 75, \"gender\": \"女\", \"chronic_diseases\": [\"骨质疏松\", \"高血压\"], \"medications\": [\"钙片\", \"ARB类\"]} 异常=[{\"item\": \"骨密度T值\", \"value\": \"-3.0\", \"status\": \"偏低\"}, {\"item\": \"维生素D\", \"value\": \"15ng/mL\", \"status\": \"不足\"}] 实体={\"Disease\": [\"冠心病\"], \"Drug\": [\"阿托伐他汀\", \"阿司匹林\"], \"Food\": [\"深海鱼\", \"坚果\"]}"
+  },
+  {
+    "type": "medpsy_risk_factor",
+    "factor_id": "F1",
+    "factor_name": "疾病严重程度",
+    "messages": [
+      {
+        "role": "system",
+        "content": "你是一位全科医生，擅长精炼评估。请在3秒内、不超过50字完成思考，然后直接输出JSON。"
+      },
+      {
+        "role": "user",
+        "content": "你是健康评估专家。评估风险因子: 疾病严重程度(权重0.25)\n\n严格按以下JSON格式输出，不要输出任何其他内容:\n{\"factor_score\":45,\"factor_reasoning\":\"评估理由\",\"related_diseases\":[\"疾病1\"]}\n\n评估风险程度(0-100)并给简短理由(20字内)。\n\n以下是评估依据:\n用户={\"age\": 72, \"gender\": \"女\", \"chronic_diseases\": [\"冠心病\", \"高血脂\"], \"medications\": [\"他汀类\", \"阿司匹林\"]} 异常=[{\"item\": \"收缩压\", \"value\": \"165mmHg\", \"status\": \"偏高\"}, {\"item\": \"空腹血糖\", \"value\": \"8.2mmol/L\", \"status\": \"偏高\"}] 实体={\"Disease\": [\"冠心病\"], \"Drug\": [\"阿托伐他汀\", \"阿司匹林\"], \"Food\": [\"深海鱼\", \"坚果\"]}"
+      }
+    ],
+    "text": "你是健康评估专家。评估风险因子: 疾病严重程度(权重0.25)\n\n严格按以下JSON格式输出，不要输出任何其他内容:\n{\"factor_score\":45,\"factor_reasoning\":\"评估理由\",\"related_diseases\":[\"疾病1\"]}\n\n评估风险程度(0-100)并给简短理由(20字内)。\n\n以下是评估依据:\n用户={\"age\": 72, \"gender\": \"女\", \"chronic_diseases\": [\"冠心病\", \"高血脂\"], \"medications\": [\"他汀类\", \"阿司匹林\"]} 异常=[{\"item\": \"收缩压\", \"value\": \"165mmHg\", \"status\": \"偏高\"}, {\"item\": \"空腹血糖\", \"value\": \"8.2mmol/L\", \"status\": \"偏高\"}] 实体={\"Disease\": [\"冠心病\"], \"Drug\": [\"阿托伐他汀\", \"阿司匹林\"], \"Food\": [\"深海鱼\", \"坚果\"]}"
+  }
+]

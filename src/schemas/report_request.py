@@ -5,7 +5,7 @@
 数据结构与SpringBoot后端数据库表结构对齐，符合《项目需求设计v1.1》要求。
 """
 
-from typing import Optional, List, Dict, Any
+from typing import Optional, Dict, Any
 from pydantic import BaseModel, Field
 from .base_request import BaseRequest
 
@@ -125,6 +125,7 @@ class UserProfile(BaseModel):
         user_id (Optional[int]): 用户ID，对应SpringBoot后端users表的id字段
         gender (Optional[str]): 性别，对应SpringBoot后端users表的gender字段，值为"male"、"female"或"other"
         birth_date (Optional[str]): 出生日期，对应SpringBoot后端users表的birth_date字段，格式为YYYY-MM-DD
+        age (Optional[int]): 年龄，兼容仅提供年龄且缺少birth_date的输入
         height (Optional[float]): 身高(cm)，对应SpringBoot后端users表的height字段
         weight (Optional[float]): 体重(kg)，对应SpringBoot后端users表的weight字段
         past_medical_history (Optional[str]): 既往病史，对应SpringBoot后端users表的past_medical_history字段，字符串文本类型
@@ -132,6 +133,8 @@ class UserProfile(BaseModel):
         allergy_history (Optional[str]): 过敏史，对应SpringBoot后端users表的allergy_history字段，字符串文本类型
         surgical_history (Optional[str]): 手术史，对应SpringBoot后端users表的surgical_history字段，字符串文本类型
         medical_compliance (Optional[str]): 用药医嘱，对应SpringBoot后端users表的medical_compliance字段，字符串文本类型
+        medical_history (Optional[str]): 既往病史兼容字段，标准化为past_medical_history
+        medication_history (Optional[str]): 用药记录兼容字段，标准化为medical_compliance
 
     Example:
         >>> user_profile = UserProfile(
@@ -164,6 +167,12 @@ class UserProfile(BaseModel):
         default=None,
         description="出生日期，对应SpringBoot后端users表的birth_date字段，格式为YYYY-MM-DD",
         examples=["1955-03-15", "1960-08-20"]
+    )
+
+    age: Optional[int] = Field(
+        default=None,
+        description="年龄，兼容仅提供年龄且缺少birth_date的输入",
+        examples=[68, 72]
     )
 
     height: Optional[float] = Field(
@@ -206,6 +215,18 @@ class UserProfile(BaseModel):
         default=None,
         description="用药医嘱，对应SpringBoot后端users表的medical_compliance字段，字符串文本类型",
         examples=["好", "一般", "差"]
+    )
+
+    medical_history: Optional[str] = Field(
+        default=None,
+        description="既往病史兼容字段，标准化为past_medical_history",
+        examples=["高血压病史5年"]
+    )
+
+    medication_history: Optional[str] = Field(
+        default=None,
+        description="用药记录兼容字段，标准化为medical_compliance",
+        examples=["正在服用降压药"]
     )
 
 

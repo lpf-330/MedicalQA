@@ -8,15 +8,19 @@ Langchain适配器实现类
 本适配器使用langchain_core和langgraph组件。
 """
 
-from typing import Any, Dict, List, Optional
+import logging
+from typing import Any, Dict, List
 
 from .langchain_adapter import (
-    LangchainAdapter, 
-    InternalChain, 
-    InternalTool, 
-    InternalMemory, 
+    LangchainAdapter,
+    InternalChain,
+    InternalTool,
+    InternalMemory,
     InternalAgent
 )
+from src.utils.logger import log_arch_event
+
+logger = logging.getLogger(__name__)
 
 
 class InternalChainImpl(InternalChain):
@@ -140,20 +144,22 @@ class LangchainAdapterImpl(LangchainAdapter):
     def __init__(self, llm=None):
         """
         初始化Langchain适配器
-        
+
         Args:
             llm: 语言模型实例（可选）
         """
+        super().__init__()
         self._llm = llm
     
     def set_llm(self, llm) -> None:
         """
         设置语言模型
-        
+
         Args:
             llm: 语言模型实例
         """
         self._llm = llm
+        self._set_initialized(True)
     
     def create_chain(
         self, 
@@ -170,6 +176,8 @@ class LangchainAdapterImpl(LangchainAdapter):
         Returns:
             内部链对象
         """
+        logger.info(f"[LangchainAdapterImpl.create_chain] 创建链式调用: chain_type={chain_type}")
+        
         if chain_type == "llm_chain":
             from langchain_core.prompts import PromptTemplate
             
@@ -179,11 +187,15 @@ class LangchainAdapterImpl(LangchainAdapter):
             )
             
             if self._llm is None:
+                logger.error("[LangchainAdapterImpl.create_chain] LLM未设置")
                 raise ValueError("LLM not set. Call set_llm() first.")
             
             chain = prompt | self._llm
+            log_arch_event(logger, component="LangchainAdapter", stage="ADAPTER", event="create_chain", status="success", design_id="ARCH-7.5", chain_type=chain_type)
+            logger.info(f"[LangchainAdapterImpl.create_chain] LLM链创建成功: chain_type={chain_type}")
             return InternalChainImpl(chain)
         
+        logger.error(f"[LangchainAdapterImpl.create_chain] 不支持的链类型: chain_type={chain_type}")
         raise ValueError(f"Unsupported chain type: {chain_type}")
     
     def create_tool(
@@ -201,6 +213,7 @@ class LangchainAdapterImpl(LangchainAdapter):
         Returns:
             内部工具对象
         """
+        logger.info(f"[LangchainAdapterImpl.create_tool] 创建工具: tool_type={tool_type}, name={config.get('name', tool_type)}")
         from langchain_core.tools import Tool
         
         tool = Tool(
@@ -208,6 +221,8 @@ class LangchainAdapterImpl(LangchainAdapter):
             description=config.get("description", ""),
             func=config.get("func")
         )
+        log_arch_event(logger, component="LangchainAdapter", stage="ADAPTER", event="create_tool", status="success", design_id="ARCH-7.5", tool_type=tool_type)
+        logger.info(f"[LangchainAdapterImpl.create_tool] 工具创建成功: name={tool.name}")
         return InternalToolImpl(tool)
     
     def create_memory(
@@ -262,12 +277,14 @@ class LangchainAdapterImpl(LangchainAdapter):
         Returns:
             内部Agent对象
         """
+        logger.info(f"[LangchainAdapterImpl.create_agent] 创建Agent: agent_type={agent_type}")
         from langgraph.prebuilt import create_react_agent
         
         tools = config.get("tools", [])
         llm = config.get("llm", self._llm)
         
         if llm is None:
+            logger.error("[LangchainAdapterImpl.create_agent] LLM未设置")
             raise ValueError("LLM not set. Call set_llm() or provide llm in config.")
         
         agent_executor = create_react_agent(
@@ -275,4 +292,6 @@ class LangchainAdapterImpl(LangchainAdapter):
             tools=tools,
             state_modifier=config.get("system_prompt", None)
         )
+        log_arch_event(logger, component="LangchainAdapter", stage="ADAPTER", event="create_agent", status="success", design_id="ARCH-7.5", agent_type=agent_type, tools_count=len(tools))
+        logger.info(f"[LangchainAdapterImpl.create_agent] Agent创建成功: agent_type={agent_type}, tools_count={len(tools)}")
         return InternalAgentImpl(agent_executor)

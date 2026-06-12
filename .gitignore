@@ -1,7 +1,14 @@
 logs
 __pycache__
 base_models
+docker/images/
+docker/wheels/sglang_kernel.tar
 .vscode
 .trae
 test/
+codegraph/
+codegraph/.gitignore
+.pytest_cache/
+.ruff_cache/
+.claude/plans/
 

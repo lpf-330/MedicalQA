@@ -5,12 +5,10 @@
 提供健康报告生成业务的报告生成Chain策略实现。
 """
 
-from src.orchestration.chain.report_generation_chain.report_generation_chain import (
-    ReportGenerationContextBody,
-    ReportGenerationResultData,
-    ReportGenerationResource,
-    ReportGenerationChain
-)
+from .report_generation_context import ReportGenerationContextBody
+from .report_generation_result import ReportGenerationResultData
+from .report_generation_resource import ReportGenerationResource
+from .report_generation_chain import ReportGenerationChain
 
 __all__ = [
     "ReportGenerationContextBody",

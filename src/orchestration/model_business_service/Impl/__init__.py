@@ -4,5 +4,6 @@
 """
 
 from .consult_model_service import ConsultModelService
+from .health_assessment_model_service import HealthAssessmentModelService
 
-__all__ = ['ConsultModelService']
+__all__ = ['ConsultModelService', 'HealthAssessmentModelService']

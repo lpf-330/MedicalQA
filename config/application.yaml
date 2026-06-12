@@ -1,0 +1,616 @@
+# ============================================================================
+# MedicalQA 统一配置文件
+# 由 ConfigManager 加载，是运行期配置的唯一来源
+# 仓库只提交 application.example.yaml，真实文件不入库
+# ============================================================================
+
+
+# ============================================================================
+# 服务端配置 — uvicorn 服务参数和启动前检查
+# ============================================================================
+server:
+  port: 8001                          # 服务监听端口
+  vram_sufficient_gb: 8.0             # 显存充足判定阈值(GB)，低于此值输出警告
+  warmup_timeout: 30.0                # 模型预热请求超时(秒)
+  timeout_keep_alive: 60              # HTTP Keep-Alive 超时(秒)
+
+
+# ============================================================================
+# 资源连接配置 — 各外部依赖的连接参数
+# 注意：真实密码/Token 不得入库，仅在此文件中维护
+# ============================================================================
+resources:
+  neo4j_connection_config:
+    uri: neo4j+s://627658bb.databases.neo4j.io
+    user: 627658bb
+    password: 35No69NaLaoasxQqW-JhcjbxgQjeY_WzUVGHYtKWeNo
+    database: 627658bb
+  milvus_connection_config:
+    uri: https://in03-1c39e13a65460bf.serverless.ali-cn-hangzhou.cloud.zilliz.com.cn
+    user: db_1c39e13a65460bf
+    password: Jk1*Xv*gJCv0}7Gg
+    token: 321a3d34b440e76d0e7d6bc5c4c40524aab8fee95cbd016f818b8e8285b3eb1258805be86fb100ad38c7b9fdcb2e33cf58e931e0
+  reasoning_model_config:
+    base_url: http://localhost:30000
+    model_name: Qwen3-4B-AWQ
+    default_repetition_penalty: 1.15
+    default_temperature: 0.3
+    default_max_tokens: 512
+    default_top_p: 0.9
+    timeout: 600.0
+    # -- 服务启动参数 --
+    auto_start: true
+    model_path: base_models/Qwen3-4B-AWQ
+    launch_host: "0.0.0.0"
+    launch_port: 30000
+    launch_args: "--reasoning-parser qwen3 --context-length 8192 --mem-fraction-static 0.45 --max-total-tokens 10240 --max-running-requests 4 --dtype float16 --attention-backend triton --sampling-backend pytorch --schedule-policy lpm"
+    startup_timeout: 600
+    health_check_interval: 5.0
+    shutdown_timeout: 30
+  health_assessment_model_config:
+    base_url: http://localhost:30001
+    model_name: MedPsy-4B-AWQ
+    default_temperature: 0.0
+    default_max_tokens: 2048
+    default_top_p: 1.0
+    default_repetition_penalty: 1.15
+    timeout: 600.0
+    # -- 服务启动参数 --
+    auto_start: true
+    model_path: base_models/MedPsy-4B-AWQ
+    launch_host: "0.0.0.0"
+    launch_port: 30001
+    launch_args: "--reasoning-parser qwen3 --context-length 8192 --mem-fraction-static 0.40 --max-total-tokens 10240 --max-running-requests 3 --enable-torch-compile --dtype float16 --attention-backend triton --chunked-prefill-size 2048"
+    startup_timeout: 900
+    health_check_interval: 5.0
+    shutdown_timeout: 30
+  vector_model_config:
+    model_path: base_models/models--BAAI--bge-large-zh-v1.5/snapshots/79e7739b6ab944e86d6171e44d24c997fc1e0116
+    model_name: BAAI/bge-large-zh-v1.5
+    device: cuda
+    dimension: 1024
+    batch_size: 512
+  intent_model_config:
+    model_path: base_models/ernie-health-zh
+    model_name: nghuyong/ernie-health-zh
+    device: cuda
+    max_length: 512
+  ner_model_config:
+    model_path: base_models/nlp_raner_named-entity-recognition_chinese-base-cmeee
+    model_name: iic/nlp_raner_named-entity-recognition_chinese-base-cmeee
+    device: cuda
+    max_length: 512
+
+
+# ============================================================================
+# 资源池配置 — 每个资源的池化参数
+# max_size/min_idle 控制池容量，pre_create_check 控制创建前预检
+# ============================================================================
+resource_pools:
+  neo4j_connection_config:
+    max_size: 10
+    min_idle: 2
+    idle_timeout: 300000              # 空闲超时(毫秒)
+    max_wait_time: 5000               # 最大等待(毫秒)
+    allow_dynamic_creation: true
+    max_pending_requests: 100
+    creation_timeout: 60000
+    pre_create_check_enabled: false
+    min_memory_mb: 256
+    min_vram_mb: 0
+  milvus_connection_config:
+    max_size: 10
+    min_idle: 2
+    idle_timeout: 300000
+    max_wait_time: 5000
+    allow_dynamic_creation: true
+    max_pending_requests: 100
+    creation_timeout: 60000
+    pre_create_check_enabled: false
+    min_memory_mb: 256
+    min_vram_mb: 0
+  reasoning_model_config:
+    max_size: 4
+    min_idle: 1
+    idle_timeout: 600000
+    max_wait_time: 120000
+    allow_dynamic_creation: true
+    max_pending_requests: 10
+    creation_timeout: 60000
+    pre_create_check_enabled: false
+    min_memory_mb: 256
+    min_vram_mb: 0
+  health_assessment_model_config:
+    max_size: 3
+    min_idle: 1
+    idle_timeout: 600000
+    max_wait_time: 60000
+    allow_dynamic_creation: true
+    max_pending_requests: 10
+    creation_timeout: 60000
+    pre_create_check_enabled: false
+    min_memory_mb: 256
+    min_vram_mb: 0
+  vector_model_config:
+    max_size: 1
+    min_idle: 1
+    idle_timeout: 600000
+    max_wait_time: 30000
+    allow_dynamic_creation: true
+    max_pending_requests: 10
+    creation_timeout: 60000
+    pre_create_check_enabled: true
+    min_memory_mb: 1024
+    min_vram_mb: 2048
+  intent_model_config:
+    max_size: 1
+    min_idle: 1
+    idle_timeout: 600000
+    max_wait_time: 30000
+    allow_dynamic_creation: true
+    max_pending_requests: 10
+    creation_timeout: 60000
+    pre_create_check_enabled: true
+    min_memory_mb: 256
+    min_vram_mb: 512
+  ner_model_config:
+    max_size: 1
+    min_idle: 1
+    idle_timeout: 600000
+    max_wait_time: 30000
+    allow_dynamic_creation: true
+    max_pending_requests: 10
+    creation_timeout: 60000
+    pre_create_check_enabled: true
+    min_memory_mb: 512
+    min_vram_mb: 1024
+
+
+# ============================================================================
+# 业务配置
+# ============================================================================
+business:
+
+  # --------------------------------------------------------------------------
+  # 健康咨询业务 (ConsultServiceConfig)
+  # --------------------------------------------------------------------------
+  consult_service_config:
+
+    # -- 依赖的资源配置 --
+    resource_configs:
+    - neo4j_connection_config
+    - reasoning_model_config
+    - health_assessment_model_config
+    - milvus_connection_config
+    - vector_model_config
+
+    # -- 基础参数 --
+    max_retries: 3                    # 最大重试次数
+    timeout: 60                       # 咨询总超时(秒)
+    enable_knowledge_retrieval: true  # 是否启用知识检索
+    enable_model_consultation: true   # 是否启用模型咨询
+
+    # -- 知识检索参数 --
+    knowledge_retrieval_top_k: 20     # 向量检索返回Top-K
+    knowledge_fusion_threshold: 0.6   # 融合结果过滤阈值
+    knowledge_integration_threshold: 0.6  # 知识整合过滤阈值
+    sequential_top_k: 20                  # 降级顺序检索Top-K
+    sequential_collection_weights:       # 降级顺序检索集合权重
+      medical_entity: 0.40
+      entity_attributes: 0.30
+      entity_relations: 0.30
+    vector_entity_weight: 0.4         # 实体集合检索权重
+    vector_attribute_weight: 0.3      # 属性集合检索权重
+    vector_relation_weight: 0.3       # 关系集合检索权重
+    knowledge_merge_limit: 15         # 合并去重后保留条数上限
+    knowledge_sufficiency_min_count: 3 # 充分性最低结果数
+    vector_search_timeout: 10         # 向量检索超时(秒)
+
+    # -- 知识检索Agent(ReAct模式) --
+    knowledge_retrieval_max_steps: 5  # ReAct最大步数
+    knowledge_retrieval_max_prompt_chars: 4000  # ReAct Prompt最大字符数
+    sufficiency_count_weight: 0.4     # 充分性-结果数量权重
+    sufficiency_entity_weight: 0.3    # 充分性-锚定实体权重
+    sufficiency_relevance_weight: 0.3 # 充分性-平均相关度权重
+    sufficiency_count_denominator: 10.0  # 充分性-数量归一化分母
+    sufficiency_entity_denominator: 5.0  # 充分性-实体归一化分母
+    neo4j_keyword_search_limit: 5     # 降级时Neo4j关键词搜索上限
+    neo4j_degraded_search_score: 0.5  # 降级检索默认分数
+
+    # -- 回答生成参数 --
+    answer_min_length: 200            # 回答最短字数
+    answer_max_length: 800            # 回答最长字数
+    max_knowledge_chars: 2500         # 知识素材最大字符数（原2000，提高以减少截断）
+    max_assistant_len: 200            # 助手消息截断长度
+    max_dialogue_rounds: 2            # 最大对话轮次
+    reasoning_enable_thinking: true      # SGLang模型是否启用思考模式(Qwen3-Think模型必须为true以启用reasoning-parser)
+    reasoning_repetition_penalty: 1.15   # SGLang模型重复惩罚系数
+
+    # -- 意图分类与置信度 --
+    intent_classification_threshold: 0.5  # 意图分类判定阈值
+    confidence_high: 0.8              # 高置信度阈值
+    confidence_medium: 0.5            # 中置信度阈值
+    confidence_low: 0.3               # 低置信度阈值
+
+    # -- 实体与关键词提取限制 --
+    anchored_entity_limit: 10         # 锚定实体上限
+    symptom_keyword_limit: 5          # 症状关键词上限
+    fuzzy_match_symptom_limit: 3      # 模糊匹配症状上限
+    disease_per_symptom_limit: 5      # 每个症状关联疾病上限
+    follow_up_limit: 3                # 追问问题上限
+    template_knowledge_limit: 3       # 模板回答引用知识条目上限
+    question_max_length: 1000         # 问题最大字符数
+    knowledge_context_display_limit: 5  # 知识上下文展示条目上限
+
+    # -- 咨询知识链置信度 --
+    consult_with_knowledge_high_confidence: 0.85  # 有知识时置信度
+    consult_with_knowledge_low_confidence: 0.5    # 无知识时置信度
+
+    # -- 超时参数(各阶段) --
+    query_parse_timeout: 10
+    knowledge_retrieval_timeout: 120
+    answer_generation_timeout: 120
+
+    # -- 批量评估参数 --
+    batch_evaluation_max_tokens: 256     # 批量评估最大token数
+    batch_evaluation_timeout: 120        # 批量评估超时(秒)
+
+    # -- FSM控制 --
+    consult_max_iterations: 20        # FSM最大迭代次数
+
+    # -- 默认评分参数 --
+    neo4j_default_score: 0.8          # Neo4j检索默认评分
+    neo4j_degraded_score: 0.6         # Neo4j降级评分
+    source_default_confidence: 0.5    # 来源默认置信度
+
+    # -- FSM各状态超时(秒) --
+    state_timeouts:
+      INITIAL: 5
+      QUERY_PARSE: 10
+      KNOWLEDGE_RETRIEVAL: 120
+      KNOWLEDGE_INTEGRATION: 10
+      ANSWER_GENERATION: 120
+      STREAMING: 60
+      FINISHED: 5
+
+  # --------------------------------------------------------------------------
+  # 健康报告业务 (ReportServiceConfig)
+  # --------------------------------------------------------------------------
+  report_service_config:
+
+    # -- 依赖的资源配置 --
+    resource_configs:
+    - neo4j_connection_config
+    - reasoning_model_config
+    - health_assessment_model_config
+    - milvus_connection_config
+    - vector_model_config
+    - intent_model_config
+    - ner_model_config
+
+    # -- 基础参数 --
+    max_retries: 3
+    timeout: 300                      # 报告总超时(秒)
+
+    # -- 各阶段超时(秒) --
+    data_prepare_timeout: 5
+    multi_analysis_timeout: 30
+    parallel_processing_timeout: 120
+    report_generation_timeout: 240
+
+    # -- FSM控制 --
+    report_max_iterations: 30         # 报告FSM最大迭代次数
+
+    # -- FSM各状态超时(秒) --
+    state_timeouts:
+      INITIAL: 15
+      DATA_PREPARE: 10
+      DATA_PARSE: 30
+      COMPREHENSIVE_HEALTH_ANALYSIS: 1200
+      REPORT_GENERATION: 240
+      STREAMING: 30
+      ASSEMBLY: 10
+      FINISHED: 5
+
+    # -- 知识检索参数 --
+    enable_knowledge_retrieval: true
+    knowledge_retrieval_top_k: 30
+    knowledge_fusion_threshold: 0.6
+    vector_entity_weight: 0.4
+    vector_attribute_weight: 0.3
+    vector_relation_weight: 0.3
+    knowledge_merge_limit: 30
+    prompt_truncation_chars: 4000     # Prompt截断字符数
+    max_prompt_chars: 4500            # Prompt最大字符数（格式指令前置，数据段末尾可安全截断）
+    max_knowledge_chars: 3000          # 知识素材最大字符数（原2500，提高以减少截断）
+
+    # -- 报告生成参数 --
+    report_min_length: 800            # 报告最短字数(原80%)
+    report_max_length: 4000           # 报告最长字数(原80%)
+    max_report_retries: 2             # 报告生成最大重试
+    report_generation_max_tokens: 4000  # 报告生成max_tokens(原80%)
+    report_generation_temperature: 0.0  # 报告生成温度
+    value_text_max_chars: 500         # 指标值文本最大字符
+    summary_text_max_chars: 2000      # 摘要文本最大字符
+    basis_text_max_chars: 200         # 依据文本最大字符
+    family_history_limit: 100         # 家族史条目上限
+    references_limit: 100             # 参考文献上限
+    past_medical_history_limit: 100   # 既往史条目上限
+    template_summary_truncate_len: 200  # 模板摘要截断长度
+    anomaly_deviation_threshold: 10   # 异常偏差阈值
+
+    # -- 健康评估: 分数阈值 --
+    health_score_thresholds:
+      excellent: 90
+      good: 80
+      normal: 70
+      poor: 60
+    risk_level_thresholds:
+      low: 20
+      mild: 40
+      moderate: 60
+
+    # -- 健康评估: 5维度定义 --
+    health_dimensions:
+      D1:
+        name: 生理指标
+        weight: 0.35
+        sub_indicators:
+        - 血压
+        - 血糖
+        - 血脂
+        - BMI
+        - 心率
+      D2:
+        name: 生活方式
+        weight: 0.20
+        sub_indicators:
+        - 运动
+        - 饮食
+        - 睡眠
+        - 吸烟
+        - 饮酒
+      D3:
+        name: 病史风险
+        weight: 0.25
+        sub_indicators:
+        - 既往病史
+        - 家族史
+        - 用药史
+      D4:
+        name: 心理状态
+        weight: 0.10
+        sub_indicators:
+        - 压力水平
+        - 情绪状态
+      D5:
+        name: 预防措施
+        weight: 0.10
+        sub_indicators:
+        - 体检频率
+        - 疫苗接种
+        - 筛查情况
+
+    # -- 健康评估: 6风险因子定义 --
+    disease_risk_factors:
+      F1:
+        name: 异常指标风险
+        weight: 0.30
+        description: 异常指标数量和严重程度
+      F2:
+        name: 病史风险
+        weight: 0.25
+        description: 既往病史数量和类型
+      F3:
+        name: 家族史风险
+        weight: 0.15
+        description: 家族病史情况
+      F4:
+        name: 生活方式风险
+        weight: 0.15
+        description: 不良生活习惯数量
+      F5:
+        name: 年龄风险
+        weight: 0.10
+        description: 年龄相关风险
+      F6:
+        name: 并发症风险
+        weight: 0.05
+        description: 潜在并发症风险
+
+    # -- 健康评估: 风险等级划分标准 --
+    risk_level_standards:
+      低:
+        min: 0
+        max: 29
+        description: 无异常指标,无病史,生活方式良好
+        advice: 保持现状,定期体检
+      轻:
+        min: 30
+        max: 49
+        description: 1-2个轻微异常,或1个可控病史
+        advice: 改善生活方式,关注异常指标
+      中:
+        min: 50
+        max: 69
+        description: 3-5个异常,或2个病史,或生活方式差
+        advice: 积极干预,就医咨询
+      高:
+        min: 70
+        max: 100
+        description: 多个严重异常,或多病共存,或高危病史
+        advice: 立即就医,密切监测
+
+    # -- 健康评估: 规则引擎扣分值 --
+    deduction_severe: 15              # 严重异常扣分
+    deduction_moderate: 10            # 中度异常扣分
+    deduction_mild: 5                 # 轻度异常扣分
+    deduction_risk_factor: 5          # 风险因子扣分
+    deduction_disease: 8              # 疾病扣分
+
+    # -- 健康评估: 评估默认值 --
+    default_dimension_score: 0.5      # 维度默认中性评分
+    default_confidence: 0.7           # 默认置信度
+    rule_engine_confidence: 0.8       # 规则引擎置信度
+    base_health_score: 100            # 健康评分基数(满分)
+
+    # -- 健康评估: 阈值与权重 --
+    disease_count_mild: 2             # 疾病数量-轻度阈值
+    anomaly_count_mild: 2             # 异常数量-轻度阈值
+    anomaly_count_moderate: 5         # 异常数量-中度阈值
+    disease_risk_weight: 0.5          # 疾病风险权重
+
+    # -- 健康评估: Prompt预算参数 --
+    prompt_budget_buffer: 50          # Prompt预算缓冲字符
+    prompt_budget_minimum: 400        # Prompt预算最低保障字符
+    knowledge_budget_ratio: 0.55      # 知识素材占动态预算比例
+    user_info_budget_ratio: 0.45      # 用户信息占动态预算比例
+    knowledge_item_limit: 3           # 知识条目截断上限（全链路统一3条）
+    knowledge_content_truncate_len: 600  # 知识内容截断字符数（原400，提高以减少截断）
+
+    # -- 健康评估: 用户信息截断 --
+    max_user_info_chars: 800          # 用户信息最大字符
+    max_risk_factor_user_info_chars: 600  # 风险因子用户信息最大字符
+
+    # -- 健康评估: MedPsy模型调用参数 --
+    health_assessment_context_length: 8192
+    health_assessment_max_tokens: 3072
+    health_assessment_batch_max_tokens: 3072
+    health_assessment_max_retries: 1
+    health_assessment_enable_thinking: true
+    health_assessment_repetition_penalty: 1.15
+
+    # -- 健康评估: 批量评估调用参数（HybridRelevance等结构化JSON输出，关闭thinking避免格式瑕疵） --
+    batch_evaluation_enable_thinking: false
+
+    # -- 健康评估: Qwen3结构化输出自修复调用参数（关闭thinking，修复重试也是结构化JSON输出） --
+    reasoning_repair_enable_thinking: false
+    reasoning_repair_repetition_penalty: 1.15
+
+    # -- 健康评估: 疾病风险评估参数 --
+    multi_disease_threshold: 3        # 多病共存判定阈值
+    elderly_age_threshold: 65         # 高龄判定阈值
+    anomaly_match_score_increment: 15 # 异常指标匹配加分
+    history_weight_multiplier: 1.5    # 既往病史权重乘数
+    family_history_weight_multiplier: 1.2  # 家族史权重乘数
+    disease_risk_top_n: 5             # 返回前N个最高风险疾病
+    base_disease_risk_score: 30       # 疾病存在本身的基础风险分
+
+    # -- 综合健康分析: 基础参数 --
+    max_steps: 5                      # 分析最大步数
+    sufficiency_threshold: 0.6        # 充分性判定阈值
+    relevance_alpha: 0.50              # v8 HybridRelevance用户相关性权重
+    relevance_beta: 0.30              # v8 HybridRelevance维度相关性权重
+    relevance_gamma: 0.20             # v8 HybridRelevance知识质量权重
+    degraded_alpha: 0.5               # 降级-Alpha权重
+    degraded_beta: 0.3                # 降级-Beta权重
+    degraded_gamma: 0.2               # 降级-Gamma权重
+    relevance_threshold: 0.4          # 相关性判定阈值
+    max_retrieve_attempts: 2          # 最大检索尝试次数
+
+    # -- 综合健康分析: 向量检索参数 --
+    vector_candidate_top_k: 3         # 向量候选Top-K（全链路统一3条）
+    vector_candidate_threshold: 0.6   # 向量候选阈值
+    vector_default_score: 0.5         # 向量默认评分
+    low_quality_min_content_len: 10   # 低质量最小内容长度
+    analysis_sequential_top_k: 20     # 顺序检索Top-K
+
+    # -- 综合健康分析: 维度权重 --
+    dimension_weights:
+      disease_risk: 0.20
+      medication: 0.15
+      treatment: 0.15
+      dietary: 0.10
+      checkup: 0.10
+      complication: 0.15
+      prevention: 0.10
+      susceptible: 0.05
+
+    # -- 综合健康分析: LLM调用参数 --
+    batch_evaluation_max_tokens: 512
+    batch_refine_max_tokens: 512
+    dimension_max_knowledge_items: 3   # 每维度最大知识条目数（全链路统一3条）
+
+    # -- 综合健康分析: FSM控制 --
+    analysis_max_iterations: 20       # 分析FSM最大迭代次数
+    batch_max_workers: 4              # call_model_batch 并发线程数（利用SGLang continuous batching）
+
+    # -- 综合健康分析: FSM各状态超时(秒) --
+    analysis_state_timeouts:
+      BuildQueries: 10
+      PlanRetrieval: 180
+      ParallelRetrieve: 180
+      KnowledgeSelection: 60
+      Deduplicate: 30
+      HybridRelevance: 300
+      EvaluateSufficiency: 300
+      PatchPathPlan: 30
+      RefineKnowledge: 240
+      HealthAssess: 420
+      Output: 10
+
+    # -- 综合健康分析: 截断与限制 --
+    rule_knowledge_item_limit: 3      # 规则摘要知识条目上限（全链路统一3条）
+    rule_content_truncate_len: 600    # 规则摘要内容截断长度（原400，提高以减少截断）
+    knowledge_item_display_limit: 3   # 评估Prompt知识条目上限（全链路统一3条）
+    evaluation_content_truncate_len: 600  # 评估Prompt内容截断长度（原400，提高以减少截断）
+    refine_content_truncate_len: 700  # 精炼内容截断长度（原500，提高以减少截断）
+    suggested_keyword_limit: 3        # 关键字建议数量上限
+    batch_refine_timeout: 120         # 批量精炼超时(秒)
+    batch_evaluation_timeout: 120     # 批量评估超时(秒)
+    fuzzy_match_symptom_limit: 3      # 模糊匹配症状上限
+    disease_per_symptom_limit: 5      # 每个症状关联疾病上限
+    rule_entity_limit: 5              # 规则实体上限
+
+    # -- 综合健康分析: 查询构建截断 --
+    query_entity_limit: 2             # 查询构建-实体截断数
+    query_disease_limit: 3            # 查询构建-疾病截断数
+    query_anomaly_limit: 3            # 查询构建-异常截断数
+
+    # -- 综合健康分析: 充分性评分映射 --
+    sufficiency_count_high: 5         # 充分性-知识数量高阈值
+    sufficiency_count_medium: 3       # 充分性-知识数量中阈值
+    sufficiency_count_low: 1          # 充分性-知识数量低阈值
+    sufficiency_score_high: 0.8       # 充分性-高分
+    sufficiency_score_medium: 0.6     # 充分性-中分
+    sufficiency_score_low: 0.4        # 充分性-低分
+    sufficiency_score_none: 0.2       # 充分性-无分
+
+    # -- 数据准备降级参数 --
+    degradation_completeness_high: 0.9   # 降级-完整性高阈值
+    degradation_completeness_medium: 0.7 # 降级-完整性中阈值
+    degradation_completeness_low: 0.5    # 降级-完整性低阈值
+    degradation_core_missing_mild: 2     # 降级-核心缺失轻度阈值
+    degradation_core_missing_moderate: 4 # 降级-核心缺失中度阈值
+
+    # -- Agent检索参数 --
+    agent_max_paths_per_dimension: 3    # 每维度最大检索路径数
+    agent_max_supplement_rounds: 3      # 最大补充检索轮次
+    agent_vector_prescan_top_k: 10      # 向量预扫描每实体返回数量
+    agent_vector_prescan_threshold: 0.5 # 向量预扫描分数阈值
+    agent_plan_temperature: 0.0         # PlanRetrieval Qwen3温度
+    agent_plan_max_tokens: 512          # PlanRetrieval Qwen3最大token
+    agent_evaluate_max_tokens: 256      # EvaluateSufficiency Qwen3最大token
+    agent_evaluate_timeout: 120         # EvaluateSufficiency Qwen3超时(秒)
+
+    # 候选检索与知识选取参数
+    agent_candidate_retrieve_limit: 20      # 候选检索上限（KnowledgeSelection前）
+    agent_knowledge_selection_temperature: 0.1  # KnowledgeSelection Qwen3温度
+    agent_knowledge_selection_max_tokens: 512    # KnowledgeSelection Qwen3最大token
+    agent_knowledge_selection_content_truncate_len: 150  # 候选知识内容截断长度
+
+    # 混合相关性评估参数
+    agent_hybrid_relevance_user_weight: 0.60     # 用户相关性权重α
+    agent_hybrid_relevance_dim_weight: 0.40     # 维度相关性权重β
+    agent_hybrid_relevance_temperature: 0.1    # HybridRelevance Qwen3温度
+    agent_hybrid_relevance_max_tokens: 768      # HybridRelevance Qwen3最大token
+    agent_hybrid_relevance_content_truncate_len: 150  # 相关性评估知识截断长度
+
+    # 补丁路径规划参数
+    agent_patch_path_temperature: 0.0       # PatchPathPlan Qwen3温度
+    agent_patch_path_max_tokens: 256        # PatchPathPlan Qwen3最大token
+
+    # 迭代控制参数
+    agent_max_iteration_rounds: 2           # 知识迭代补充最大轮次
+    max_chain_loops: 2                      # 检索chain最大循环次数
+    max_agent_retrieval_loops: 2            # Agent检索最大循环次数

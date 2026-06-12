@@ -6,27 +6,15 @@
 定义向量嵌入模型的配置参数和资源池配置。
 """
 
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from typing import Any, Dict
-from pathlib import Path
 
 from src.config.base_config import BaseResourceConfig
 from src.config.pool_config import PoolConfig
 
 
-def _get_default_model_path() -> str:
-    """获取默认模型路径"""
-    project_root = Path(__file__).parent.parent.parent.parent
-    cache_dir = project_root / "base_models" / "models--BAAI--bge-large-zh-v1.5" / "snapshots"
-    if cache_dir.exists():
-        snapshot_dirs = [d for d in cache_dir.iterdir() if d.is_dir()]
-        if snapshot_dirs:
-            return str(sorted(snapshot_dirs)[-1])
-    return str(project_root / "base_models" / "bge-large-zh-v1.5")
-
-
 @dataclass
-class VectorModelResourceConfig(BaseResourceConfig):
+class VectorModelConfig(BaseResourceConfig):
     """
     向量模型资源配置类
 
@@ -42,11 +30,11 @@ class VectorModelResourceConfig(BaseResourceConfig):
 
     config_id: str = "vector_model_config"
     resource_type: str = "vector_model"
-    model_path: str = field(default_factory=_get_default_model_path)
-    model_name: str = "BAAI/bge-large-zh-v1.5"
-    device: str = "cuda"
-    dimension: int = 1024
-    batch_size: int = 512
+    model_path: str = ""
+    model_name: str = ""
+    device: str = ""
+    dimension: int = 1
+    batch_size: int = 1
 
     def validate(self) -> bool:
         """
@@ -85,13 +73,8 @@ class VectorModelResourceConfig(BaseResourceConfig):
         return base_dict
 
 
-resource_config = VectorModelResourceConfig()
+resource_config = VectorModelConfig()
 
 resource_type = "vector_model"
 
-pool_config = PoolConfig(
-    max_size=1,
-    min_idle=1,
-    idle_timeout=600000,
-    max_wait_time=30000
-)
+pool_config = PoolConfig()

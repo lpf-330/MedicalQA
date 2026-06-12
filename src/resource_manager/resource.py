@@ -5,8 +5,10 @@
 定义资源的基本行为，包括获取类型、获取最后使用时间、激活状态检查、激活、停用、销毁等。
 """
 
+import logging
 from abc import ABC, abstractmethod
-from typing import Any
+
+logger = logging.getLogger(__name__)
 
 
 class Resource(ABC):
@@ -15,6 +17,8 @@ class Resource(ABC):
     
     定义资源的基本行为，所有资源实例必须实现此接口。
     资源是资源管理层的核心概念，代表系统中可被管理和复用的基础资源。
+    
+    资源状态转换：IDLE -> ACTIVE -> IDLE -> DESTROYED
     
     核心职责：
     - 提供资源的唯一类型标识
@@ -84,6 +88,8 @@ class Resource(ABC):
         将资源从空闲状态切换为活跃状态，标记资源为业务占用中，
         同步更新最后使用时间，完成资源从待用到在用的状态流转。
         
+        状态转换：IDLE -> ACTIVE
+        
         注意：
         - 激活前应确保资源处于空闲状态
         - 激活后会更新最后使用时间戳
@@ -99,6 +105,7 @@ class Resource(ABC):
             >>> resource.is_activate()
             True
         """
+        logger.debug(f"[Resource.activate] 资源状态转换: IDLE -> ACTIVE, type={self.get_type()}")
         pass
     
     @abstractmethod
@@ -107,6 +114,8 @@ class Resource(ABC):
         停用资源（释放回池，保持连接）
         
         将资源从活跃状态切换为空闲状态，为资源归还至资源池、等待复用做准备。
+        
+        状态转换：ACTIVE -> IDLE
         
         语义：资源从活跃状态变为空闲状态，归还到资源池
         行为：仅标记状态，不断开连接
@@ -127,6 +136,7 @@ class Resource(ABC):
             >>> resource.is_activate()
             False
         """
+        logger.debug(f"[Resource.deactivate] 资源状态转换: ACTIVE -> IDLE, type={self.get_type()}")
         pass
     
     @abstractmethod
@@ -136,6 +146,8 @@ class Resource(ABC):
         
         执行资源的彻底释放操作，包括关闭连接、清理内存、释放系统资源等。
         用于资源池驱逐冗余/超时资源、系统停机时的全量资源回收，避免资源泄漏。
+        
+        状态转换：IDLE -> DESTROYED
         
         语义：资源彻底销毁，从资源池移除
         行为：断开连接，释放所有资源
@@ -152,4 +164,5 @@ class Resource(ABC):
             >>> resource.destroy()
             >>> # 资源已被彻底销毁，不可再使用
         """
+        logger.info(f"[Resource.destroy] 资源状态转换: IDLE -> DESTROYED, type={self.get_type()}")
         pass

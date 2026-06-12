@@ -1,0 +1,182 @@
+[
+  {
+    "id": "D1-01",
+    "dimension_id": "D1",
+    "dimension_name": "生理指标",
+    "sub_indicators": ["血压水平", "血糖水平", "血脂水平", "BMI指数", "心率"],
+    "user_profile": {"age": 68, "gender": "男", "chronic_diseases": ["高血压", "2型糖尿病"], "medications": ["氨氯地平", "二甲双胍"]},
+    "anomalies": [{"item": "收缩压", "value": "165mmHg", "status": "偏高"}, {"item": "空腹血糖", "value": "8.2mmol/L", "status": "偏高"}, {"item": "LDL-C", "value": "3.8mmol/L", "status": "偏高"}],
+    "knowledge": {"summary": "高血压合并糖尿病患者需严格控制血压和血糖", "refined_knowledge": ["血压目标<130/80mmHg", "空腹血糖4.4-7.0mmol/L"]}
+  },
+  {
+    "id": "D1-02",
+    "dimension_id": "D1",
+    "dimension_name": "生理指标",
+    "sub_indicators": ["血压水平", "血糖水平", "血脂水平", "BMI指数", "心率"],
+    "user_profile": {"age": 72, "gender": "女", "chronic_diseases": ["冠心病", "高血脂"], "medications": ["阿托伐他汀", "阿司匹林"]},
+    "anomalies": [{"item": "LDL-C", "value": "4.1mmol/L", "status": "偏高"}, {"item": "BMI", "value": "28.5", "status": "超重"}, {"item": "心率", "value": "92次/分", "status": "偏快"}],
+    "knowledge": {"summary": "冠心病患者LDL-C需达标，BMI应控制", "refined_knowledge": ["LDL-C目标<1.8mmol/L", "BMI正常范围18.5-24"]}
+  },
+  {
+    "id": "D1-03",
+    "dimension_id": "D1",
+    "dimension_name": "生理指标",
+    "sub_indicators": ["血压水平", "血糖水平", "血脂水平", "BMI指数", "心率"],
+    "user_profile": {"age": 65, "gender": "男", "chronic_diseases": ["慢性肾病3期"], "medications": ["依那普利", "呋塞米"]},
+    "anomalies": [{"item": "血肌酐", "value": "180μmol/L", "status": "偏高"}, {"item": "eGFR", "value": "38", "status": "偏低"}, {"item": "血压", "value": "150/95mmHg", "status": "偏高"}],
+    "knowledge": {"summary": "慢性肾病需控制血压和蛋白摄入", "refined_knowledge": ["eGFR<60需积极干预", "血压目标<130/80"]}
+  },
+  {
+    "id": "D1-04",
+    "dimension_id": "D1",
+    "dimension_name": "生理指标",
+    "sub_indicators": ["血压水平", "血糖水平", "血脂水平", "BMI指数", "心率"],
+    "user_profile": {"age": 75, "gender": "女", "chronic_diseases": ["骨质疏松", "高血压"], "medications": ["阿仑膦酸钠", "缬沙坦"]},
+    "anomalies": [{"item": "骨密度T值", "value": "-3.0", "status": "偏低"}, {"item": "维生素D", "value": "15ng/mL", "status": "不足"}, {"item": "血压", "value": "148/88mmHg", "status": "偏高"}],
+    "knowledge": {"summary": "骨质疏松需补充钙和维生素D", "refined_knowledge": ["T值<-2.5为骨质疏松", "维生素D目标>30ng/mL"]}
+  },
+  {
+    "id": "D2-01",
+    "dimension_id": "D2",
+    "dimension_name": "用药情况",
+    "sub_indicators": ["用药依从性", "药物副作用", "药物相互作用"],
+    "user_profile": {"age": 70, "gender": "男", "chronic_diseases": ["高血压", "痛风"], "medications": ["氨氯地平", "别嘌醇", "非甾体抗炎药"]},
+    "anomalies": [{"item": "尿酸", "value": "520μmol/L", "status": "偏高"}],
+    "knowledge": {"summary": "别嘌醇需注意药物相互作用", "refined_knowledge": ["NSAIDs可能影响降压效果"]}
+  },
+  {
+    "id": "D2-02",
+    "dimension_id": "D2",
+    "dimension_name": "用药情况",
+    "sub_indicators": ["用药依从性", "药物副作用", "药物相互作用"],
+    "user_profile": {"age": 68, "gender": "女", "chronic_diseases": ["心房颤动", "糖尿病"], "medications": ["华法林", "二甲双胍", "阿司匹林"]},
+    "anomalies": [{"item": "INR", "value": "3.5", "status": "偏高"}],
+    "knowledge": {"summary": "华法林与阿司匹林联用增加出血风险", "refined_knowledge": ["INR目标2.0-3.0", "联用需密切监测"]}
+  },
+  {
+    "id": "D3-01",
+    "dimension_id": "D3",
+    "dimension_name": "治疗状况",
+    "sub_indicators": ["治疗效果", "康复进度", "并发症控制"],
+    "user_profile": {"age": 72, "gender": "男", "chronic_diseases": ["脑梗死后遗症"], "medications": ["阿司匹林", "阿托伐他汀", "依达拉奉"]},
+    "anomalies": [{"item": "肢体肌力", "value": "4级", "status": "减退"}, {"item": "语言功能", "value": "轻度障碍", "status": "异常"}],
+    "knowledge": {"summary": "脑梗死康复期需坚持康复训练", "refined_knowledge": ["6个月内是康复黄金期"]}
+  },
+  {
+    "id": "D3-02",
+    "dimension_id": "D3",
+    "dimension_name": "治疗状况",
+    "sub_indicators": ["治疗效果", "康复进度", "并发症控制"],
+    "user_profile": {"age": 65, "gender": "女", "chronic_diseases": ["2型糖尿病", "糖尿病肾病"], "medications": ["胰岛素", "ACEI"]},
+    "anomalies": [{"item": "糖化血红蛋白", "value": "8.5%", "status": "偏高"}, {"item": "尿蛋白", "value": "++", "status": "阳性"}],
+    "knowledge": {"summary": "糖尿病肾病需严格控制血糖和血压", "refined_knowledge": ["HbA1c目标<7%", "ACEI可减少蛋白尿"]}
+  },
+  {
+    "id": "D4-01",
+    "dimension_id": "D4",
+    "dimension_name": "饮食状况",
+    "sub_indicators": ["饮食均衡性", "营养摄入", "饮食禁忌遵守"],
+    "user_profile": {"age": 70, "gender": "男", "chronic_diseases": ["高血压", "痛风"], "medications": ["氨氯地平", "别嘌醇"]},
+    "anomalies": [{"item": "尿酸", "value": "480μmol/L", "status": "偏高"}, {"item": "BMI", "value": "27", "status": "超重"}],
+    "knowledge": {"summary": "痛风患者应避免高嘌呤食物", "refined_knowledge": ["限制动物内脏和海鲜", "多饮水促进尿酸排泄"]}
+  },
+  {
+    "id": "D4-02",
+    "dimension_id": "D4",
+    "dimension_name": "饮食状况",
+    "sub_indicators": ["饮食均衡性", "营养摄入", "饮食禁忌遵守"],
+    "user_profile": {"age": 78, "gender": "女", "chronic_diseases": ["慢性肾病4期"], "medications": ["碳酸氢钠", "促红素"]},
+    "anomalies": [{"item": "血钾", "value": "5.8mmol/L", "status": "偏高"}, {"item": "白蛋白", "value": "30g/L", "status": "偏低"}],
+    "knowledge": {"summary": "慢性肾病需限制钾和蛋白质摄入", "refined_knowledge": ["避免高钾食物如香蕉橙子", "蛋白质0.6g/kg/天"]}
+  },
+  {
+    "id": "D5-01",
+    "dimension_id": "D5",
+    "dimension_name": "检查情况",
+    "sub_indicators": ["检查完整性", "指标异常追踪", "复查及时性"],
+    "user_profile": {"age": 66, "gender": "男", "chronic_diseases": ["高血压", "糖尿病"], "medications": ["ARB类", "二甲双胍"]},
+    "anomalies": [{"item": "糖化血红蛋白", "value": "8.0%", "status": "偏高"}, {"item": "眼底检查", "value": "未做", "status": "缺失"}],
+    "knowledge": {"summary": "糖尿病患者需定期做眼底和肾功能检查", "refined_knowledge": ["每年至少一次眼底检查", "每3月查HbA1c"]}
+  },
+  {
+    "id": "D5-02",
+    "dimension_id": "D5",
+    "dimension_name": "检查情况",
+    "sub_indicators": ["检查完整性", "指标异常追踪", "复查及时性"],
+    "user_profile": {"age": 73, "gender": "女", "chronic_diseases": ["乳腺癌术后"], "medications": ["来曲唑"]},
+    "anomalies": [{"item": "肿瘤标志物CA15-3", "value": "35U/mL", "status": "偏高"}, {"item": "骨扫描", "value": "未做", "status": "缺失"}],
+    "knowledge": {"summary": "乳腺癌术后需定期监测肿瘤标志物和骨扫描", "refined_knowledge": ["CA15-3>25需警惕复发", "来曲唑增加骨质疏松风险"]}
+  },
+  {
+    "id": "D1-05",
+    "dimension_id": "D1",
+    "dimension_name": "生理指标",
+    "sub_indicators": ["血压水平", "血糖水平", "血脂水平", "BMI指数", "心率"],
+    "user_profile": {"age": 80, "gender": "男", "chronic_diseases": ["心衰", "高血压"], "medications": ["沙库巴曲缬沙坦", "螺内酯", "呋塞米"]},
+    "anomalies": [{"item": "BNP", "value": "800pg/mL", "status": "偏高"}, {"item": "血压", "value": "135/82mmHg", "status": "临界"}, {"item": "血钾", "value": "5.2mmol/L", "status": "偏高"}],
+    "knowledge": {"summary": "心衰患者需监测BNP和电解质", "refined_knowledge": ["BNP>400提示心衰", "螺内酯注意高钾风险"]}
+  },
+  {
+    "id": "D2-03",
+    "dimension_id": "D2",
+    "dimension_name": "用药情况",
+    "sub_indicators": ["用药依从性", "药物副作用", "药物相互作用"],
+    "user_profile": {"age": 69, "gender": "女", "chronic_diseases": ["高血压", "糖尿病", "骨质疏松"], "medications": ["氨氯地平", "二甲双胍", "阿仑膦酸钠", "钙片"]},
+    "anomalies": [{"item": "空腹血糖", "value": "7.8mmol/L", "status": "偏高"}],
+    "knowledge": {"summary": "多病共存需注意药物相互作用", "refined_knowledge": ["阿仑膦酸钠需空腹服用", "钙片与二甲双胍间隔2小时"]}
+  },
+  {
+    "id": "D3-03",
+    "dimension_id": "D3",
+    "dimension_name": "治疗状况",
+    "sub_indicators": ["治疗效果", "康复进度", "并发症控制"],
+    "user_profile": {"age": 74, "gender": "男", "chronic_diseases": ["帕金森病"], "medications": ["左旋多巴", "普拉克索"]},
+    "anomalies": [{"item": "UPDRS评分", "value": "35分", "status": "中度"}, {"item": "步态", "value": "不稳", "status": "异常"}],
+    "knowledge": {"summary": "帕金森病药物需规律服用避免开关现象", "refined_knowledge": ["左旋多巴餐前1小时服用", "注意体位性低血压"]}
+  },
+  {
+    "id": "D2-04",
+    "dimension_id": "D2",
+    "dimension_name": "用药情况",
+    "sub_indicators": ["用药依从性", "药物副作用", "药物相互作用"],
+    "user_profile": {"age": 71, "gender": "男", "chronic_diseases": ["COPD", "高血压"], "medications": ["沙美特罗替卡松", "氨氯地平"]},
+    "anomalies": [{"item": "FEV1", "value": "55%预计值", "status": "偏低"}, {"item": "血压", "value": "145/90mmHg", "status": "偏高"}],
+    "knowledge": {"summary": "COPD患者吸入激素需注意口腔护理", "refined_knowledge": ["吸入后漱口预防鹅口疮", "定期肺功能复查"]}
+  },
+  {
+    "id": "D4-03",
+    "dimension_id": "D4",
+    "dimension_name": "饮食状况",
+    "sub_indicators": ["饮食均衡性", "营养摄入", "饮食禁忌遵守"],
+    "user_profile": {"age": 67, "gender": "男", "chronic_diseases": ["高血压", "冠心病"], "medications": ["阿托伐他汀", "阿司匹林", "美托洛尔"]},
+    "anomalies": [{"item": "LDL-C", "value": "3.2mmol/L", "status": "偏高"}, {"item": "钠盐摄入", "value": ">10g/天", "status": "超标"}],
+    "knowledge": {"summary": "冠心病患者应低盐低脂饮食", "refined_knowledge": ["每日钠盐<5g", "避免反式脂肪酸"]}
+  },
+  {
+    "id": "D5-03",
+    "dimension_id": "D5",
+    "dimension_name": "检查情况",
+    "sub_indicators": ["检查完整性", "指标异常追踪", "复查及时性"],
+    "user_profile": {"age": 76, "gender": "女", "chronic_diseases": ["心房颤动", "高血压"], "medications": ["利伐沙班", "地尔硫卓"]},
+    "anomalies": [{"item": "肝功能ALT", "value": "60U/L", "status": "偏高"}, {"item": "肾功能检查", "value": "3月未查", "status": "超期"}],
+    "knowledge": {"summary": "房颤抗凝治疗需定期监测肝肾功能", "refined_knowledge": ["利伐沙班需监测CrCl", "每3月复查肝肾功能"]}
+  },
+  {
+    "id": "D3-04",
+    "dimension_id": "D3",
+    "dimension_name": "治疗状况",
+    "sub_indicators": ["治疗效果", "康复进度", "并发症控制"],
+    "user_profile": {"age": 63, "gender": "女", "chronic_diseases": ["类风湿关节炎"], "medications": ["甲氨蝶呤", "来氟米特", "泼尼松"]},
+    "anomalies": [{"item": "CRP", "value": "25mg/L", "status": "偏高"}, {"item": "ESR", "value": "45mm/h", "status": "偏高"}],
+    "knowledge": {"summary": "类风湿需定期监测炎症指标和药物副作用", "refined_knowledge": ["甲氨蝶呤需补充叶酸", "定期查肝功能和血常规"]}
+  },
+  {
+    "id": "D1-06",
+    "dimension_id": "D1",
+    "dimension_name": "生理指标",
+    "sub_indicators": ["血压水平", "血糖水平", "血脂水平", "BMI指数", "心率"],
+    "user_profile": {"age": 69, "gender": "女", "chronic_diseases": ["甲状腺功能减退", "高血脂"], "medications": ["左甲状腺素", "瑞舒伐他汀"]},
+    "anomalies": [{"item": "TSH", "value": "8.5mIU/L", "status": "偏高"}, {"item": "总胆固醇", "value": "6.2mmol/L", "status": "偏高"}, {"item": "BMI", "value": "26.8", "status": "超重"}],
+    "knowledge": {"summary": "甲减需调整左甲状腺素剂量", "refined_knowledge": ["TSH目标0.5-4.0", "甲减可继发高血脂"]}
+  }
+]

@@ -5,7 +5,7 @@
 """
 
 from abc import ABC, abstractmethod
-from typing import Any, Generic, TypeVar
+from typing import Generic, TypeVar
 
 
 # 定义配置协议的泛型类型变量

@@ -7,97 +7,27 @@
 
 import logging
 import time
-from dataclasses import dataclass, field
-from typing import Any, AsyncGenerator, Dict, Generator, List, Optional
+from typing import AsyncGenerator, Dict, List
 
+from src.config.business.consult_service_config import get_runtime_config
 from src.orchestration.chain.chain import Chain
 from src.orchestration.chain.data_classes import ChainContext, ChainResult
-from src.orchestration.model_business_service.Impl.consult_model_service import ConsultModelService
+from src.orchestration.chain.answer_generation_chain.answer_generation_context import AnswerGenerationContextBody
+from src.orchestration.chain.answer_generation_chain.answer_generation_result import AnswerGenerationResultData
+from src.orchestration.chain.answer_generation_chain.answer_generation_resource import AnswerGenerationResource
+from src.utils.logger import log_arch_event
 
 logger = logging.getLogger(__name__)
 
+
 DISCLAIMER = "以上信息仅供参考，不构成医疗建议。如有健康问题，请及时就医。"
 
-# 回答长度控制常量
-MIN_WORDS = 200
-MAX_WORDS = 800
+# 回答长度控制 - 使用惰性获取模式，避免模块级求值时ConfigManager未初始化
+def _get_min_words() -> int:
+    return get_runtime_config().answer_min_length
 
-
-@dataclass
-class AnswerGenerationContextBody:
-    """
-    回答生成Chain策略专属输入数据类
-
-    Attributes:
-        query_text: 用户查询文本
-        knowledge_context: 整合后的知识素材文本
-        intent_label: 意图标签
-        chat_history: 对话历史
-    """
-    query_text: str
-    knowledge_context: str = ""
-    intent_label: str = ""
-    chat_history: List[Dict[str, str]] = field(default_factory=list)
-
-    def to_dict(self) -> Dict[str, Any]:
-        """转换为字典"""
-        return {
-            "query_text": self.query_text,
-            "knowledge_context": self.knowledge_context,
-            "intent_label": self.intent_label,
-            "chat_history": self.chat_history
-        }
-
-
-@dataclass
-class AnswerGenerationResultData:
-    """
-    回答生成Chain策略专属输出数据类
-
-    Attributes:
-        answer_text: 生成的回答文本
-        sources: 知识来源引用列表
-        word_count: 回答字数
-        has_disclaimer: 是否包含免责声明
-    """
-    answer_text: str
-    sources: List[str] = field(default_factory=list)
-    word_count: int = 0
-    has_disclaimer: bool = False
-
-    def to_dict(self) -> Dict[str, Any]:
-        """转换为字典"""
-        return {
-            "answer_text": self.answer_text,
-            "sources": self.sources,
-            "word_count": self.word_count,
-            "has_disclaimer": self.has_disclaimer
-        }
-
-
-@dataclass
-class AnswerGenerationResource:
-    """
-    回答生成Chain策略专属资源类
-
-    Attributes:
-        model_service: 咨询模型服务
-    """
-    model_service: Optional[ConsultModelService] = None
-
-    def get_model_result(self, messages: List[Dict[str, str]]) -> str:
-        """
-        获取模型生成结果
-
-        Args:
-            messages: 消息列表
-
-        Returns:
-            模型生成的回复
-        """
-        if self.model_service is None:
-            return "模型服务未初始化"
-        return self.model_service.call_model(messages)
+def _get_max_words() -> int:
+    return get_runtime_config().answer_max_length
 
 
 class AnswerGenerationChain(Chain[ChainContext[AnswerGenerationContextBody], ChainResult[AnswerGenerationResultData]]):
@@ -132,6 +62,13 @@ class AnswerGenerationChain(Chain[ChainContext[AnswerGenerationContextBody], Cha
         """
         start_time = time.time()
         logger.info(f"[AnswerGenerationChain] 开始执行Chain: session_id={chain_context.session_id}")
+        log_arch_event(
+            logger,
+            component="AnswerGenerationChain",
+            stage="CHAIN",
+            event="execute",
+            status="start",
+        )
 
         body = chain_context.body
         if body is None:
@@ -149,7 +86,12 @@ class AnswerGenerationChain(Chain[ChainContext[AnswerGenerationContextBody], Cha
             {"role": "user", "content": prompt["user_message"]}
         ]
 
-        logger.info(f"[AnswerGenerationChain] 开始模型推理: messages_count={len(messages)}")
+        logger.info(f"[LLM_INPUT] messages_count={len(messages)}")
+        for i, msg in enumerate(messages):
+            logger.info(f"[LLM_INPUT] Message[{i}] role={msg.get('role')}: {msg.get('content', '')}")
+
+        logger.info(f"[CHAIN_EXEC] purpose=回答生成, message_count={len(messages)}")
+        _llm_start = time.time()
         try:
             raw_answer = self._resource.get_model_result(messages)
         except Exception as e:
@@ -158,7 +100,10 @@ class AnswerGenerationChain(Chain[ChainContext[AnswerGenerationContextBody], Cha
                 session_id=chain_context.session_id,
                 data=AnswerGenerationResultData(answer_text=f"模型推理失败: {str(e)}", has_disclaimer=False)
             )
-        logger.info(f"[AnswerGenerationChain] 模型推理完成: answer_len={len(raw_answer)}")
+        _llm_elapsed = time.time() - _llm_start
+        logger.info(f"[LLM_OUTPUT] {raw_answer}")
+        logger.info(f"[LLM_DURATION] duration={_llm_elapsed:.2f}s")
+        logger.info(f"[CHAIN_EXEC] purpose=回答生成, output_length={len(raw_answer)}, elapsed={_llm_elapsed:.3f}s")
 
         sources = self._extract_sources(body.knowledge_context)
         formatted_answer = self._format_answer(raw_answer, sources)
@@ -198,9 +143,7 @@ class AnswerGenerationChain(Chain[ChainContext[AnswerGenerationContextBody], Cha
             return
         
         model_service = self._resource.model_service
-        if hasattr(model_service, 'get_model_result'):
-            model_service = model_service.get_model_result()
-        
+
         if model_service is None:
             yield "抱歉，模型服务不可用。"
             return
@@ -212,12 +155,22 @@ class AnswerGenerationChain(Chain[ChainContext[AnswerGenerationContextBody], Cha
                 {"role": "system", "content": prompt["system_message"]},
                 {"role": "user", "content": prompt["user_message"]}
             ]
+            logger.info(f"[LLM_INPUT] messages_count={len(messages)}")
+            for i, msg in enumerate(messages):
+                logger.info(f"[LLM_INPUT] Message[{i}] role={msg.get('role')}: {msg.get('content', '')}")
+
+            logger.info(f"[CHAIN_EXEC] purpose=流式回答生成, message_count={len(messages)}")
+            _llm_start = time.time()
             async for token in model_service.async_stream_generate(messages):
                 full_response.append(token)
                 yield token
-            
+
+            _llm_elapsed = time.time() - _llm_start
             complete_answer = ''.join(full_response)
-            
+            logger.info(f"[LLM_OUTPUT] {complete_answer}")
+            logger.info(f"[LLM_DURATION] duration={_llm_elapsed:.2f}s")
+            logger.info(f"[CHAIN_EXEC] purpose=流式回答生成, output_length={len(complete_answer)}, elapsed={_llm_elapsed:.3f}s")
+
             if "以上信息仅供参考" not in complete_answer and "不构成医疗建议" not in complete_answer:
                 disclaimer = "\n\n以上信息仅供参考，不构成医疗建议。如有健康问题，请及时就医。"
                 for char in disclaimer:
@@ -225,16 +178,18 @@ class AnswerGenerationChain(Chain[ChainContext[AnswerGenerationContextBody], Cha
                     yield char
                 complete_answer += disclaimer
             
-            logger.info(f"[AnswerGenerationChain] ========== LLM完整输出 ==========")
-            logger.info(f"[AnswerGenerationChain] 完整回答 (长度={len(complete_answer)}):")
-            logger.info(f"{complete_answer}")
-            logger.info(f"[AnswerGenerationChain] ==============================")
+            logger.info(f"[AnswerGenerationChain] LLM流式回答生成完成，输出长度={len(complete_answer)}")
                 
         except Exception as e:
             logger.error(f"[AnswerGenerationChain] 流式生成异常: {str(e)}")
-            yield f"\n\n抱歉，生成过程中出现错误。"
+            raise
 
-    def _truncate_chat_history(self, chat_history: List[Dict[str, str]], max_rounds: int = 2, max_assistant_len: int = 200) -> List[Dict[str, str]]:
+    def _truncate_chat_history(self, chat_history: List[Dict[str, str]], max_rounds: int = None, max_assistant_len: int = None) -> List[Dict[str, str]]:
+        if max_rounds is None:
+            max_rounds = get_runtime_config().max_dialogue_rounds
+        if max_assistant_len is None:
+            max_assistant_len = get_runtime_config().max_assistant_len
+
         if not chat_history:
             return []
 
@@ -250,7 +205,6 @@ class AnswerGenerationChain(Chain[ChainContext[AnswerGenerationContextBody], Cha
 
         return truncated
 
-    MAX_KNOWLEDGE_CHARS = 6000
 
     def _build_prompt(self, context_body: AnswerGenerationContextBody) -> Dict[str, str]:
         system_message = """你是一位专业的医疗健康咨询助手，请根据提供的医学知识素材回答用户的问题。
@@ -262,15 +216,15 @@ class AnswerGenerationChain(Chain[ChainContext[AnswerGenerationContextBody], Cha
 
         if context_body.knowledge_context:
             knowledge = context_body.knowledge_context
-            if len(knowledge) > self.MAX_KNOWLEDGE_CHARS:
-                knowledge = knowledge[:self.MAX_KNOWLEDGE_CHARS] + "\n...(知识素材已截断)"
+            if len(knowledge) > get_runtime_config().max_knowledge_chars:
+                knowledge = knowledge[:get_runtime_config().max_knowledge_chars] + "\n...(知识素材已截断)"
             system_message += f"\n\n参考知识素材：\n{knowledge}"
 
         user_message = f"用户问题：{context_body.query_text}"
 
         user_message += (
-            "\n\n回答要求："
-            "\n1.回答长度200-800字"
+            f"\n\n回答要求："
+            f"\n1.回答长度{_get_min_words()}-{_get_max_words()}字"
             "\n2.基于知识素材回答，不要编造信息"
             "\n3.如果知识素材不足以回答问题，请如实说明"
             "\n4.仅针对用户问题回答，不要添加自我评价或总结"
@@ -315,8 +269,8 @@ class AnswerGenerationChain(Chain[ChainContext[AnswerGenerationContextBody], Cha
             质量检查是否通过
         """
         answer_len = len(answer)
-        if answer_len < 200 or answer_len > 800:
-            logger.warning(f"[AnswerGenerationChain] 质量检查未通过: 回答长度={answer_len}, 要求200-800字")
+        if answer_len < _get_min_words() or answer_len > _get_max_words():
+            logger.warning(f"[AnswerGenerationChain] 质量检查未通过: 回答长度={answer_len}, 要求{_get_min_words()}-{_get_max_words()}字")
             return False
 
         if DISCLAIMER not in answer:
@@ -360,13 +314,13 @@ class AnswerGenerationChain(Chain[ChainContext[AnswerGenerationContextBody], Cha
             调整后的回答
         """
         answer_len = len(answer)
-        logger.info(f"[AnswerGenerationChain] 检查回答长度: current_len={answer_len}, min={MIN_WORDS}, max={MAX_WORDS}")
-        
-        if answer_len < MIN_WORDS:
-            logger.warning(f"[AnswerGenerationChain] 回答过短: {answer_len} < {MIN_WORDS}, 开始扩展")
+        logger.info(f"[AnswerGenerationChain] 检查回答长度: current_len={answer_len}, min={_get_min_words()}, max={_get_max_words()}")
+
+        if answer_len < _get_min_words():
+            logger.warning(f"[AnswerGenerationChain] 回答过短: {answer_len} < {_get_min_words()}, 开始扩展")
             return self._expand_answer(answer, context_body)
-        elif answer_len > MAX_WORDS:
-            logger.warning(f"[AnswerGenerationChain] 回答过长: {answer_len} > {MAX_WORDS}, 开始精简")
+        elif answer_len > _get_max_words():
+            logger.warning(f"[AnswerGenerationChain] 回答过长: {answer_len} > {_get_max_words()}, 开始精简")
             return self._compress_answer(answer)
         else:
             logger.info(f"[AnswerGenerationChain] 回答长度符合要求: {answer_len}")
@@ -374,7 +328,7 @@ class AnswerGenerationChain(Chain[ChainContext[AnswerGenerationContextBody], Cha
     
     def _expand_answer(self, answer: str, context_body: AnswerGenerationContextBody) -> str:
         """
-        扩展不足200字的回答
+        扩展不足最小长度的回答
         
         Args:
             answer: 原始回答
@@ -402,16 +356,26 @@ class AnswerGenerationChain(Chain[ChainContext[AnswerGenerationContextBody], Cha
 1. 基于知识素材扩展，不要编造信息
 2. 增加相关细节和解释
 3. 保持回答的专业性和准确性
-4. 扩展后的回答长度应在200-800字之间
+4. 扩展后的回答长度应在{_get_min_words()}-{_get_max_words()}字之间
 """
         
         messages = [
             {"role": "system", "content": "你是一位专业的医疗健康咨询助手，请根据提供的医学知识素材扩展回答。"},
             {"role": "user", "content": expand_prompt}
         ]
-        
+
+        logger.info(f"[CHAIN_EXEC] purpose=回答扩展, original_length={len(answer)}")
+        logger.info(f"[LLM_INPUT] messages_count={len(messages)}")
+        for i, msg in enumerate(messages):
+            logger.info(f"[LLM_INPUT] Message[{i}] role={msg.get('role')}: {msg.get('content', '')}")
+        _llm_start = time.time()
+
         try:
             expanded_answer = self._resource.get_model_result(messages)
+            _llm_elapsed = time.time() - _llm_start
+            logger.info(f"[LLM_OUTPUT] {expanded_answer}")
+            logger.info(f"[LLM_DURATION] duration={_llm_elapsed:.2f}s")
+            logger.info(f"[CHAIN_EXEC] purpose=回答扩展, output_length={len(expanded_answer)}, elapsed={_llm_elapsed:.3f}s")
             # 确保包含免责声明
             if DISCLAIMER not in expanded_answer:
                 expanded_answer = expanded_answer.rstrip() + "\n\n" + DISCLAIMER
@@ -424,7 +388,7 @@ class AnswerGenerationChain(Chain[ChainContext[AnswerGenerationContextBody], Cha
     
     def _compress_answer(self, answer: str) -> str:
         """
-        精简超过800字的回答
+        精简超过最大长度的回答
         
         Args:
             answer: 原始回答
@@ -446,7 +410,7 @@ class AnswerGenerationChain(Chain[ChainContext[AnswerGenerationContextBody], Cha
 1. 保留核心信息和关键内容
 2. 删除冗余和重复内容
 3. 保持回答的准确性和专业性
-4. 精简后的回答长度应在200-800字之间
+4. 精简后的回答长度应在{_get_min_words()}-{_get_max_words()}字之间
 """
         
         messages = [
@@ -454,8 +418,16 @@ class AnswerGenerationChain(Chain[ChainContext[AnswerGenerationContextBody], Cha
             {"role": "user", "content": compress_prompt}
         ]
         
+        logger.info(f"[LLM_INPUT] messages_count={len(messages)}")
+        for i, msg in enumerate(messages):
+            logger.info(f"[LLM_INPUT] Message[{i}] role={msg.get('role')}: {msg.get('content', '')}")
+        _llm_start = time.time()
+
         try:
             compressed_answer = self._resource.get_model_result(messages)
+            _llm_elapsed = time.time() - _llm_start
+            logger.info(f"[LLM_OUTPUT] {compressed_answer}")
+            logger.info(f"[LLM_DURATION] duration={_llm_elapsed:.2f}s")
             # 确保包含免责声明
             if DISCLAIMER not in compressed_answer:
                 compressed_answer = compressed_answer.rstrip() + "\n\n" + DISCLAIMER

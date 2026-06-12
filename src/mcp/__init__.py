@@ -10,7 +10,7 @@ MCP代理层
     - 协议转换：将编排层的抽象调用转换为具体工具的执行请求
 
 重要说明：
-    MCP代理层只代理真正的Tool（如Neo4jMedicalTool、VectorEnhancedRetrievalTool、ValidationTool），
+    MCP代理层只代理真正的Tool（如Neo4jMedicalTool、VectorRetrievalTool、ValidationTool），
     不代理模型调用！模型调用由编排层的模型业务服务直接完成。
 """
 

@@ -1,0 +1,5202 @@
+[
+  {
+    "type": "relation",
+    "relation_type": "has_symptom",
+    "text": "疾病：咯血，有症状，症状：咯血伴有皮肤粘膜出血"
+  },
+  {
+    "type": "relation",
+    "relation_type": "has_symptom",
+    "text": "疾病：呼吸衰竭，有症状，症状：指甲特大有纵纹..."
+  },
+  {
+    "type": "relation",
+    "relation_type": "has_symptom",
+    "text": "疾病：肺放线菌病，有症状，症状：骨膜炎"
+  },
+  {
+    "type": "relation",
+    "relation_type": "has_symptom",
+    "text": "疾病：脱疽，有症状，症状：足趾发凉怕冷，..."
+  },
+  {
+    "type": "relation",
+    "relation_type": "has_symptom",
+    "text": "疾病：呼吸道异物，有症状，症状：吞咽困难"
+  },
+  {
+    "type": "relation",
+    "relation_type": "has_symptom",
+    "text": "疾病：肺炎球菌肺炎，有症状，症状：咳嗽伴胸痛"
+  },
+  {
+    "type": "relation",
+    "relation_type": "has_symptom",
+    "text": "疾病：汞中毒，有症状，症状：脸红"
+  },
+  {
+    "type": "relation",
+    "relation_type": "has_symptom",
+    "text": "疾病：汞中毒，有症状，症状：汞毒性震颤"
+  },
+  {
+    "type": "relation",
+    "relation_type": "has_symptom",
+    "text": "疾病：感染性休克，有症状，症状：甲皱毛细血管袢数减少"
+  },
+  {
+    "type": "relation",
+    "relation_type": "has_symptom",
+    "text": "疾病：军团病，有症状，症状：发绀"
+  },
+  {
+    "type": "relation",
+    "relation_type": "has_symptom",
+    "text": "疾病：大叶性肺炎，有症状，症状：发烧"
+  },
+  {
+    "type": "relation",
+    "relation_type": "has_symptom",
+    "text": "疾病：肺水肿，有症状，症状：呼吸困难"
+  },
+  {
+    "type": "relation",
+    "relation_type": "has_symptom",
+    "text": "疾病：肺炎性假瘤，有症状，症状：咯血"
+  },
+  {
+    "type": "relation",
+    "relation_type": "has_symptom",
+    "text": "疾病：肺泡蛋白沉着症，有症状，症状：肺泡灌洗液可见..."
+  },
+  {
+    "type": "relation",
+    "relation_type": "has_symptom",
+    "text": "疾病：呼吸衰竭，有症状，症状：扑翼样震颤"
+  },
+  {
+    "type": "relation",
+    "relation_type": "has_symptom",
+    "text": "疾病：咖啡因与氨茶碱中毒，有症状，症状：腹痛"
+  },
+  {
+    "type": "relation",
+    "relation_type": "has_symptom",
+    "text": "疾病：肺炎杆菌肺炎，有症状，症状：气急"
+  },
+  {
+    "type": "relation",
+    "relation_type": "has_symptom",
+    "text": "疾病：单纯性肺嗜酸粒细胞浸润症，有症状，症状：咯血伴发热"
+  },
+  {
+    "type": "relation",
+    "relation_type": "has_symptom",
+    "text": "疾病：感染性休克，有症状，症状：烦躁不安"
+  },
+  {
+    "type": "relation",
+    "relation_type": "has_symptom",
+    "text": "疾病：Goodpasture综合征，有症状，症状：发热伴咳嗽、咯..."
+  },
+  {
+    "type": "relation",
+    "relation_type": "has_symptom",
+    "text": "疾病：Goodpasture综合征，有症状，症状：肾衰竭"
+  },
+  {
+    "type": "relation",
+    "relation_type": "has_symptom",
+    "text": "疾病：苯中毒，有症状，症状：抽搐"
+  },
+  {
+    "type": "relation",
+    "relation_type": "has_symptom",
+    "text": "疾病：肺隐球菌病，有症状，症状：痰呈粘液脓性"
+  },
+  {
+    "type": "relation",
+    "relation_type": "has_symptom",
+    "text": "疾病：肺水肿，有症状，症状：肺功能失常"
+  },
+  {
+    "type": "relation",
+    "relation_type": "has_symptom",
+    "text": "疾病：Goodpasture综合征，有症状，症状：咯血"
+  },
+  {
+    "type": "relation",
+    "relation_type": "has_symptom",
+    "text": "疾病：心室扑动和心室颤动，有症状，症状：意识丧失"
+  },
+  {
+    "type": "relation",
+    "relation_type": "has_symptom",
+    "text": "疾病：急性呼吸窘迫综合征，有症状，症状：呼吸衰竭"
+  },
+  {
+    "type": "relation",
+    "relation_type": "has_symptom",
+    "text": "疾病：放射性肺炎，有症状，症状：闫铁"
+  },
+  {
+    "type": "relation",
+    "relation_type": "has_symptom",
+    "text": "疾病：急性呼吸衰竭，有症状，症状：心率增快"
+  },
+  {
+    "type": "relation",
+    "relation_type": "has_symptom",
+    "text": "疾病：军团菌病，有症状，症状：少尿"
+  },
+  {
+    "type": "relation",
+    "relation_type": "has_symptom",
+    "text": "疾病：大楼病综合征，有症状，症状：紧张性头痛"
+  },
+  {
+    "type": "relation",
+    "relation_type": "has_symptom",
+    "text": "疾病：过敏性肺炎，有症状，症状：乏力"
+  },
+  {
+    "type": "relation",
+    "relation_type": "has_symptom",
+    "text": "疾病：单纯性肺嗜酸粒细胞浸润症，有症状，症状：胸闷"
+  },
+  {
+    "type": "relation",
+    "relation_type": "has_symptom",
+    "text": "疾病：感冒，有症状，症状：浑身忽冷忽热"
+  },
+  {
+    "type": "relation",
+    "relation_type": "has_symptom",
+    "text": "疾病：大楼病综合征，有症状，症状：恶心"
+  },
+  {
+    "type": "relation",
+    "relation_type": "has_symptom",
+    "text": "疾病：二硫化碳中毒，有症状，症状：昏迷"
+  },
+  {
+    "type": "relation",
+    "relation_type": "has_symptom",
+    "text": "疾病：呼吸性细支气管相关的间质性肺疾病，有症状，症状：呼吸衰竭"
+  },
+  {
+    "type": "relation",
+    "relation_type": "has_symptom",
+    "text": "疾病：金黄色葡萄球菌肺炎，有症状，症状：毒血症"
+  },
+  {
+    "type": "relation",
+    "relation_type": "has_symptom",
+    "text": "疾病：急性呼吸窘迫综合征，有症状，症状：口唇发绀"
+  },
+  {
+    "type": "relation",
+    "relation_type": "has_symptom",
+    "text": "疾病：大叶性肺炎，有症状，症状：呼吸音减弱"
+  },
+  {
+    "type": "relation",
+    "relation_type": "has_symptom",
+    "text": "疾病：过敏性休克，有症状，症状：心慌"
+  },
+  {
+    "type": "relation",
+    "relation_type": "has_symptom",
+    "text": "疾病：肺水肿，有症状，症状：咳嗽伴呼吸困难"
+  },
+  {
+    "type": "relation",
+    "relation_type": "has_symptom",
+    "text": "疾病：脱疽，有症状，症状：坏疽脓皮"
+  },
+  {
+    "type": "relation",
+    "relation_type": "has_symptom",
+    "text": "疾病：肺泡蛋白沉着症，有症状，症状：胸痛"
+  },
+  {
+    "type": "relation",
+    "relation_type": "has_symptom",
+    "text": "疾病：过敏性休克，有症状，症状：晕厥"
+  },
+  {
+    "type": "relation",
+    "relation_type": "has_symptom",
+    "text": "疾病：肺泡蛋白沉着症，有症状，症状：发热伴咳嗽、咯..."
+  },
+  {
+    "type": "relation",
+    "relation_type": "has_symptom",
+    "text": "疾病：乳房导管内乳头状瘤，有症状，症状：乳房肿块"
+  },
+  {
+    "type": "relation",
+    "relation_type": "has_symptom",
+    "text": "疾病：肺炎球菌肺炎，有症状，症状：痰中带血丝"
+  },
+  {
+    "type": "relation",
+    "relation_type": "has_symptom",
+    "text": "疾病：肺水肿，有症状，症状：端坐呼吸"
+  },
+  {
+    "type": "relation",
+    "relation_type": "has_symptom",
+    "text": "疾病：肺曲菌病，有症状，症状：咳出棕色痰栓"
+  },
+  {
+    "type": "relation",
+    "relation_type": "has_symptom",
+    "text": "疾病：脱疽，有症状，症状：脚趾皮肤黄泡后紫黑"
+  },
+  {
+    "type": "relation",
+    "relation_type": "has_symptom",
+    "text": "疾病：急性呼吸窘迫综合征，有症状，症状：心源性呼吸窘迫"
+  },
+  {
+    "type": "relation",
+    "relation_type": "has_symptom",
+    "text": "疾病：肺出血－肾炎综合征，有症状，症状：肺部出血"
+  },
+  {
+    "type": "relation",
+    "relation_type": "has_symptom",
+    "text": "疾病：过敏性肺炎，有症状，症状：呼吸困难"
+  },
+  {
+    "type": "relation",
+    "relation_type": "has_symptom",
+    "text": "疾病：肺水肿，有症状，症状：肺通气一血流比例失调"
+  },
+  {
+    "type": "relation",
+    "relation_type": "has_symptom",
+    "text": "疾病：肺转移瘤，有症状，症状：吐血痰"
+  },
+  {
+    "type": "relation",
+    "relation_type": "has_symptom",
+    "text": "疾病：感染性休克，有症状，症状：尿偏碱"
+  },
+  {
+    "type": "relation",
+    "relation_type": "has_symptom",
+    "text": "疾病：感冒，有症状，症状：咽喉干燥及灼热感"
+  },
+  {
+    "type": "relation",
+    "relation_type": "has_symptom",
+    "text": "疾病：脱囊，有症状，症状：恶寒"
+  },
+  {
+    "type": "relation",
+    "relation_type": "has_symptom",
+    "text": "疾病：结核性脓胸，有症状，症状：呼吸困难"
+  },
+  {
+    "type": "relation",
+    "relation_type": "has_symptom",
+    "text": "疾病：军团病，有症状，症状：肌肉酸痛"
+  },
+  {
+    "type": "relation",
+    "relation_type": "has_symptom",
+    "text": "疾病：肺栓塞，有症状，症状：咯血"
+  },
+  {
+    "type": "relation",
+    "relation_type": "has_symptom",
+    "text": "疾病：喘息样支气管炎，有症状，症状：纤毛上皮细胞损伤脱落"
+  },
+  {
+    "type": "relation",
+    "relation_type": "has_symptom",
+    "text": "疾病：过敏性肺炎，有症状，症状：变应性咳嗽"
+  },
+  {
+    "type": "relation",
+    "relation_type": "has_symptom",
+    "text": "疾病：急性肺脓肿，有症状，症状：烂桃样血痰"
+  },
+  {
+    "type": "relation",
+    "relation_type": "has_symptom",
+    "text": "疾病：肺气肿，有症状，症状：黏稠或脓性痰伴..."
+  },
+  {
+    "type": "relation",
+    "relation_type": "has_symptom",
+    "text": "疾病：肺炎球菌肺炎，有症状，症状：发热伴咳嗽、咯..."
+  },
+  {
+    "type": "relation",
+    "relation_type": "has_symptom",
+    "text": "疾病：呼吸衰竭，有症状，症状：呼吸衰竭"
+  },
+  {
+    "type": "relation",
+    "relation_type": "has_symptom",
+    "text": "疾病：硫化氢中毒，有症状，症状：头晕"
+  },
+  {
+    "type": "relation",
+    "relation_type": "has_symptom",
+    "text": "疾病：呼吸性细支气管相关的间质性肺疾病，有症状，症状：捻发音"
+  },
+  {
+    "type": "relation",
+    "relation_type": "has_symptom",
+    "text": "疾病：二硫化碳中毒，有症状，症状：恶心"
+  },
+  {
+    "type": "relation",
+    "relation_type": "has_symptom",
+    "text": "疾病：非典，有症状，症状：乏力"
+  },
+  {
+    "type": "relation",
+    "relation_type": "has_symptom",
+    "text": "疾病：非典，有症状，症状：畏寒"
+  },
+  {
+    "type": "relation",
+    "relation_type": "has_symptom",
+    "text": "疾病：咯血，有症状，症状：咯血伴黄疸"
+  },
+  {
+    "type": "relation",
+    "relation_type": "has_symptom",
+    "text": "疾病：呼吸衰竭，有症状，症状：上肺纤维化明显"
+  },
+  {
+    "type": "relation",
+    "relation_type": "has_symptom",
+    "text": "疾病：百日咳，有症状，症状：痉挛性咳嗽"
+  },
+  {
+    "type": "relation",
+    "relation_type": "has_symptom",
+    "text": "疾病：过敏性肺炎，有症状，症状：喘息"
+  },
+  {
+    "type": "relation",
+    "relation_type": "has_symptom",
+    "text": "疾病：肺大疱，有症状，症状：气短"
+  },
+  {
+    "type": "relation",
+    "relation_type": "has_symptom",
+    "text": "疾病：军团病，有症状，症状：食欲减退"
+  },
+  {
+    "type": "relation",
+    "relation_type": "has_symptom",
+    "text": "疾病：卡氏肺囊虫肺炎，有症状，症状：消瘦"
+  },
+  {
+    "type": "relation",
+    "relation_type": "has_symptom",
+    "text": "疾病：急性肺脓肿，有症状，症状：畏寒"
+  },
+  {
+    "type": "relation",
+    "relation_type": "has_symptom",
+    "text": "疾病：肺隐球菌病，有症状，症状：隐球菌囊膜多糖堆积"
+  },
+  {
+    "type": "relation",
+    "relation_type": "has_symptom",
+    "text": "疾病：肺大泡，有症状，症状：气短"
+  },
+  {
+    "type": "relation",
+    "relation_type": "has_symptom",
+    "text": "疾病：肺炎，有症状，症状：呼气时两颊鼓起和缩唇"
+  },
+  {
+    "type": "relation",
+    "relation_type": "has_symptom",
+    "text": "疾病：军团菌病，有症状，症状：神志不清"
+  },
+  {
+    "type": "relation",
+    "relation_type": "has_symptom",
+    "text": "疾病：过敏性休克，有症状，症状：风团"
+  },
+  {
+    "type": "relation",
+    "relation_type": "has_symptom",
+    "text": "疾病：减压病，有症状，症状：瘙痒"
+  },
+  {
+    "type": "relation",
+    "relation_type": "has_symptom",
+    "text": "疾病：心室扑动和心室颤动，有症状，症状：昏迷"
+  },
+  {
+    "type": "relation",
+    "relation_type": "has_symptom",
+    "text": "疾病：卡氏肺囊虫肺炎，有症状，症状：烦躁不安"
+  },
+  {
+    "type": "relation",
+    "relation_type": "has_symptom",
+    "text": "疾病：金黄色葡萄球菌肺炎，有症状，症状：胸腔积液"
+  },
+  {
+    "type": "relation",
+    "relation_type": "has_symptom",
+    "text": "疾病：镉中毒，有症状，症状：消化不良"
+  },
+  {
+    "type": "relation",
+    "relation_type": "has_symptom",
+    "text": "疾病：金黄色葡萄球菌肺炎，有症状，症状：脓肿"
+  },
+  {
+    "type": "relation",
+    "relation_type": "has_symptom",
+    "text": "疾病：肺泡蛋白沉着症，有症状，症状：肺泡炎症"
+  },
+  {
+    "type": "relation",
+    "relation_type": "has_symptom",
+    "text": "疾病：军团病，有症状，症状：肌痛"
+  },
+  {
+    "type": "relation",
+    "relation_type": "has_symptom",
+    "text": "疾病：金黄色葡萄球菌肺炎，有症状，症状：脓胸"
+  },
+  {
+    "type": "relation",
+    "relation_type": "has_symptom",
+    "text": "疾病：肺气肿，有症状，症状：肺部啰音"
+  },
+  {
+    "type": "relation",
+    "relation_type": "has_symptom",
+    "text": "疾病：咯血，有症状，症状：咯血伴胸痛"
+  },
+  {
+    "type": "relation",
+    "relation_type": "has_symptom",
+    "text": "疾病：咯血，有症状，症状：呼吸音减弱"
+  },
+  {
+    "type": "relation",
+    "relation_type": "has_symptom",
+    "text": "疾病：二硫化碳中毒，有症状，症状：多发性神经炎"
+  },
+  {
+    "type": "relation",
+    "relation_type": "has_symptom",
+    "text": "疾病：大楼病综合征，有症状，症状：头晕"
+  },
+  {
+    "type": "relation",
+    "relation_type": "has_symptom",
+    "text": "疾病：肺水肿，有症状，症状：混合型酸碱平衡紊乱"
+  },
+  {
+    "type": "relation",
+    "relation_type": "has_symptom",
+    "text": "疾病：大量羊水吸入，有症状，症状：肺纹理增粗"
+  },
+  {
+    "type": "relation",
+    "relation_type": "has_symptom",
+    "text": "疾病：减压病，有症状，症状：丘疹"
+  },
+  {
+    "type": "relation",
+    "relation_type": "has_symptom",
+    "text": "疾病：肺癌，有症状，症状：痰中带血丝"
+  },
+  {
+    "type": "relation",
+    "relation_type": "has_symptom",
+    "text": "疾病：肺炎，有症状，症状：发热伴寒战"
+  },
+  {
+    "type": "relation",
+    "relation_type": "has_symptom",
+    "text": "疾病：成人呼吸窘迫综合征，有症状，症状：紫绀"
+  },
+  {
+    "type": "relation",
+    "relation_type": "has_symptom",
+    "text": "疾病：咖啡因与氨茶碱中毒，有症状，症状：恶心"
+  },
+  {
+    "type": "relation",
+    "relation_type": "has_symptom",
+    "text": "疾病：过敏性休克，有症状，症状：意识障碍"
+  },
+  {
+    "type": "relation",
+    "relation_type": "has_symptom",
+    "text": "疾病：呼吸性细支气管相关的间质性肺疾病，有症状，症状：咯血"
+  },
+  {
+    "type": "relation",
+    "relation_type": "has_symptom",
+    "text": "疾病：肺放线菌病，有症状，症状：乏力"
+  },
+  {
+    "type": "relation",
+    "relation_type": "has_symptom",
+    "text": "疾病：大楼病综合征，有症状，症状：间歇性头晕"
+  },
+  {
+    "type": "relation",
+    "relation_type": "has_symptom",
+    "text": "疾病：肺癌，有症状，症状：种植播散"
+  },
+  {
+    "type": "relation",
+    "relation_type": "has_symptom",
+    "text": "疾病：退行性黄韧带肥厚，有症状，症状：头晕"
+  },
+  {
+    "type": "relation",
+    "relation_type": "has_symptom",
+    "text": "疾病：放射性肺炎，有症状，症状：低热"
+  },
+  {
+    "type": "relation",
+    "relation_type": "has_symptom",
+    "text": "疾病：脱囊，有症状，症状：尿赤"
+  },
+  {
+    "type": "relation",
+    "relation_type": "has_symptom",
+    "text": "疾病：大量羊水吸入，有症状，症状：口唇和甲床略带青紫"
+  },
+  {
+    "type": "relation",
+    "relation_type": "has_symptom",
+    "text": "疾病：结核性脓胸，有症状，症状：胸腔积液"
+  },
+  {
+    "type": "relation",
+    "relation_type": "has_symptom",
+    "text": "疾病：卡氏肺囊虫肺炎，有症状，症状：紫绀"
+  },
+  {
+    "type": "relation",
+    "relation_type": "has_symptom",
+    "text": "疾病：过敏性肺炎，有症状，症状：食欲减退"
+  },
+  {
+    "type": "relation",
+    "relation_type": "has_symptom",
+    "text": "疾病：急性呼吸窘迫综合征，有症状，症状：昏迷"
+  },
+  {
+    "type": "relation",
+    "relation_type": "has_symptom",
+    "text": "疾病：大叶性肺炎，有症状，症状：咳铁锈色痰"
+  },
+  {
+    "type": "relation",
+    "relation_type": "has_symptom",
+    "text": "疾病：脱囊，有症状，症状：阴囊坠胀痛"
+  },
+  {
+    "type": "relation",
+    "relation_type": "has_symptom",
+    "text": "疾病：大楼病综合征，有症状，症状：眼睛痒"
+  },
+  {
+    "type": "relation",
+    "relation_type": "has_symptom",
+    "text": "疾病：肺炎球菌肺炎，有症状，症状：胸痛"
+  },
+  {
+    "type": "relation",
+    "relation_type": "has_symptom",
+    "text": "疾病：二硫化碳中毒，有症状，症状：感觉障碍"
+  },
+  {
+    "type": "relation",
+    "relation_type": "has_symptom",
+    "text": "疾病：急性呼吸衰竭，有症状，症状：气体弥散障碍"
+  },
+  {
+    "type": "relation",
+    "relation_type": "has_symptom",
+    "text": "疾病：急性呼吸衰竭，有症状，症状：心脏停搏"
+  },
+  {
+    "type": "relation",
+    "relation_type": "has_symptom",
+    "text": "疾病：蠕形螨病，有症状，症状：痤疮样皮疹"
+  },
+  {
+    "type": "relation",
+    "relation_type": "has_symptom",
+    "text": "疾病：肺炎杆菌肺炎，有症状，症状：胸痛"
+  },
+  {
+    "type": "relation",
+    "relation_type": "has_symptom",
+    "text": "疾病：百日咳，有症状，症状：肺阴虚"
+  },
+  {
+    "type": "relation",
+    "relation_type": "has_symptom",
+    "text": "疾病：肺放线菌病，有症状，症状：低热"
+  },
+  {
+    "type": "relation",
+    "relation_type": "has_symptom",
+    "text": "疾病：感冒，有症状，症状：发烧"
+  },
+  {
+    "type": "relation",
+    "relation_type": "has_symptom",
+    "text": "疾病：咯血，有症状，症状：啰音"
+  },
+  {
+    "type": "relation",
+    "relation_type": "has_symptom",
+    "text": "疾病：呼吸性细支气管相关的间质性肺疾病，有症状，症状：肺纤维化"
+  },
+  {
+    "type": "relation",
+    "relation_type": "has_symptom",
+    "text": "疾病：大楼病综合征，有症状，症状：目赤"
+  },
+  {
+    "type": "relation",
+    "relation_type": "has_symptom",
+    "text": "疾病：结核性脓胸，有症状，症状：肋间隙变窄"
+  },
+  {
+    "type": "relation",
+    "relation_type": "has_symptom",
+    "text": "疾病：呼吸性细支气管相关的间质性肺疾病，有症状，症状：蜂窝肺"
+  },
+  {
+    "type": "relation",
+    "relation_type": "has_symptom",
+    "text": "疾病：大叶性肺炎，有症状，症状：胸痛"
+  },
+  {
+    "type": "relation",
+    "relation_type": "has_symptom",
+    "text": "疾病：二硫化碳中毒，有症状，症状：呕吐"
+  },
+  {
+    "type": "relation",
+    "relation_type": "has_symptom",
+    "text": "疾病：军团菌病，有症状，症状：发绀"
+  },
+  {
+    "type": "relation",
+    "relation_type": "has_symptom",
+    "text": "疾病：汞中毒，有症状，症状：齿龈肿胀"
+  },
+  {
+    "type": "relation",
+    "relation_type": "has_symptom",
+    "text": "疾病：肺炎，有症状，症状：呼吸困难"
+  },
+  {
+    "type": "relation",
+    "relation_type": "has_symptom",
+    "text": "疾病：军团菌病，有症状，症状：肌肉酸痛"
+  },
+  {
+    "type": "relation",
+    "relation_type": "has_symptom",
+    "text": "疾病：肺泡蛋白质沉积症，有症状，症状：呼吸困难"
+  },
+  {
+    "type": "relation",
+    "relation_type": "has_symptom",
+    "text": "疾病：呼吸衰竭，有症状，症状：混合型酸碱平衡紊乱"
+  },
+  {
+    "type": "relation",
+    "relation_type": "has_symptom",
+    "text": "疾病：肺-胸膜阿米巴病，有症状，症状：乏力"
+  },
+  {
+    "type": "relation",
+    "relation_type": "has_symptom",
+    "text": "疾病：肺-胸膜阿米巴病，有症状，症状：腹泻"
+  },
+  {
+    "type": "relation",
+    "relation_type": "has_symptom",
+    "text": "疾病：肺泡蛋白质沉积症，有症状，症状：胸痛"
+  },
+  {
+    "type": "relation",
+    "relation_type": "has_symptom",
+    "text": "疾病：脱囊，有症状，症状：便秘"
+  },
+  {
+    "type": "relation",
+    "relation_type": "has_symptom",
+    "text": "疾病：心室扑动和心室颤动，有症状，症状：室颤阈值降低"
+  },
+  {
+    "type": "relation",
+    "relation_type": "has_symptom",
+    "text": "疾病：喘息样支气管炎，有症状，症状：喘息"
+  },
+  {
+    "type": "relation",
+    "relation_type": "has_symptom",
+    "text": "疾病：咯血，有症状，症状：咯血"
+  },
+  {
+    "type": "relation",
+    "relation_type": "has_symptom",
+    "text": "疾病：镉中毒，有症状，症状：恶心"
+  },
+  {
+    "type": "relation",
+    "relation_type": "has_symptom",
+    "text": "疾病：卡氏肺囊虫肺炎，有症状，症状：低热"
+  },
+  {
+    "type": "relation",
+    "relation_type": "has_symptom",
+    "text": "疾病：肺大疱，有症状，症状：发热伴咳嗽、咯..."
+  },
+  {
+    "type": "relation",
+    "relation_type": "has_symptom",
+    "text": "疾病：Goodpasture综合征，有症状，症状：少尿"
+  },
+  {
+    "type": "relation",
+    "relation_type": "has_symptom",
+    "text": "疾病：呼吸性细支气管相关的间质性肺疾病，有症状，症状：疲劳"
+  },
+  {
+    "type": "relation",
+    "relation_type": "has_symptom",
+    "text": "疾病：肺癌，有症状，症状：咳嗽伴体重减轻"
+  },
+  {
+    "type": "relation",
+    "relation_type": "has_symptom",
+    "text": "疾病：百日咳，有症状，症状：抽搐"
+  },
+  {
+    "type": "relation",
+    "relation_type": "has_symptom",
+    "text": "疾病：肺脓肿，有症状，症状：痰中带血丝"
+  },
+  {
+    "type": "relation",
+    "relation_type": "has_symptom",
+    "text": "疾病：脱囊，有症状，症状：阴囊潮湿有异味"
+  },
+  {
+    "type": "relation",
+    "relation_type": "has_symptom",
+    "text": "疾病：百日咳，有症状，症状：胸闷"
+  },
+  {
+    "type": "relation",
+    "relation_type": "has_symptom",
+    "text": "疾病：肺曲菌病，有症状，症状：嗜酸性粒细胞增多"
+  },
+  {
+    "type": "relation",
+    "relation_type": "has_symptom",
+    "text": "疾病：感冒，有症状，症状：流鼻涕"
+  },
+  {
+    "type": "relation",
+    "relation_type": "has_symptom",
+    "text": "疾病：肺脓肿，有症状，症状：要利琴"
+  },
+  {
+    "type": "relation",
+    "relation_type": "has_symptom",
+    "text": "疾病：肺脓肿，有症状，症状：肺内空洞"
+  },
+  {
+    "type": "relation",
+    "relation_type": "has_symptom",
+    "text": "疾病：汞中毒，有症状，症状：恶心"
+  },
+  {
+    "type": "relation",
+    "relation_type": "has_symptom",
+    "text": "疾病：镉中毒，有症状，症状：腹泻"
+  },
+  {
+    "type": "relation",
+    "relation_type": "has_symptom",
+    "text": "疾病：咯血，有症状，症状：窒息"
+  },
+  {
+    "type": "relation",
+    "relation_type": "has_symptom",
+    "text": "疾病：肺气肿，有症状，症状：桶状胸"
+  },
+  {
+    "type": "relation",
+    "relation_type": "has_symptom",
+    "text": "疾病：急性肺脓肿，有症状，症状：痰呈粘液脓性"
+  },
+  {
+    "type": "relation",
+    "relation_type": "has_symptom",
+    "text": "疾病：急性肺脓肿，有症状，症状：咳泡沫黏液痰"
+  },
+  {
+    "type": "relation",
+    "relation_type": "has_symptom",
+    "text": "疾病：乳房导管内乳头状瘤，有症状，症状：乳头溢液"
+  },
+  {
+    "type": "relation",
+    "relation_type": "has_symptom",
+    "text": "疾病：急性呼吸窘迫综合征，有症状，症状：呼吸困难"
+  },
+  {
+    "type": "relation",
+    "relation_type": "has_symptom",
+    "text": "疾病：放射性肺炎，有症状，症状：胸痛"
+  },
+  {
+    "type": "relation",
+    "relation_type": "has_symptom",
+    "text": "疾病：肺栓塞，有症状，症状：恶性胸水"
+  },
+  {
+    "type": "relation",
+    "relation_type": "has_symptom",
+    "text": "疾病：Goodpasture综合征，有症状，症状：无尿"
+  },
+  {
+    "type": "relation",
+    "relation_type": "has_symptom",
+    "text": "疾病：肺脓肿，有症状，症状：脓痰"
+  },
+  {
+    "type": "relation",
+    "relation_type": "has_symptom",
+    "text": "疾病：肺气肿，有症状，症状：横膈低平"
+  },
+  {
+    "type": "relation",
+    "relation_type": "has_symptom",
+    "text": "疾病：感染性休克，有症状，症状：低血压"
+  },
+  {
+    "type": "relation",
+    "relation_type": "has_symptom",
+    "text": "疾病：心室扑动和心室颤动，有症状，症状：心律失常"
+  },
+  {
+    "type": "relation",
+    "relation_type": "has_symptom",
+    "text": "疾病：急性呼吸窘迫综合征，有症状，症状：二氧化碳潴留"
+  },
+  {
+    "type": "relation",
+    "relation_type": "has_symptom",
+    "text": "疾病：肺炎，有症状，症状：咳铁锈色痰"
+  },
+  {
+    "type": "relation",
+    "relation_type": "has_symptom",
+    "text": "疾病：肺栓塞，有症状，症状：大咯血"
+  },
+  {
+    "type": "relation",
+    "relation_type": "has_symptom",
+    "text": "疾病：过敏性肺炎，有症状，症状：发绀"
+  },
+  {
+    "type": "relation",
+    "relation_type": "has_symptom",
+    "text": "疾病：过敏性休克，有症状，症状：低血压"
+  },
+  {
+    "type": "relation",
+    "relation_type": "has_symptom",
+    "text": "疾病：感染性休克，有症状，症状：低温性昏迷"
+  },
+  {
+    "type": "relation",
+    "relation_type": "has_symptom",
+    "text": "疾病：二硫化碳中毒，有症状，症状：浅感觉减退或缺失"
+  },
+  {
+    "type": "relation",
+    "relation_type": "has_symptom",
+    "text": "疾病：呼吸性细支气管相关的间质性肺疾病，有症状，症状：胸痛"
+  },
+  {
+    "type": "relation",
+    "relation_type": "has_symptom",
+    "text": "疾病：肺炎，有症状，症状：持续性发热"
+  },
+  {
+    "type": "relation",
+    "relation_type": "has_symptom",
+    "text": "疾病：Goodpasture综合征，有症状，症状：肺部出血"
+  },
+  {
+    "type": "relation",
+    "relation_type": "has_symptom",
+    "text": "疾病：肺放线菌病，有症状，症状：咯血"
+  },
+  {
+    "type": "relation",
+    "relation_type": "has_symptom",
+    "text": "疾病：呼吸衰竭，有症状，症状：心脏功能突然失代偿"
+  },
+  {
+    "type": "relation",
+    "relation_type": "has_symptom",
+    "text": "疾病：肺隐球菌病，有症状，症状：发热伴咳嗽、咯..."
+  },
+  {
+    "type": "relation",
+    "relation_type": "has_symptom",
+    "text": "疾病：急性呼吸衰竭，有症状，症状：呼吸困难"
+  },
+  {
+    "type": "relation",
+    "relation_type": "has_symptom",
+    "text": "疾病：肺隐球菌病，有症状，症状：驻站医"
+  },
+  {
+    "type": "relation",
+    "relation_type": "has_symptom",
+    "text": "疾病：肺转移瘤，有症状，症状：驻站医"
+  },
+  {
+    "type": "relation",
+    "relation_type": "has_symptom",
+    "text": "疾病：肺-胸膜阿米巴病，有症状，症状：发热伴咳嗽、咯..."
+  },
+  {
+    "type": "relation",
+    "relation_type": "has_symptom",
+    "text": "疾病：军团病，有症状，症状：乏力"
+  },
+  {
+    "type": "relation",
+    "relation_type": "has_symptom",
+    "text": "疾病：肺脓肿，有症状，症状：横膈低平"
+  },
+  {
+    "type": "relation",
+    "relation_type": "recommand_drug",
+    "text": "疾病：肺转移瘤，推荐用药，药品：紫龙金片"
+  },
+  {
+    "type": "relation",
+    "relation_type": "recommand_drug",
+    "text": "疾病：喘息样支气管炎，推荐用药，药品：二羟丙茶碱片"
+  },
+  {
+    "type": "relation",
+    "relation_type": "recommand_drug",
+    "text": "疾病：肺念珠菌病，推荐用药，药品：盐酸特比萘芬凝胶"
+  },
+  {
+    "type": "relation",
+    "relation_type": "recommand_drug",
+    "text": "疾病：肺癌，推荐用药，药品：消癌平胶囊"
+  },
+  {
+    "type": "relation",
+    "relation_type": "recommand_drug",
+    "text": "疾病：放射性肺炎，推荐用药，药品：诺氟沙星胶囊"
+  },
+  {
+    "type": "relation",
+    "relation_type": "recommand_drug",
+    "text": "疾病：乳房导管内乳头状瘤，推荐用药，药品：平消片"
+  },
+  {
+    "type": "relation",
+    "relation_type": "recommand_drug",
+    "text": "疾病：肺气肿，推荐用药，药品：硫酸特布他林片"
+  },
+  {
+    "type": "relation",
+    "relation_type": "recommand_drug",
+    "text": "疾病：感冒，推荐用药，药品：感冒灵颗粒"
+  },
+  {
+    "type": "relation",
+    "relation_type": "recommand_drug",
+    "text": "疾病：肺炎，推荐用药，药品：罗红霉素胶囊"
+  },
+  {
+    "type": "relation",
+    "relation_type": "recommand_drug",
+    "text": "疾病：肺念珠菌病，推荐用药，药品：盐酸特比萘芬溶液"
+  },
+  {
+    "type": "relation",
+    "relation_type": "recommand_drug",
+    "text": "疾病：二硫化碳中毒，推荐用药，药品：地塞米松磷酸钠注射液"
+  },
+  {
+    "type": "relation",
+    "relation_type": "recommand_drug",
+    "text": "疾病：心室扑动和心室颤动，推荐用药，药品：盐酸维拉帕米注射液"
+  },
+  {
+    "type": "relation",
+    "relation_type": "recommand_drug",
+    "text": "疾病：心室扑动和心室颤动，推荐用药，药品：地高辛片"
+  },
+  {
+    "type": "relation",
+    "relation_type": "recommand_drug",
+    "text": "疾病：感冒，推荐用药，药品：头孢丙烯分散片"
+  },
+  {
+    "type": "relation",
+    "relation_type": "recommand_drug",
+    "text": "疾病：苯中毒，推荐用药，药品：仁青芒觉"
+  },
+  {
+    "type": "relation",
+    "relation_type": "recommand_drug",
+    "text": "疾病：感冒，推荐用药，药品：头孢拉定胶囊"
+  },
+  {
+    "type": "relation",
+    "relation_type": "recommand_drug",
+    "text": "疾病：感染性休克，推荐用药，药品：参附注射液"
+  },
+  {
+    "type": "relation",
+    "relation_type": "recommand_drug",
+    "text": "疾病：肺栓塞，推荐用药，药品：注射用盐酸罂粟碱"
+  },
+  {
+    "type": "relation",
+    "relation_type": "recommand_drug",
+    "text": "疾病：肺出血－肾炎综合征，推荐用药，药品：雷公藤多苷片"
+  },
+  {
+    "type": "relation",
+    "relation_type": "recommand_drug",
+    "text": "疾病：肺炎杆菌肺炎，推荐用药，药品：头孢丙烯分散片"
+  },
+  {
+    "type": "relation",
+    "relation_type": "recommand_drug",
+    "text": "疾病：过敏性休克，推荐用药，药品：氢化泼尼松注射液"
+  },
+  {
+    "type": "relation",
+    "relation_type": "recommand_drug",
+    "text": "疾病：肺脓肿，推荐用药，药品：回生甘露丸"
+  },
+  {
+    "type": "relation",
+    "relation_type": "recommand_drug",
+    "text": "疾病：苯中毒，推荐用药，药品：注射用硫代硫酸钠"
+  },
+  {
+    "type": "relation",
+    "relation_type": "recommand_drug",
+    "text": "疾病：单纯性肺嗜酸粒细胞浸润症，推荐用药，药品：头孢泊肟酯胶囊"
+  },
+  {
+    "type": "relation",
+    "relation_type": "recommand_drug",
+    "text": "疾病：肺转移瘤，推荐用药，药品：复方斑蝥胶囊"
+  },
+  {
+    "type": "relation",
+    "relation_type": "recommand_drug",
+    "text": "疾病：肺念珠菌病，推荐用药，药品：环吡酮胺乳膏"
+  },
+  {
+    "type": "relation",
+    "relation_type": "recommand_drug",
+    "text": "疾病：肺念珠菌病，推荐用药，药品：酮康唑乳膏"
+  },
+  {
+    "type": "relation",
+    "relation_type": "recommand_drug",
+    "text": "疾病：非典，推荐用药，药品：盐酸金刚烷胺糖浆"
+  },
+  {
+    "type": "relation",
+    "relation_type": "recommand_drug",
+    "text": "疾病：肺脓肿，推荐用药，药品：4:1分散片"
+  },
+  {
+    "type": "relation",
+    "relation_type": "recommand_drug",
+    "text": "疾病：肺气肿，推荐用药，药品：盐酸班布特罗片"
+  },
+  {
+    "type": "relation",
+    "relation_type": "recommand_drug",
+    "text": "疾病：肺炎，推荐用药，药品：乳酸左氧氟沙星片"
+  },
+  {
+    "type": "relation",
+    "relation_type": "recommand_drug",
+    "text": "疾病：肺出血－肾炎综合征，推荐用药，药品：蒺藜药酒"
+  },
+  {
+    "type": "relation",
+    "relation_type": "recommand_drug",
+    "text": "疾病：肺炎，推荐用药，药品：头孢克洛颗粒"
+  },
+  {
+    "type": "relation",
+    "relation_type": "recommand_drug",
+    "text": "疾病：肺癌，推荐用药，药品：注射用氨磷汀"
+  },
+  {
+    "type": "relation",
+    "relation_type": "recommand_drug",
+    "text": "疾病：二硫化碳中毒，推荐用药，药品：注射用硫代硫酸钠"
+  },
+  {
+    "type": "relation",
+    "relation_type": "recommand_drug",
+    "text": "疾病：肺栓塞，推荐用药，药品：注射用尿激酶"
+  },
+  {
+    "type": "relation",
+    "relation_type": "recommand_drug",
+    "text": "疾病：感染性休克，推荐用药，药品：人血白蛋白"
+  },
+  {
+    "type": "relation",
+    "relation_type": "recommand_drug",
+    "text": "疾病：感冒，推荐用药，药品：愈美胶囊"
+  },
+  {
+    "type": "relation",
+    "relation_type": "recommand_drug",
+    "text": "疾病：肺炎杆菌肺炎，推荐用药，药品：头孢氨苄胶囊"
+  },
+  {
+    "type": "relation",
+    "relation_type": "recommand_drug",
+    "text": "疾病：肺炎杆菌肺炎，推荐用药，药品：头孢克洛颗粒"
+  },
+  {
+    "type": "relation",
+    "relation_type": "recommand_drug",
+    "text": "疾病：感冒，推荐用药，药品：喉痛灵片"
+  },
+  {
+    "type": "relation",
+    "relation_type": "recommand_drug",
+    "text": "疾病：喘息样支气管炎，推荐用药，药品：喷托维林氯化铵糖浆"
+  },
+  {
+    "type": "relation",
+    "relation_type": "recommand_drug",
+    "text": "疾病：感染性休克，推荐用药，药品：盐酸纳洛酮注射液"
+  },
+  {
+    "type": "relation",
+    "relation_type": "recommand_drug",
+    "text": "疾病：放射性肺炎，推荐用药，药品：阿奇霉素胶囊"
+  },
+  {
+    "type": "relation",
+    "relation_type": "recommand_drug",
+    "text": "疾病：肺转移瘤，推荐用药，药品：肿节风胶囊"
+  },
+  {
+    "type": "relation",
+    "relation_type": "recommand_drug",
+    "text": "疾病：肺炎，推荐用药，药品：依托红霉素片"
+  },
+  {
+    "type": "relation",
+    "relation_type": "recommand_drug",
+    "text": "疾病：肺脓肿，推荐用药，药品：盐酸克林霉素棕榈酸酯干混悬剂"
+  },
+  {
+    "type": "relation",
+    "relation_type": "recommand_drug",
+    "text": "疾病：肺癌，推荐用药，药品：复方万年青胶囊"
+  },
+  {
+    "type": "relation",
+    "relation_type": "recommand_drug",
+    "text": "疾病：脱囊，推荐用药，药品：维生素B2片"
+  },
+  {
+    "type": "relation",
+    "relation_type": "recommand_drug",
+    "text": "疾病：退行性黄韧带肥厚，推荐用药，药品：灵仙跌打片"
+  },
+  {
+    "type": "relation",
+    "relation_type": "recommand_drug",
+    "text": "疾病：感冒，推荐用药，药品：抗病毒口服液"
+  },
+  {
+    "type": "relation",
+    "relation_type": "recommand_drug",
+    "text": "疾病：Goodpasture综合征，推荐用药，药品：蒺藜药酒"
+  },
+  {
+    "type": "relation",
+    "relation_type": "recommand_drug",
+    "text": "疾病：肺-胸膜阿米巴病，推荐用药，药品：甲硝唑维B6片"
+  },
+  {
+    "type": "relation",
+    "relation_type": "recommand_drug",
+    "text": "疾病：肺炎，推荐用药，药品：桔贝合剂"
+  },
+  {
+    "type": "relation",
+    "relation_type": "recommand_drug",
+    "text": "疾病：大叶性肺炎，推荐用药，药品：阿奇霉素片"
+  },
+  {
+    "type": "relation",
+    "relation_type": "recommand_drug",
+    "text": "疾病：肺炎，推荐用药，药品：阿莫西林颗粒"
+  },
+  {
+    "type": "relation",
+    "relation_type": "recommand_drug",
+    "text": "疾病：肺气肿，推荐用药，药品：氨茶碱片"
+  },
+  {
+    "type": "relation",
+    "relation_type": "recommand_drug",
+    "text": "疾病：镉中毒，推荐用药，药品：仁青芒觉"
+  },
+  {
+    "type": "relation",
+    "relation_type": "recommand_drug",
+    "text": "疾病：肺脓肿，推荐用药，药品：西黄胶囊"
+  },
+  {
+    "type": "relation",
+    "relation_type": "recommand_drug",
+    "text": "疾病：肺炎杆菌肺炎，推荐用药，药品：盐酸左氧氟沙星胶囊"
+  },
+  {
+    "type": "relation",
+    "relation_type": "recommand_drug",
+    "text": "疾病：肺脓肿，推荐用药，药品：桉柠蒎肠溶软胶囊"
+  },
+  {
+    "type": "relation",
+    "relation_type": "recommand_drug",
+    "text": "疾病：蠕形螨病，推荐用药，药品：复方甘草酸苷片"
+  },
+  {
+    "type": "relation",
+    "relation_type": "recommand_drug",
+    "text": "疾病：肺癌，推荐用药，药品：西黄丸"
+  },
+  {
+    "type": "relation",
+    "relation_type": "recommand_drug",
+    "text": "疾病：肺-胸膜阿米巴病，推荐用药，药品：甲硝唑片"
+  },
+  {
+    "type": "relation",
+    "relation_type": "recommand_drug",
+    "text": "疾病：肺炎杆菌肺炎，推荐用药，药品：司帕沙星分散片"
+  },
+  {
+    "type": "relation",
+    "relation_type": "recommand_drug",
+    "text": "疾病：心室扑动和心室颤动，推荐用药，药品：盐酸索他洛尔片"
+  },
+  {
+    "type": "relation",
+    "relation_type": "recommand_drug",
+    "text": "疾病：Goodpasture综合征，推荐用药，药品：注射用甲泼尼龙琥珀酸钠"
+  },
+  {
+    "type": "relation",
+    "relation_type": "recommand_drug",
+    "text": "疾病：退行性黄韧带肥厚，推荐用药，药品：腰息痛胶囊"
+  },
+  {
+    "type": "relation",
+    "relation_type": "recommand_drug",
+    "text": "疾病：肺炎，推荐用药，药品：加替沙星片"
+  },
+  {
+    "type": "relation",
+    "relation_type": "recommand_drug",
+    "text": "疾病：脱疽，推荐用药，药品：前列地尔注射液"
+  },
+  {
+    "type": "relation",
+    "relation_type": "recommand_drug",
+    "text": "疾病：放射性肺炎，推荐用药，药品：阿奇霉素片"
+  },
+  {
+    "type": "relation",
+    "relation_type": "recommand_drug",
+    "text": "疾病：肺气肿，推荐用药，药品：硫酸特布他林雾化液"
+  },
+  {
+    "type": "relation",
+    "relation_type": "recommand_drug",
+    "text": "疾病：肺曲菌病，推荐用药，药品：阿奇霉素分散片"
+  },
+  {
+    "type": "relation",
+    "relation_type": "recommand_drug",
+    "text": "疾病：退行性黄韧带肥厚，推荐用药，药品：骨刺平片"
+  },
+  {
+    "type": "relation",
+    "relation_type": "recommand_drug",
+    "text": "疾病：退行性黄韧带肥厚，推荐用药，药品：颈康胶囊"
+  },
+  {
+    "type": "relation",
+    "relation_type": "recommand_drug",
+    "text": "疾病：喘息样支气管炎，推荐用药，药品：小青龙颗粒"
+  },
+  {
+    "type": "relation",
+    "relation_type": "recommand_drug",
+    "text": "疾病：苯中毒，推荐用药，药品：十一味金色丸"
+  },
+  {
+    "type": "relation",
+    "relation_type": "recommand_drug",
+    "text": "疾病：二硫化碳中毒，推荐用药，药品：注射用布美他尼"
+  },
+  {
+    "type": "relation",
+    "relation_type": "recommand_drug",
+    "text": "疾病：退行性黄韧带肥厚，推荐用药，药品：抗骨增生片"
+  },
+  {
+    "type": "relation",
+    "relation_type": "recommand_drug",
+    "text": "疾病：肺气肿，推荐用药，药品：复方蛤青胶囊"
+  },
+  {
+    "type": "relation",
+    "relation_type": "recommand_drug",
+    "text": "疾病：蠕形螨病，推荐用药，药品：倍他米松片"
+  },
+  {
+    "type": "relation",
+    "relation_type": "recommand_drug",
+    "text": "疾病：过敏性休克，推荐用药，药品：盐酸纳洛酮注射液"
+  },
+  {
+    "type": "relation",
+    "relation_type": "recommand_drug",
+    "text": "疾病：二硫化碳中毒，推荐用药，药品：布美他尼片"
+  },
+  {
+    "type": "relation",
+    "relation_type": "recommand_drug",
+    "text": "疾病：镉中毒，推荐用药，药品：二维葡醛内酯片"
+  },
+  {
+    "type": "relation",
+    "relation_type": "recommand_drug",
+    "text": "疾病：肺癌，推荐用药，药品：消癌平糖浆"
+  },
+  {
+    "type": "relation",
+    "relation_type": "recommand_drug",
+    "text": "疾病：肺炎杆菌肺炎，推荐用药，药品：麦迪霉素片"
+  },
+  {
+    "type": "relation",
+    "relation_type": "recommand_drug",
+    "text": "疾病：感冒，推荐用药，药品：洛索洛芬钠胶囊"
+  },
+  {
+    "type": "relation",
+    "relation_type": "recommand_drug",
+    "text": "疾病：成人呼吸窘迫综合征，推荐用药，药品：人血白蛋白"
+  },
+  {
+    "type": "relation",
+    "relation_type": "recommand_drug",
+    "text": "疾病：肺脓肿，推荐用药，药品：阿莫西林克拉维酸钾片"
+  },
+  {
+    "type": "relation",
+    "relation_type": "recommand_drug",
+    "text": "疾病：肺气肿，推荐用药，药品：氨溴特罗口服溶液"
+  },
+  {
+    "type": "relation",
+    "relation_type": "recommand_drug",
+    "text": "疾病：退行性黄韧带肥厚，推荐用药，药品：盐酸乙哌立松片"
+  },
+  {
+    "type": "relation",
+    "relation_type": "recommand_drug",
+    "text": "疾病：肺炎，推荐用药，药品：司帕沙星分散片"
+  },
+  {
+    "type": "relation",
+    "relation_type": "recommand_drug",
+    "text": "疾病：乳房导管内乳头状瘤，推荐用药，药品：强力康颗粒"
+  },
+  {
+    "type": "relation",
+    "relation_type": "recommand_drug",
+    "text": "疾病：肺炎杆菌肺炎，推荐用药，药品：头孢克肟颗粒"
+  },
+  {
+    "type": "relation",
+    "relation_type": "recommand_drug",
+    "text": "疾病：肺念珠菌病，推荐用药，药品：硝酸咪康唑栓"
+  },
+  {
+    "type": "relation",
+    "relation_type": "recommand_drug",
+    "text": "疾病：肺曲菌病，推荐用药，药品：阿奇霉素胶囊"
+  },
+  {
+    "type": "relation",
+    "relation_type": "recommand_drug",
+    "text": "疾病：感染性休克，推荐用药，药品：生脉注射液"
+  },
+  {
+    "type": "relation",
+    "relation_type": "recommand_drug",
+    "text": "疾病：百日咳，推荐用药，药品：百咳静糖浆"
+  },
+  {
+    "type": "relation",
+    "relation_type": "recommand_drug",
+    "text": "疾病：肺炎杆菌肺炎，推荐用药，药品：乳酸左氧氟沙星片"
+  },
+  {
+    "type": "relation",
+    "relation_type": "recommand_drug",
+    "text": "疾病：肺念珠菌病，推荐用药，药品：伊曲康唑胶囊"
+  },
+  {
+    "type": "relation",
+    "relation_type": "recommand_drug",
+    "text": "疾病：肺水肿，推荐用药，药品：氨茶碱片"
+  },
+  {
+    "type": "relation",
+    "relation_type": "recommand_drug",
+    "text": "疾病：百日咳，推荐用药，药品：红霉素肠溶片"
+  },
+  {
+    "type": "relation",
+    "relation_type": "recommand_drug",
+    "text": "疾病：蠕形螨病，推荐用药，药品：醋酸地塞米松片"
+  },
+  {
+    "type": "relation",
+    "relation_type": "recommand_drug",
+    "text": "疾病：镉中毒，推荐用药，药品：注射用硫代硫酸钠"
+  },
+  {
+    "type": "relation",
+    "relation_type": "recommand_drug",
+    "text": "疾病：肺癌，推荐用药，药品：氟尿嘧啶注射液"
+  },
+  {
+    "type": "relation",
+    "relation_type": "recommand_drug",
+    "text": "疾病：镉中毒，推荐用药，药品：大月晶丸"
+  },
+  {
+    "type": "relation",
+    "relation_type": "recommand_drug",
+    "text": "疾病：肺癌，推荐用药，药品：消癌平片"
+  },
+  {
+    "type": "relation",
+    "relation_type": "recommand_drug",
+    "text": "疾病：苯中毒，推荐用药，药品：地塞米松磷酸钠注射液"
+  },
+  {
+    "type": "relation",
+    "relation_type": "recommand_drug",
+    "text": "疾病：肺水肿，推荐用药，药品：茶新那敏片"
+  },
+  {
+    "type": "relation",
+    "relation_type": "recommand_drug",
+    "text": "疾病：乳房导管内乳头状瘤，推荐用药，药品：注射用胸腺五肽"
+  },
+  {
+    "type": "relation",
+    "relation_type": "recommand_drug",
+    "text": "疾病：肺炎杆菌肺炎，推荐用药，药品：阿莫西林颗粒"
+  },
+  {
+    "type": "relation",
+    "relation_type": "recommand_drug",
+    "text": "疾病：肺转移瘤，推荐用药，药品：消癌平片"
+  },
+  {
+    "type": "relation",
+    "relation_type": "recommand_drug",
+    "text": "疾病：二硫化碳中毒，推荐用药，药品：注射用鼠神经生长因子"
+  },
+  {
+    "type": "relation",
+    "relation_type": "recommand_drug",
+    "text": "疾病：苯中毒，推荐用药，药品：布美他尼片"
+  },
+  {
+    "type": "relation",
+    "relation_type": "recommand_drug",
+    "text": "疾病：肺水肿，推荐用药，药品：呋塞米片"
+  },
+  {
+    "type": "relation",
+    "relation_type": "recommand_drug",
+    "text": "疾病：心室扑动和心室颤动，推荐用药，药品：盐酸维拉帕米片"
+  },
+  {
+    "type": "relation",
+    "relation_type": "recommand_drug",
+    "text": "疾病：脱疽，推荐用药，药品：毛冬青胶囊"
+  },
+  {
+    "type": "relation",
+    "relation_type": "recommand_drug",
+    "text": "疾病：肺转移瘤，推荐用药，药品：阿魏化痞膏"
+  },
+  {
+    "type": "relation",
+    "relation_type": "recommand_drug",
+    "text": "疾病：镉中毒，推荐用药，药品：盐酸利多卡因注射液"
+  },
+  {
+    "type": "relation",
+    "relation_type": "recommand_drug",
+    "text": "疾病：感冒，推荐用药，药品：风油精"
+  },
+  {
+    "type": "relation",
+    "relation_type": "recommand_drug",
+    "text": "疾病：二硫化碳中毒，推荐用药，药品：大月晶丸"
+  },
+  {
+    "type": "relation",
+    "relation_type": "recommand_drug",
+    "text": "疾病：肺炎杆菌肺炎，推荐用药，药品：注射用头孢唑林钠"
+  },
+  {
+    "type": "relation",
+    "relation_type": "recommand_drug",
+    "text": "疾病：肺-胸膜阿米巴病，推荐用药，药品：奥硝唑片"
+  },
+  {
+    "type": "relation",
+    "relation_type": "recommand_drug",
+    "text": "疾病：肺出血－肾炎综合征，推荐用药，药品：注射用甲泼尼龙琥珀酸钠"
+  },
+  {
+    "type": "relation",
+    "relation_type": "recommand_drug",
+    "text": "疾病：肺气肿，推荐用药，药品：如意定喘丸"
+  },
+  {
+    "type": "relation",
+    "relation_type": "recommand_drug",
+    "text": "疾病：肺炎，推荐用药，药品：麦迪霉素片"
+  },
+  {
+    "type": "relation",
+    "relation_type": "recommand_drug",
+    "text": "疾病：肺炎，推荐用药，药品：头孢氨苄胶囊"
+  },
+  {
+    "type": "relation",
+    "relation_type": "recommand_drug",
+    "text": "疾病：感冒，推荐用药，药品：肺宁片"
+  },
+  {
+    "type": "relation",
+    "relation_type": "recommand_drug",
+    "text": "疾病：退行性黄韧带肥厚，推荐用药，药品：骨刺片"
+  },
+  {
+    "type": "relation",
+    "relation_type": "recommand_drug",
+    "text": "疾病：肺炎性假瘤，推荐用药，药品：托西酸舒他西林胶囊"
+  },
+  {
+    "type": "relation",
+    "relation_type": "recommand_drug",
+    "text": "疾病：肺癌，推荐用药，药品：清肺散结丸"
+  },
+  {
+    "type": "relation",
+    "relation_type": "recommand_drug",
+    "text": "疾病：喘息样支气管炎，推荐用药，药品：硫酸沙丁胺醇气雾剂"
+  },
+  {
+    "type": "relation",
+    "relation_type": "recommand_drug",
+    "text": "疾病：肺气肿，推荐用药，药品：盐酸妥洛特罗片"
+  },
+  {
+    "type": "relation",
+    "relation_type": "recommand_drug",
+    "text": "疾病：肺气肿，推荐用药，药品：肺气肿片"
+  },
+  {
+    "type": "relation",
+    "relation_type": "recommand_drug",
+    "text": "疾病：二硫化碳中毒，推荐用药，药品：注射用呋塞米"
+  },
+  {
+    "type": "relation",
+    "relation_type": "recommand_drug",
+    "text": "疾病：大楼病综合征，推荐用药，药品：注射用盐酸溴己新"
+  },
+  {
+    "type": "relation",
+    "relation_type": "recommand_drug",
+    "text": "疾病：肺脓肿，推荐用药，药品：盐酸克林霉素胶囊"
+  },
+  {
+    "type": "relation",
+    "relation_type": "recommand_drug",
+    "text": "疾病：苯中毒，推荐用药，药品：注射用布美他尼"
+  },
+  {
+    "type": "relation",
+    "relation_type": "recommand_drug",
+    "text": "疾病：肺转移瘤，推荐用药，药品：复方万年青胶囊"
+  },
+  {
+    "type": "relation",
+    "relation_type": "recommand_drug",
+    "text": "疾病：肺炎，推荐用药，药品：盐酸左氧氟沙星胶囊"
+  },
+  {
+    "type": "relation",
+    "relation_type": "recommand_drug",
+    "text": "疾病：放射性肺炎，推荐用药，药品：阿奇霉素分散片"
+  },
+  {
+    "type": "relation",
+    "relation_type": "recommand_drug",
+    "text": "疾病：镉中毒，推荐用药，药品：二十九味能消散"
+  },
+  {
+    "type": "relation",
+    "relation_type": "recommand_drug",
+    "text": "疾病：肺气肿，推荐用药，药品：噻托溴铵粉吸入剂"
+  },
+  {
+    "type": "relation",
+    "relation_type": "recommand_drug",
+    "text": "疾病：肺隐球菌病，推荐用药，药品：注射用米卡芬净钠"
+  },
+  {
+    "type": "relation",
+    "relation_type": "recommand_drug",
+    "text": "疾病：喘息样支气管炎，推荐用药，药品：枸橼酸喷托维林片"
+  },
+  {
+    "type": "relation",
+    "relation_type": "recommand_drug",
+    "text": "疾病：肺炎，推荐用药，药品：氨苄西林胶囊"
+  },
+  {
+    "type": "relation",
+    "relation_type": "recommand_drug",
+    "text": "疾病：感冒，推荐用药，药品：依托红霉素片"
+  },
+  {
+    "type": "relation",
+    "relation_type": "recommand_drug",
+    "text": "疾病：镉中毒，推荐用药，药品：布美他尼片"
+  },
+  {
+    "type": "relation",
+    "relation_type": "recommand_drug",
+    "text": "疾病：退行性黄韧带肥厚，推荐用药，药品：抑眩宁胶囊"
+  },
+  {
+    "type": "relation",
+    "relation_type": "recommand_drug",
+    "text": "疾病：感冒，推荐用药，药品：穿心莲片"
+  },
+  {
+    "type": "relation",
+    "relation_type": "need_check",
+    "text": "疾病：急性呼吸衰竭，需要检查，检查：血氧饱和度"
+  },
+  {
+    "type": "relation",
+    "relation_type": "need_check",
+    "text": "疾病：肺水肿，需要检查，检查：肺量计检测"
+  },
+  {
+    "type": "relation",
+    "relation_type": "need_check",
+    "text": "疾病：肺隐球菌病，需要检查，检查：痰液病原体检查"
+  },
+  {
+    "type": "relation",
+    "relation_type": "need_check",
+    "text": "疾病：大叶性肺炎，需要检查，检查：血常规"
+  },
+  {
+    "type": "relation",
+    "relation_type": "need_check",
+    "text": "疾病：急性肺脓肿，需要检查，检查：痰液中细胞分类"
+  },
+  {
+    "type": "relation",
+    "relation_type": "need_check",
+    "text": "疾病：肺栓塞，需要检查，检查：通气与血流灌注比值（V/Q）"
+  },
+  {
+    "type": "relation",
+    "relation_type": "need_check",
+    "text": "疾病：急性呼吸窘迫综合征，需要检查，检查：肺顺应性(C)"
+  },
+  {
+    "type": "relation",
+    "relation_type": "need_check",
+    "text": "疾病：肺栓塞，需要检查，检查：因子VIII/因子IX促凝活性"
+  },
+  {
+    "type": "relation",
+    "relation_type": "need_check",
+    "text": "疾病：汞中毒，需要检查，检查：血常规"
+  },
+  {
+    "type": "relation",
+    "relation_type": "need_check",
+    "text": "疾病：镉中毒，需要检查，检查：胸部平片"
+  },
+  {
+    "type": "relation",
+    "relation_type": "need_check",
+    "text": "疾病：结核性脓胸，需要检查，检查：金伯克现象"
+  },
+  {
+    "type": "relation",
+    "relation_type": "need_check",
+    "text": "疾病：呼吸道合胞病毒肺炎，需要检查，检查：痰液病原体检查"
+  },
+  {
+    "type": "relation",
+    "relation_type": "need_check",
+    "text": "疾病：肺脓肿，需要检查，检查：呼吸道粘液-纤毛清除功能测定"
+  },
+  {
+    "type": "relation",
+    "relation_type": "need_check",
+    "text": "疾病：肺隐球菌病，需要检查，检查：痰液的一般性状检查"
+  },
+  {
+    "type": "relation",
+    "relation_type": "need_check",
+    "text": "疾病：呼吸性细支气管相关的间质性肺疾病，需要检查，检查：胸部平片"
+  },
+  {
+    "type": "relation",
+    "relation_type": "need_check",
+    "text": "疾病：呼吸衰竭，需要检查，检查：胸部CT检查"
+  },
+  {
+    "type": "relation",
+    "relation_type": "need_check",
+    "text": "疾病：脱疽，需要检查，检查：周围血管征"
+  },
+  {
+    "type": "relation",
+    "relation_type": "need_check",
+    "text": "疾病：呼吸道合胞病毒肺炎，需要检查，检查：痰液的一般性状检查"
+  },
+  {
+    "type": "relation",
+    "relation_type": "need_check",
+    "text": "疾病：金黄色葡萄球菌肺炎，需要检查，检查：胸部CT检查"
+  },
+  {
+    "type": "relation",
+    "relation_type": "need_check",
+    "text": "疾病：肺栓塞，需要检查，检查：心电图"
+  },
+  {
+    "type": "relation",
+    "relation_type": "need_check",
+    "text": "疾病：百日咳，需要检查，检查：血常规"
+  },
+  {
+    "type": "relation",
+    "relation_type": "need_check",
+    "text": "疾病：感冒，需要检查，检查：白细胞计数（WBC）"
+  },
+  {
+    "type": "relation",
+    "relation_type": "need_check",
+    "text": "疾病：肺气肿，需要检查，检查：深吸气量（IC）"
+  },
+  {
+    "type": "relation",
+    "relation_type": "need_check",
+    "text": "疾病：肺炎杆菌肺炎，需要检查，检查：痰液细菌培养"
+  },
+  {
+    "type": "relation",
+    "relation_type": "need_check",
+    "text": "疾病：肺转移瘤，需要检查，检查：CT造影扫描"
+  },
+  {
+    "type": "relation",
+    "relation_type": "need_check",
+    "text": "疾病：Goodpasture综合征，需要检查，检查：尿液镜检法"
+  },
+  {
+    "type": "relation",
+    "relation_type": "need_check",
+    "text": "疾病：肺癌，需要检查，检查：血卟啉雾化吸入试验"
+  },
+  {
+    "type": "relation",
+    "relation_type": "need_check",
+    "text": "疾病：急性肺脓肿，需要检查，检查：支气管镜检查"
+  },
+  {
+    "type": "relation",
+    "relation_type": "need_check",
+    "text": "疾病：心室扑动和心室颤动，需要检查，检查：动态心电图（Holter监测）"
+  },
+  {
+    "type": "relation",
+    "relation_type": "need_check",
+    "text": "疾病：肺栓塞，需要检查，检查：肺灌注显像"
+  },
+  {
+    "type": "relation",
+    "relation_type": "need_check",
+    "text": "疾病：肺栓塞，需要检查，检查：补呼气量"
+  },
+  {
+    "type": "relation",
+    "relation_type": "need_check",
+    "text": "疾病：肺大泡，需要检查，检查：支气管造影"
+  },
+  {
+    "type": "relation",
+    "relation_type": "need_check",
+    "text": "疾病：成人呼吸窘迫综合征，需要检查，检查：血浆蛋白C抗原"
+  },
+  {
+    "type": "relation",
+    "relation_type": "need_check",
+    "text": "疾病：过敏性休克，需要检查，检查：肾功能检查"
+  },
+  {
+    "type": "relation",
+    "relation_type": "need_check",
+    "text": "疾病：肺隐球菌病，需要检查，检查：隐球菌病胶乳凝集试验"
+  },
+  {
+    "type": "relation",
+    "relation_type": "need_check",
+    "text": "疾病：喘息样支气管炎，需要检查，检查：酶联免疫吸附试验"
+  },
+  {
+    "type": "relation",
+    "relation_type": "need_check",
+    "text": "疾病：肺曲菌病，需要检查，检查：胸部平片"
+  },
+  {
+    "type": "relation",
+    "relation_type": "need_check",
+    "text": "疾病：呼吸衰竭，需要检查，检查：胸部平片"
+  },
+  {
+    "type": "relation",
+    "relation_type": "need_check",
+    "text": "疾病：肺转移瘤，需要检查，检查：痰液细胞学检查"
+  },
+  {
+    "type": "relation",
+    "relation_type": "need_check",
+    "text": "疾病：肺癌，需要检查，检查：纵隔镜检查"
+  },
+  {
+    "type": "relation",
+    "relation_type": "need_check",
+    "text": "疾病：肺气肿，需要检查，检查：最大呼气流量-容积曲线（MEFV）"
+  },
+  {
+    "type": "relation",
+    "relation_type": "need_check",
+    "text": "疾病：肺炎，需要检查，检查：胸部CT检查"
+  },
+  {
+    "type": "relation",
+    "relation_type": "need_check",
+    "text": "疾病：放射性肺炎，需要检查，检查：血常规"
+  },
+  {
+    "type": "relation",
+    "relation_type": "need_check",
+    "text": "疾病：肺念珠菌病，需要检查，检查：肺量计检测"
+  },
+  {
+    "type": "relation",
+    "relation_type": "need_check",
+    "text": "疾病：急性呼吸衰竭，需要检查，检查：二氧化碳结合力"
+  },
+  {
+    "type": "relation",
+    "relation_type": "need_check",
+    "text": "疾病：镉中毒，需要检查，检查：尿镉"
+  },
+  {
+    "type": "relation",
+    "relation_type": "need_check",
+    "text": "疾病：大量羊水吸入，需要检查，检查：胸部平片"
+  },
+  {
+    "type": "relation",
+    "relation_type": "need_check",
+    "text": "疾病：大叶性肺炎，需要检查，检查：痰液细菌涂片检查"
+  },
+  {
+    "type": "relation",
+    "relation_type": "need_check",
+    "text": "疾病：急性呼吸衰竭，需要检查，检查：标准碳酸氢盐(SB)"
+  },
+  {
+    "type": "relation",
+    "relation_type": "need_check",
+    "text": "疾病：大叶性肺炎，需要检查，检查：痰培养"
+  },
+  {
+    "type": "relation",
+    "relation_type": "need_check",
+    "text": "疾病：汞中毒，需要检查，检查：尿汞"
+  },
+  {
+    "type": "relation",
+    "relation_type": "need_check",
+    "text": "疾病：二硫化碳中毒，需要检查，检查：神经系统检查"
+  },
+  {
+    "type": "relation",
+    "relation_type": "need_check",
+    "text": "疾病：单纯性肺嗜酸粒细胞浸润症，需要检查，检查：痰液中寄生虫和虫卵"
+  },
+  {
+    "type": "relation",
+    "relation_type": "need_check",
+    "text": "疾病：大叶性肺炎，需要检查，检查：免疫电泳"
+  },
+  {
+    "type": "relation",
+    "relation_type": "need_check",
+    "text": "疾病：减压病，需要检查，检查：核磁共振成像(MRI)"
+  },
+  {
+    "type": "relation",
+    "relation_type": "need_check",
+    "text": "疾病：Goodpasture综合征，需要检查，检查：抗肾小球基底膜抗体测定（AGBM）"
+  },
+  {
+    "type": "relation",
+    "relation_type": "need_check",
+    "text": "疾病：大楼病综合征，需要检查，检查：钼靶X线检查"
+  },
+  {
+    "type": "relation",
+    "relation_type": "need_check",
+    "text": "疾病：Goodpasture综合征，需要检查，检查：肾功能检查"
+  },
+  {
+    "type": "relation",
+    "relation_type": "need_check",
+    "text": "疾病：非典，需要检查，检查：胸部平片"
+  },
+  {
+    "type": "relation",
+    "relation_type": "need_check",
+    "text": "疾病：急性肺脓肿，需要检查，检查：脱落细胞检查"
+  },
+  {
+    "type": "relation",
+    "relation_type": "need_check",
+    "text": "疾病：喘息样支气管炎，需要检查，检查：肺部检查"
+  },
+  {
+    "type": "relation",
+    "relation_type": "need_check",
+    "text": "疾病：感染性休克，需要检查，检查：肾功能检查"
+  },
+  {
+    "type": "relation",
+    "relation_type": "need_check",
+    "text": "疾病：肺泡蛋白质沉积症，需要检查，检查：胸部CT检查"
+  },
+  {
+    "type": "relation",
+    "relation_type": "need_check",
+    "text": "疾病：百日咳，需要检查，检查：酶联免疫吸附试验"
+  },
+  {
+    "type": "relation",
+    "relation_type": "need_check",
+    "text": "疾病：军团菌病，需要检查，检查：肾功能检查"
+  },
+  {
+    "type": "relation",
+    "relation_type": "need_check",
+    "text": "疾病：脱囊，需要检查，检查：皮肤涂片显微镜检查"
+  },
+  {
+    "type": "relation",
+    "relation_type": "need_check",
+    "text": "疾病：军团菌病，需要检查，检查：尿常规"
+  },
+  {
+    "type": "relation",
+    "relation_type": "need_check",
+    "text": "疾病：肺炎性假瘤，需要检查，检查：痰液病原体检查"
+  },
+  {
+    "type": "relation",
+    "relation_type": "need_check",
+    "text": "疾病：肺栓塞，需要检查，检查：凝血因子活性测定"
+  },
+  {
+    "type": "relation",
+    "relation_type": "need_check",
+    "text": "疾病：非典，需要检查，检查：白细胞分类计数"
+  },
+  {
+    "type": "relation",
+    "relation_type": "need_check",
+    "text": "疾病：心室扑动和心室颤动，需要检查，检查：血液电解质检查"
+  },
+  {
+    "type": "relation",
+    "relation_type": "need_check",
+    "text": "疾病：急性呼吸窘迫综合征，需要检查，检查：肺毛细血管楔压"
+  },
+  {
+    "type": "relation",
+    "relation_type": "need_check",
+    "text": "疾病：过敏性肺炎，需要检查，检查：胸部平片"
+  },
+  {
+    "type": "relation",
+    "relation_type": "need_check",
+    "text": "疾病：肺炎，需要检查，检查：纤维支气管镜检查"
+  },
+  {
+    "type": "relation",
+    "relation_type": "need_check",
+    "text": "疾病：退行性黄韧带肥厚，需要检查，检查：膝反射"
+  },
+  {
+    "type": "relation",
+    "relation_type": "need_check",
+    "text": "疾病：过敏性肺炎，需要检查，检查：肺功能检查"
+  },
+  {
+    "type": "relation",
+    "relation_type": "need_check",
+    "text": "疾病：肺脓肿，需要检查，检查：血常规"
+  },
+  {
+    "type": "relation",
+    "relation_type": "need_check",
+    "text": "疾病：放射性肺炎，需要检查，检查：通气与血流灌注比值（V/Q）"
+  },
+  {
+    "type": "relation",
+    "relation_type": "need_check",
+    "text": "疾病：呼吸衰竭，需要检查，检查：胶乳凝集抑制试验(LAI)"
+  },
+  {
+    "type": "relation",
+    "relation_type": "need_check",
+    "text": "疾病：肺出血－肾炎综合征，需要检查，检查：肾功能检查"
+  },
+  {
+    "type": "relation",
+    "relation_type": "need_check",
+    "text": "疾病：呼吸性细支气管相关的间质性肺疾病，需要检查，检查：胸部CT检查"
+  },
+  {
+    "type": "relation",
+    "relation_type": "need_check",
+    "text": "疾病：军团病，需要检查，检查：抗军团菌抗体试验"
+  },
+  {
+    "type": "relation",
+    "relation_type": "need_check",
+    "text": "疾病：二硫化碳中毒，需要检查，检查：血常规"
+  },
+  {
+    "type": "relation",
+    "relation_type": "need_check",
+    "text": "疾病：肺脓肿，需要检查，检查：肺功能检查"
+  },
+  {
+    "type": "relation",
+    "relation_type": "need_check",
+    "text": "疾病：成人呼吸窘迫综合征，需要检查，检查：肺毛细血管楔压"
+  },
+  {
+    "type": "relation",
+    "relation_type": "need_check",
+    "text": "疾病：呼吸道异物，需要检查，检查：胸部CT检查"
+  },
+  {
+    "type": "relation",
+    "relation_type": "need_check",
+    "text": "疾病：肺栓塞，需要检查，检查：生理无效腔（Vd/Vt）"
+  },
+  {
+    "type": "relation",
+    "relation_type": "need_check",
+    "text": "疾病：二硫化碳中毒，需要检查，检查：脑电图检查"
+  },
+  {
+    "type": "relation",
+    "relation_type": "need_check",
+    "text": "疾病：肺大疱，需要检查，检查：支气管造影"
+  },
+  {
+    "type": "relation",
+    "relation_type": "need_check",
+    "text": "疾病：大叶性肺炎，需要检查，检查：Optochin敏感试验"
+  },
+  {
+    "type": "relation",
+    "relation_type": "need_check",
+    "text": "疾病：镉中毒，需要检查，检查：尿常规"
+  },
+  {
+    "type": "relation",
+    "relation_type": "need_check",
+    "text": "疾病：过敏性肺炎，需要检查，检查：血氧饱和度"
+  },
+  {
+    "type": "relation",
+    "relation_type": "need_check",
+    "text": "疾病：百日咳，需要检查，检查：耳、鼻、咽拭子细菌培养"
+  },
+  {
+    "type": "relation",
+    "relation_type": "need_check",
+    "text": "疾病：退行性黄韧带肥厚，需要检查，检查：直腿抬高试验"
+  },
+  {
+    "type": "relation",
+    "relation_type": "need_check",
+    "text": "疾病：军团病，需要检查，检查：酶联免疫吸附试验"
+  },
+  {
+    "type": "relation",
+    "relation_type": "need_check",
+    "text": "疾病：急性肺脓肿，需要检查，检查：体位引流"
+  },
+  {
+    "type": "relation",
+    "relation_type": "need_check",
+    "text": "疾病：肺气肿，需要检查，检查：肺量计检测"
+  },
+  {
+    "type": "relation",
+    "relation_type": "need_check",
+    "text": "疾病：肺脓肿，需要检查，检查：支气管造影"
+  },
+  {
+    "type": "relation",
+    "relation_type": "need_check",
+    "text": "疾病：结核性脓胸，需要检查，检查：胸腔镜检查"
+  },
+  {
+    "type": "relation",
+    "relation_type": "need_check",
+    "text": "疾病：蠕形螨病，需要检查，检查：免疫病理检查"
+  },
+  {
+    "type": "relation",
+    "relation_type": "need_check",
+    "text": "疾病：结核性脓胸，需要检查，检查：血常规"
+  },
+  {
+    "type": "relation",
+    "relation_type": "need_check",
+    "text": "疾病：肺曲菌病，需要检查，检查：纤维支气管镜检查"
+  },
+  {
+    "type": "relation",
+    "relation_type": "need_check",
+    "text": "疾病：肺大疱，需要检查，检查：胸部CT检查"
+  },
+  {
+    "type": "relation",
+    "relation_type": "need_check",
+    "text": "疾病：急性肺脓肿，需要检查，检查：胸部平片"
+  },
+  {
+    "type": "relation",
+    "relation_type": "need_check",
+    "text": "疾病：成人呼吸窘迫综合征，需要检查，检查：肺泡气-动脉血氧分压差"
+  },
+  {
+    "type": "relation",
+    "relation_type": "need_check",
+    "text": "疾病：急性呼吸窘迫综合征，需要检查，检查：胸部CT检查"
+  },
+  {
+    "type": "relation",
+    "relation_type": "need_check",
+    "text": "疾病：呼吸衰竭，需要检查，检查：二氧化碳分压（PCO2,PCO2）"
+  },
+  {
+    "type": "relation",
+    "relation_type": "need_check",
+    "text": "疾病：肺癌，需要检查，检查：胸部CT检查"
+  },
+  {
+    "type": "relation",
+    "relation_type": "need_check",
+    "text": "疾病：军团菌病，需要检查，检查：胸部CT检查"
+  },
+  {
+    "type": "relation",
+    "relation_type": "need_check",
+    "text": "疾病：感冒，需要检查，检查：内科检查"
+  },
+  {
+    "type": "relation",
+    "relation_type": "need_check",
+    "text": "疾病：过敏性肺炎，需要检查，检查：氧分压"
+  },
+  {
+    "type": "relation",
+    "relation_type": "need_check",
+    "text": "疾病：肺隐球菌病，需要检查，检查：胸部平片"
+  },
+  {
+    "type": "relation",
+    "relation_type": "need_check",
+    "text": "疾病：心室扑动和心室颤动，需要检查，检查：尿液分析"
+  },
+  {
+    "type": "relation",
+    "relation_type": "need_check",
+    "text": "疾病：心室扑动和心室颤动，需要检查，检查：血常规"
+  },
+  {
+    "type": "relation",
+    "relation_type": "need_check",
+    "text": "疾病：肺隐球菌病，需要检查，检查：胸部CT检查"
+  },
+  {
+    "type": "relation",
+    "relation_type": "need_check",
+    "text": "疾病：单纯性肺嗜酸粒细胞浸润症，需要检查，检查：痰液中细胞分类"
+  },
+  {
+    "type": "relation",
+    "relation_type": "need_check",
+    "text": "疾病：急性呼吸衰竭，需要检查，检查：心电图"
+  },
+  {
+    "type": "relation",
+    "relation_type": "need_check",
+    "text": "疾病：肺大泡，需要检查，检查：呼吸道粘液-纤毛清除功能测定"
+  },
+  {
+    "type": "relation",
+    "relation_type": "need_check",
+    "text": "疾病：乳房导管内乳头状瘤，需要检查，检查：涂片"
+  },
+  {
+    "type": "relation",
+    "relation_type": "need_check",
+    "text": "疾病：肺放线菌病，需要检查，检查：胸部平片"
+  },
+  {
+    "type": "relation",
+    "relation_type": "need_check",
+    "text": "疾病：放射性肺炎，需要检查，检查：每分钟最大通气量（MVV）"
+  },
+  {
+    "type": "relation",
+    "relation_type": "need_check",
+    "text": "疾病：非典，需要检查，检查：补体结合试验"
+  },
+  {
+    "type": "relation",
+    "relation_type": "need_check",
+    "text": "疾病：二硫化碳中毒，需要检查，检查：眼底荧光血管造影"
+  },
+  {
+    "type": "relation",
+    "relation_type": "need_check",
+    "text": "疾病：军团病，需要检查，检查：胸部CT检查"
+  },
+  {
+    "type": "relation",
+    "relation_type": "need_check",
+    "text": "疾病：肺炎，需要检查，检查：嗜中性杆状粒细胞数"
+  },
+  {
+    "type": "relation",
+    "relation_type": "need_check",
+    "text": "疾病：呼吸道合胞病毒肺炎，需要检查，检查：痰液细菌涂片检查"
+  },
+  {
+    "type": "relation",
+    "relation_type": "need_check",
+    "text": "疾病：减压病，需要检查，检查：多普勒超声心动图"
+  },
+  {
+    "type": "relation",
+    "relation_type": "need_check",
+    "text": "疾病：二硫化碳中毒，需要检查，检查：心肺功能运动试验（CPET）"
+  },
+  {
+    "type": "relation",
+    "relation_type": "need_check",
+    "text": "疾病：肺脓肿，需要检查，检查：纤维支气管镜检查"
+  },
+  {
+    "type": "relation",
+    "relation_type": "need_check",
+    "text": "疾病：过敏性休克，需要检查，检查：中心静脉压测定（CVP）"
+  },
+  {
+    "type": "relation",
+    "relation_type": "need_check",
+    "text": "疾病：肺曲菌病，需要检查，检查：胸部CT检查"
+  },
+  {
+    "type": "relation",
+    "relation_type": "need_check",
+    "text": "疾病：金黄色葡萄球菌肺炎，需要检查，检查：痰液细菌涂片检查"
+  },
+  {
+    "type": "relation",
+    "relation_type": "need_check",
+    "text": "疾病：减压病，需要检查，检查：钼靶X线检查"
+  },
+  {
+    "type": "relation",
+    "relation_type": "need_check",
+    "text": "疾病：军团病，需要检查，检查：痰液病原体检查"
+  },
+  {
+    "type": "relation",
+    "relation_type": "need_check",
+    "text": "疾病：过敏性休克，需要检查，检查：血液生化六项检查"
+  },
+  {
+    "type": "relation",
+    "relation_type": "need_check",
+    "text": "疾病：肺癌，需要检查，检查：支气管镜检查"
+  },
+  {
+    "type": "relation",
+    "relation_type": "need_check",
+    "text": "疾病：肺气肿，需要检查，检查：肺活量（VC）"
+  },
+  {
+    "type": "relation",
+    "relation_type": "need_check",
+    "text": "疾病：汞中毒，需要检查，检查：大生化检查"
+  },
+  {
+    "type": "relation",
+    "relation_type": "need_check",
+    "text": "疾病：肺炎性假瘤，需要检查，检查：痰液的一般性状检查"
+  },
+  {
+    "type": "relation",
+    "relation_type": "need_check",
+    "text": "疾病：肺大疱，需要检查，检查：胸部平片"
+  },
+  {
+    "type": "relation",
+    "relation_type": "need_check",
+    "text": "疾病：Goodpasture综合征，需要检查，检查：隐血试验与含铁血黄素检查"
+  },
+  {
+    "type": "relation",
+    "relation_type": "need_check",
+    "text": "疾病：肺炎杆菌肺炎，需要检查，检查：血常规"
+  },
+  {
+    "type": "relation",
+    "relation_type": "need_check",
+    "text": "疾病：过敏性肺炎，需要检查，检查：痰液中分泌型IgE"
+  },
+  {
+    "type": "relation",
+    "relation_type": "need_check",
+    "text": "疾病：肺大泡，需要检查，检查：胸部CT检查"
+  },
+  {
+    "type": "relation",
+    "relation_type": "need_check",
+    "text": "疾病：百日咳，需要检查，检查：白细胞分类计数"
+  },
+  {
+    "type": "relation",
+    "relation_type": "need_check",
+    "text": "疾病：过敏性休克，需要检查，检查：链霉素皮内试验"
+  },
+  {
+    "type": "relation",
+    "relation_type": "need_check",
+    "text": "疾病：军团菌病，需要检查，检查：酶联免疫吸附试验"
+  },
+  {
+    "type": "relation",
+    "relation_type": "need_check",
+    "text": "疾病：急性肺脓肿，需要检查，检查：痰液的一般性状检查"
+  },
+  {
+    "type": "relation",
+    "relation_type": "need_check",
+    "text": "疾病：二硫化碳中毒，需要检查，检查：肾功能检查"
+  },
+  {
+    "type": "relation",
+    "relation_type": "need_check",
+    "text": "疾病：呼吸性细支气管相关的间质性肺疾病，需要检查，检查：肺功能检查"
+  },
+  {
+    "type": "relation",
+    "relation_type": "recommand_eat",
+    "text": "疾病：肺念珠菌病，推荐食用，食物：杂粮粥"
+  },
+  {
+    "type": "relation",
+    "relation_type": "recommand_eat",
+    "text": "疾病：大楼病综合征，推荐食用，食物：山楂乌梅饮"
+  },
+  {
+    "type": "relation",
+    "relation_type": "recommand_eat",
+    "text": "疾病：成人呼吸窘迫综合征，推荐食用，食物：百合糖粥"
+  },
+  {
+    "type": "relation",
+    "relation_type": "recommand_eat",
+    "text": "疾病：肺炎性假瘤，推荐食用，食物：瓜粒杂锦汤"
+  },
+  {
+    "type": "relation",
+    "relation_type": "recommand_eat",
+    "text": "疾病：成人呼吸窘迫综合征，推荐食用，食物：萝卜豆腐汤"
+  },
+  {
+    "type": "relation",
+    "relation_type": "recommand_eat",
+    "text": "疾病：肺炎杆菌肺炎，推荐食用，食物：锅塌番茄"
+  },
+  {
+    "type": "relation",
+    "relation_type": "recommand_eat",
+    "text": "疾病：心室扑动和心室颤动，推荐食用，食物：南瓜大麦粥"
+  },
+  {
+    "type": "relation",
+    "relation_type": "recommand_eat",
+    "text": "疾病：大叶性肺炎，推荐食用，食物：百合汤"
+  },
+  {
+    "type": "relation",
+    "relation_type": "recommand_eat",
+    "text": "疾病：肺炎球菌肺炎，推荐食用，食物：黄瓜三丝汤"
+  },
+  {
+    "type": "relation",
+    "relation_type": "recommand_eat",
+    "text": "疾病：肺脓肿，推荐食用，食物：土豆丝拌白菜"
+  },
+  {
+    "type": "relation",
+    "relation_type": "recommand_eat",
+    "text": "疾病：成人呼吸窘迫综合征，推荐食用，食物：百合花生汤"
+  },
+  {
+    "type": "relation",
+    "relation_type": "recommand_eat",
+    "text": "疾病：肺水肿，推荐食用，食物：桂圆鸡蛋汤"
+  },
+  {
+    "type": "relation",
+    "relation_type": "recommand_eat",
+    "text": "疾病：肺脓肿，推荐食用，食物：白菜蛋花粥"
+  },
+  {
+    "type": "relation",
+    "relation_type": "recommand_eat",
+    "text": "疾病：肺栓塞，推荐食用，食物：番茄青豆汤"
+  },
+  {
+    "type": "relation",
+    "relation_type": "recommand_eat",
+    "text": "疾病：肺炎性假瘤，推荐食用，食物：蔬菜杂烩粥"
+  },
+  {
+    "type": "relation",
+    "relation_type": "recommand_eat",
+    "text": "疾病：肺曲菌病，推荐食用，食物：冰糖银耳羹"
+  },
+  {
+    "type": "relation",
+    "relation_type": "recommand_eat",
+    "text": "疾病：肺炎杆菌肺炎，推荐食用，食物：番茄牛肉"
+  },
+  {
+    "type": "relation",
+    "relation_type": "recommand_eat",
+    "text": "疾病：肺放线菌病，推荐食用，食物：番茄西米粥"
+  },
+  {
+    "type": "relation",
+    "relation_type": "recommand_eat",
+    "text": "疾病：肺出血－肾炎综合征，推荐食用，食物：肉松"
+  },
+  {
+    "type": "relation",
+    "relation_type": "recommand_eat",
+    "text": "疾病：肺炎，推荐食用，食物：酱兔肉"
+  },
+  {
+    "type": "relation",
+    "relation_type": "recommand_eat",
+    "text": "疾病：肺炎，推荐食用，食物：柏子仁鸡心"
+  },
+  {
+    "type": "relation",
+    "relation_type": "recommand_eat",
+    "text": "疾病：脱疽，推荐食用，食物：黄瓜玫瑰饮"
+  },
+  {
+    "type": "relation",
+    "relation_type": "recommand_eat",
+    "text": "疾病：肺念珠菌病，推荐食用，食物：三鲜冬瓜汤"
+  },
+  {
+    "type": "relation",
+    "relation_type": "recommand_eat",
+    "text": "疾病：苯中毒，推荐食用，食物：素炒小白菜"
+  },
+  {
+    "type": "relation",
+    "relation_type": "recommand_eat",
+    "text": "疾病：成人呼吸窘迫综合征，推荐食用，食物：百合粥"
+  },
+  {
+    "type": "relation",
+    "relation_type": "recommand_eat",
+    "text": "疾病：百日咳，推荐食用，食物：罗汉果雪耳鸡汤"
+  },
+  {
+    "type": "relation",
+    "relation_type": "recommand_eat",
+    "text": "疾病：二硫化碳中毒，推荐食用，食物：小麦粥"
+  },
+  {
+    "type": "relation",
+    "relation_type": "recommand_eat",
+    "text": "疾病：肺出血－肾炎综合征，推荐食用，食物：肉末冬瓜"
+  },
+  {
+    "type": "relation",
+    "relation_type": "recommand_eat",
+    "text": "疾病：肺癌，推荐食用，食物：白果莲子粥"
+  },
+  {
+    "type": "relation",
+    "relation_type": "recommand_eat",
+    "text": "疾病：肺炎性假瘤，推荐食用，食物：虾皮香芹燕麦粥"
+  },
+  {
+    "type": "relation",
+    "relation_type": "recommand_eat",
+    "text": "疾病：苯中毒，推荐食用，食物：白菜蛋花粥"
+  },
+  {
+    "type": "relation",
+    "relation_type": "recommand_eat",
+    "text": "疾病：肺气肿，推荐食用，食物：凉拌莲藕"
+  },
+  {
+    "type": "relation",
+    "relation_type": "recommand_eat",
+    "text": "疾病：肺曲菌病，推荐食用，食物：川贝酿梨"
+  },
+  {
+    "type": "relation",
+    "relation_type": "recommand_eat",
+    "text": "疾病：肺出血－肾炎综合征，推荐食用，食物：五丝白菜卷"
+  },
+  {
+    "type": "relation",
+    "relation_type": "recommand_eat",
+    "text": "疾病：放射性肺炎，推荐食用，食物：荞麦粥"
+  },
+  {
+    "type": "relation",
+    "relation_type": "recommand_eat",
+    "text": "疾病：肺水肿，推荐食用，食物：鸡蛋豆腐汤"
+  },
+  {
+    "type": "relation",
+    "relation_type": "recommand_eat",
+    "text": "疾病：肺转移瘤，推荐食用，食物：番茄煮牛肉"
+  },
+  {
+    "type": "relation",
+    "relation_type": "recommand_eat",
+    "text": "疾病：肺栓塞，推荐食用，食物：番茄黄瓜汁"
+  },
+  {
+    "type": "relation",
+    "relation_type": "recommand_eat",
+    "text": "疾病：非典，推荐食用，食物：玉竹白菜"
+  },
+  {
+    "type": "relation",
+    "relation_type": "recommand_eat",
+    "text": "疾病：放射性肺炎，推荐食用，食物：蔬菜杂烩粥"
+  },
+  {
+    "type": "relation",
+    "relation_type": "recommand_eat",
+    "text": "疾病：心室扑动和心室颤动，推荐食用，食物：苦瓜炖猪排骨"
+  },
+  {
+    "type": "relation",
+    "relation_type": "recommand_eat",
+    "text": "疾病：肺炎球菌肺炎，推荐食用，食物：小黄瓜凉拌面"
+  },
+  {
+    "type": "relation",
+    "relation_type": "recommand_eat",
+    "text": "疾病：喘息样支气管炎，推荐食用，食物：菊花芦根茶"
+  },
+  {
+    "type": "relation",
+    "relation_type": "recommand_eat",
+    "text": "疾病：放射性肺炎，推荐食用，食物：杂粮粥"
+  },
+  {
+    "type": "relation",
+    "relation_type": "recommand_eat",
+    "text": "疾病：肺大泡，推荐食用，食物：绿豆南瓜汤"
+  },
+  {
+    "type": "relation",
+    "relation_type": "recommand_eat",
+    "text": "疾病：肺癌，推荐食用，食物：豌豆绿豆粥"
+  },
+  {
+    "type": "relation",
+    "relation_type": "recommand_eat",
+    "text": "疾病：肺炎，推荐食用，食物：赤小豆粥"
+  },
+  {
+    "type": "relation",
+    "relation_type": "recommand_eat",
+    "text": "疾病：肺大泡，推荐食用，食物：蔬菜杂烩粥"
+  },
+  {
+    "type": "relation",
+    "relation_type": "recommand_eat",
+    "text": "疾病：肺栓塞，推荐食用，食物：番茄洋葱芹菜汁"
+  },
+  {
+    "type": "relation",
+    "relation_type": "recommand_eat",
+    "text": "疾病：大叶性肺炎，推荐食用，食物：山楂百合汤"
+  },
+  {
+    "type": "relation",
+    "relation_type": "recommand_eat",
+    "text": "疾病：肺放线菌病，推荐食用，食物：番茄皮蛋汤"
+  },
+  {
+    "type": "relation",
+    "relation_type": "recommand_eat",
+    "text": "疾病：放射性肺炎，推荐食用，食物：豆薯小米粥"
+  },
+  {
+    "type": "relation",
+    "relation_type": "recommand_eat",
+    "text": "疾病：肺曲菌病，推荐食用，食物：红枣银耳粥"
+  },
+  {
+    "type": "relation",
+    "relation_type": "recommand_eat",
+    "text": "疾病：肺脓肿，推荐食用，食物：五丝白菜卷"
+  },
+  {
+    "type": "relation",
+    "relation_type": "recommand_eat",
+    "text": "疾病：肺炎性假瘤，推荐食用，食物：小麦粥"
+  },
+  {
+    "type": "relation",
+    "relation_type": "recommand_eat",
+    "text": "疾病：肺气肿，推荐食用，食物：山楂糕"
+  },
+  {
+    "type": "relation",
+    "relation_type": "recommand_eat",
+    "text": "疾病：百日咳，推荐食用，食物：黄瓜三丝汤"
+  },
+  {
+    "type": "relation",
+    "relation_type": "recommand_eat",
+    "text": "疾病：感冒，推荐食用，食物：绿豆薏米饭"
+  },
+  {
+    "type": "relation",
+    "relation_type": "recommand_eat",
+    "text": "疾病：肺放线菌病，推荐食用，食物：鲜百合烧肉"
+  },
+  {
+    "type": "relation",
+    "relation_type": "recommand_eat",
+    "text": "疾病：肺气肿，推荐食用，食物：百合粥"
+  },
+  {
+    "type": "relation",
+    "relation_type": "recommand_eat",
+    "text": "疾病：肺癌，推荐食用，食物：炒苋菜"
+  },
+  {
+    "type": "relation",
+    "relation_type": "recommand_eat",
+    "text": "疾病：大叶性肺炎，推荐食用，食物：酱豆腐汁烧猪肉"
+  },
+  {
+    "type": "relation",
+    "relation_type": "recommand_eat",
+    "text": "疾病：肺曲菌病，推荐食用，食物：椰子银耳煲鸽汤"
+  },
+  {
+    "type": "relation",
+    "relation_type": "recommand_eat",
+    "text": "疾病：肺癌，推荐食用，食物：紫米薏仁粥"
+  },
+  {
+    "type": "relation",
+    "relation_type": "recommand_eat",
+    "text": "疾病：肺炎球菌肺炎，推荐食用，食物：小黄瓜西瓜汁"
+  },
+  {
+    "type": "relation",
+    "relation_type": "recommand_eat",
+    "text": "疾病：百日咳，推荐食用，食物：小黄瓜凉拌面"
+  },
+  {
+    "type": "relation",
+    "relation_type": "recommand_eat",
+    "text": "疾病：肺水肿，推荐食用，食物：豆苗炒鸡蛋"
+  },
+  {
+    "type": "relation",
+    "relation_type": "recommand_eat",
+    "text": "疾病：肺转移瘤，推荐食用，食物：草菇熘番茄"
+  },
+  {
+    "type": "relation",
+    "relation_type": "recommand_eat",
+    "text": "疾病：放射性肺炎，推荐食用，食物：小麦粥"
+  },
+  {
+    "type": "relation",
+    "relation_type": "recommand_eat",
+    "text": "疾病：二硫化碳中毒，推荐食用，食物：豆薯小米粥"
+  },
+  {
+    "type": "relation",
+    "relation_type": "recommand_eat",
+    "text": "疾病：肺炎性假瘤，推荐食用，食物：杂粮粥"
+  },
+  {
+    "type": "relation",
+    "relation_type": "recommand_eat",
+    "text": "疾病：肺曲菌病，推荐食用，食物：银耳粥"
+  },
+  {
+    "type": "relation",
+    "relation_type": "recommand_eat",
+    "text": "疾病：肺放线菌病，推荐食用，食物：番茄羊肉汤"
+  },
+  {
+    "type": "relation",
+    "relation_type": "recommand_eat",
+    "text": "疾病：肺炎，推荐食用，食物：酱泥鳅"
+  },
+  {
+    "type": "relation",
+    "relation_type": "recommand_eat",
+    "text": "疾病：肺癌，推荐食用，食物：素炒菠菜"
+  },
+  {
+    "type": "relation",
+    "relation_type": "recommand_eat",
+    "text": "疾病：肺放线菌病，推荐食用，食物：百合炖猪蹄"
+  },
+  {
+    "type": "relation",
+    "relation_type": "recommand_eat",
+    "text": "疾病：肺曲菌病，推荐食用，食物：雪梨饮"
+  },
+  {
+    "type": "relation",
+    "relation_type": "recommand_eat",
+    "text": "疾病：肺大泡，推荐食用，食物：杂粮粥"
+  },
+  {
+    "type": "relation",
+    "relation_type": "recommand_eat",
+    "text": "疾病：肺炎杆菌肺炎，推荐食用，食物：番茄汁"
+  },
+  {
+    "type": "relation",
+    "relation_type": "recommand_eat",
+    "text": "疾病：肺气肿，推荐食用，食物：炖白鲢鱼"
+  },
+  {
+    "type": "relation",
+    "relation_type": "recommand_eat",
+    "text": "疾病：二硫化碳中毒，推荐食用，食物：蔬菜杂烩粥"
+  },
+  {
+    "type": "relation",
+    "relation_type": "recommand_eat",
+    "text": "疾病：肺念珠菌病，推荐食用，食物：冬瓜草鱼汤"
+  },
+  {
+    "type": "relation",
+    "relation_type": "recommand_eat",
+    "text": "疾病：肺炎球菌肺炎，推荐食用，食物：黄瓜拌香菜"
+  },
+  {
+    "type": "relation",
+    "relation_type": "recommand_eat",
+    "text": "疾病：大叶性肺炎，推荐食用，食物：番茄猪肝瘦肉汤"
+  },
+  {
+    "type": "relation",
+    "relation_type": "recommand_eat",
+    "text": "疾病：肺念珠菌病，推荐食用，食物：小麦粥"
+  },
+  {
+    "type": "relation",
+    "relation_type": "recommand_eat",
+    "text": "疾病：肺放线菌病，推荐食用，食物：番茄牛肉片"
+  },
+  {
+    "type": "relation",
+    "relation_type": "recommand_eat",
+    "text": "疾病：肺水肿，推荐食用，食物：肉卤鸡蛋"
+  },
+  {
+    "type": "relation",
+    "relation_type": "recommand_eat",
+    "text": "疾病：二硫化碳中毒，推荐食用，食物：杂粮粥"
+  },
+  {
+    "type": "relation",
+    "relation_type": "recommand_eat",
+    "text": "疾病：大楼病综合征，推荐食用，食物：山楂红糖粥"
+  },
+  {
+    "type": "relation",
+    "relation_type": "recommand_eat",
+    "text": "疾病：百日咳，推荐食用，食物：黄瓜拌兔丝"
+  },
+  {
+    "type": "relation",
+    "relation_type": "recommand_eat",
+    "text": "疾病：苯中毒，推荐食用，食物：豆腐干炒韭菜"
+  },
+  {
+    "type": "relation",
+    "relation_type": "recommand_eat",
+    "text": "疾病：肺癌，推荐食用，食物：拌菜花"
+  },
+  {
+    "type": "relation",
+    "relation_type": "recommand_eat",
+    "text": "疾病：百日咳，推荐食用，食物：清蒸鸡蛋羹"
+  },
+  {
+    "type": "relation",
+    "relation_type": "recommand_eat",
+    "text": "疾病：放射性肺炎，推荐食用，食物：虾皮香芹燕麦粥"
+  },
+  {
+    "type": "relation",
+    "relation_type": "recommand_eat",
+    "text": "疾病：喘息样支气管炎，推荐食用，食物：生芦根粥"
+  },
+  {
+    "type": "relation",
+    "relation_type": "recommand_eat",
+    "text": "疾病：肺曲菌病，推荐食用，食物：鸭梨粥"
+  },
+  {
+    "type": "relation",
+    "relation_type": "recommand_eat",
+    "text": "疾病：喘息样支气管炎，推荐食用，食物：党参粥"
+  },
+  {
+    "type": "relation",
+    "relation_type": "recommand_eat",
+    "text": "疾病：非典，推荐食用，食物：冬菇烧白菜"
+  },
+  {
+    "type": "relation",
+    "relation_type": "recommand_eat",
+    "text": "疾病：肺大泡，推荐食用，食物：银耳羹"
+  },
+  {
+    "type": "relation",
+    "relation_type": "recommand_eat",
+    "text": "疾病：肺念珠菌病，推荐食用，食物：花生杏仁粥"
+  },
+  {
+    "type": "relation",
+    "relation_type": "do_eat",
+    "text": "疾病：放射性肺炎，宜吃，食物：生菜"
+  },
+  {
+    "type": "relation",
+    "relation_type": "do_eat",
+    "text": "疾病：肺出血－肾炎综合征，宜吃，食物：茄子"
+  },
+  {
+    "type": "relation",
+    "relation_type": "do_eat",
+    "text": "疾病：肺炎性假瘤，宜吃，食物：鸭肉"
+  },
+  {
+    "type": "relation",
+    "relation_type": "do_eat",
+    "text": "疾病：成人呼吸窘迫综合征，宜吃，食物：生菜"
+  },
+  {
+    "type": "relation",
+    "relation_type": "do_eat",
+    "text": "疾病：成人呼吸窘迫综合征，宜吃，食物：山药"
+  },
+  {
+    "type": "relation",
+    "relation_type": "do_eat",
+    "text": "疾病：苯中毒，宜吃，食物：鸡蛋"
+  },
+  {
+    "type": "relation",
+    "relation_type": "do_eat",
+    "text": "疾病：Goodpasture综合征，宜吃，食物：南瓜子仁"
+  },
+  {
+    "type": "relation",
+    "relation_type": "do_eat",
+    "text": "疾病：呼吸衰竭，宜吃，食物：芝麻"
+  },
+  {
+    "type": "relation",
+    "relation_type": "do_eat",
+    "text": "疾病：百日咳，宜吃，食物：小白菜"
+  },
+  {
+    "type": "relation",
+    "relation_type": "do_eat",
+    "text": "疾病：退行性黄韧带肥厚，宜吃，食物：鸡爪"
+  },
+  {
+    "type": "relation",
+    "relation_type": "do_eat",
+    "text": "疾病：免疫缺陷者肺炎，宜吃，食物：芝麻"
+  },
+  {
+    "type": "relation",
+    "relation_type": "do_eat",
+    "text": "疾病：呼吸道异物，宜吃，食物：栗子（熟）"
+  },
+  {
+    "type": "relation",
+    "relation_type": "do_eat",
+    "text": "疾病：喘息样支气管炎，宜吃，食物：海蚌"
+  },
+  {
+    "type": "relation",
+    "relation_type": "do_eat",
+    "text": "疾病：免疫缺陷者肺炎，宜吃，食物：鸡蛋"
+  },
+  {
+    "type": "relation",
+    "relation_type": "do_eat",
+    "text": "疾病：肺气肿，宜吃，食物：松子仁"
+  },
+  {
+    "type": "relation",
+    "relation_type": "do_eat",
+    "text": "疾病：军团病，宜吃，食物：南瓜子仁"
+  },
+  {
+    "type": "relation",
+    "relation_type": "do_eat",
+    "text": "疾病：二硫化碳中毒，宜吃，食物：南瓜"
+  },
+  {
+    "type": "relation",
+    "relation_type": "do_eat",
+    "text": "疾病：硫化氢中毒，宜吃，食物：葵花子仁"
+  },
+  {
+    "type": "relation",
+    "relation_type": "do_eat",
+    "text": "疾病：军团菌病，宜吃，食物：葵花子仁"
+  },
+  {
+    "type": "relation",
+    "relation_type": "do_eat",
+    "text": "疾病：肺转移瘤，宜吃，食物：腰果"
+  },
+  {
+    "type": "relation",
+    "relation_type": "do_eat",
+    "text": "疾病：肺栓塞，宜吃，食物：蜂蜜"
+  },
+  {
+    "type": "relation",
+    "relation_type": "do_eat",
+    "text": "疾病：肺念珠菌病，宜吃，食物：鸡"
+  },
+  {
+    "type": "relation",
+    "relation_type": "do_eat",
+    "text": "疾病：肺炎球菌肺炎，宜吃，食物：鲈鱼"
+  },
+  {
+    "type": "relation",
+    "relation_type": "do_eat",
+    "text": "疾病：肺脓肿，宜吃，食物：杏仁"
+  },
+  {
+    "type": "relation",
+    "relation_type": "do_eat",
+    "text": "疾病：感染性休克，宜吃，食物：芝麻"
+  },
+  {
+    "type": "relation",
+    "relation_type": "do_eat",
+    "text": "疾病：急性呼吸窘迫综合征，宜吃，食物：鸡蛋"
+  },
+  {
+    "type": "relation",
+    "relation_type": "do_eat",
+    "text": "疾病：大楼病综合征，宜吃，食物：空心菜"
+  },
+  {
+    "type": "relation",
+    "relation_type": "do_eat",
+    "text": "疾病：大楼病综合征，宜吃，食物：生菜"
+  },
+  {
+    "type": "relation",
+    "relation_type": "do_eat",
+    "text": "疾病：老年肺炎，宜吃，食物：芝麻"
+  },
+  {
+    "type": "relation",
+    "relation_type": "do_eat",
+    "text": "疾病：肺出血－肾炎综合征，宜吃，食物：茭白"
+  },
+  {
+    "type": "relation",
+    "relation_type": "do_eat",
+    "text": "疾病：退行性黄韧带肥厚，宜吃，食物：鸭蛋"
+  },
+  {
+    "type": "relation",
+    "relation_type": "do_eat",
+    "text": "疾病：脱疽，宜吃，食物：鸡肉"
+  },
+  {
+    "type": "relation",
+    "relation_type": "do_eat",
+    "text": "疾病：肺水肿，宜吃，食物：松子仁"
+  },
+  {
+    "type": "relation",
+    "relation_type": "do_eat",
+    "text": "疾病：肺炎，宜吃，食物：腰果"
+  },
+  {
+    "type": "relation",
+    "relation_type": "do_eat",
+    "text": "疾病：流行性感冒，宜吃，食物：芝麻"
+  },
+  {
+    "type": "relation",
+    "relation_type": "do_eat",
+    "text": "疾病：过敏性休克，宜吃，食物：鹌鹑蛋"
+  },
+  {
+    "type": "relation",
+    "relation_type": "do_eat",
+    "text": "疾病：呼吸性细支气管相关的间质性肺疾病，宜吃，食物：南瓜子仁"
+  },
+  {
+    "type": "relation",
+    "relation_type": "do_eat",
+    "text": "疾病：肺炎杆菌肺炎，宜吃，食物：杏仁"
+  },
+  {
+    "type": "relation",
+    "relation_type": "do_eat",
+    "text": "疾病：流行性感冒，宜吃，食物：鸡蛋"
+  },
+  {
+    "type": "relation",
+    "relation_type": "do_eat",
+    "text": "疾病：金黄色葡萄球菌肺炎，宜吃，食物：葵花子仁"
+  },
+  {
+    "type": "relation",
+    "relation_type": "do_eat",
+    "text": "疾病：大楼病综合征，宜吃，食物：小白菜"
+  },
+  {
+    "type": "relation",
+    "relation_type": "do_eat",
+    "text": "疾病：急性呼吸窘迫综合征，宜吃，食物：南瓜子仁"
+  },
+  {
+    "type": "relation",
+    "relation_type": "do_eat",
+    "text": "疾病：肺放线菌病，宜吃，食物：空心菜"
+  },
+  {
+    "type": "relation",
+    "relation_type": "do_eat",
+    "text": "疾病：急性呼吸衰竭，宜吃，食物：葵花子仁"
+  },
+  {
+    "type": "relation",
+    "relation_type": "do_eat",
+    "text": "疾病：急性肺脓肿，宜吃，食物：芝麻"
+  },
+  {
+    "type": "relation",
+    "relation_type": "do_eat",
+    "text": "疾病：过敏性休克，宜吃，食物：鸡蛋"
+  },
+  {
+    "type": "relation",
+    "relation_type": "do_eat",
+    "text": "疾病：呼吸道合胞病毒肺炎，宜吃，食物：芝麻"
+  },
+  {
+    "type": "relation",
+    "relation_type": "do_eat",
+    "text": "疾病：感冒，宜吃，食物：鹌鹑蛋"
+  },
+  {
+    "type": "relation",
+    "relation_type": "do_eat",
+    "text": "疾病：结核性脓胸，宜吃，食物：栗子（熟）"
+  },
+  {
+    "type": "relation",
+    "relation_type": "do_eat",
+    "text": "疾病：呼吸性细支气管相关的间质性肺疾病，宜吃，食物：鸡蛋"
+  },
+  {
+    "type": "relation",
+    "relation_type": "do_eat",
+    "text": "疾病：卡氏肺囊虫肺炎，宜吃，食物：鸡蛋黄"
+  },
+  {
+    "type": "relation",
+    "relation_type": "do_eat",
+    "text": "疾病：肺水肿，宜吃，食物：杏仁"
+  },
+  {
+    "type": "relation",
+    "relation_type": "do_eat",
+    "text": "疾病：Goodpasture综合征，宜吃，食物：葵花子仁"
+  },
+  {
+    "type": "relation",
+    "relation_type": "do_eat",
+    "text": "疾病：硫化氢中毒，宜吃，食物：芝麻"
+  },
+  {
+    "type": "relation",
+    "relation_type": "do_eat",
+    "text": "疾病：卡氏肺囊虫肺炎，宜吃，食物：栗子（熟）"
+  },
+  {
+    "type": "relation",
+    "relation_type": "do_eat",
+    "text": "疾病：喘息样支气管炎，宜吃，食物：赤贝"
+  },
+  {
+    "type": "relation",
+    "relation_type": "do_eat",
+    "text": "疾病：金黄色葡萄球菌肺炎，宜吃，食物：栗子（熟）"
+  },
+  {
+    "type": "relation",
+    "relation_type": "do_eat",
+    "text": "疾病：肺栓塞，宜吃，食物：鸡肝"
+  },
+  {
+    "type": "relation",
+    "relation_type": "do_eat",
+    "text": "疾病：非典，宜吃，食物：鹿肉"
+  },
+  {
+    "type": "relation",
+    "relation_type": "do_eat",
+    "text": "疾病：肺癌，宜吃，食物：芝麻"
+  },
+  {
+    "type": "relation",
+    "relation_type": "do_eat",
+    "text": "疾病：肺气肿，宜吃，食物：鸡肝"
+  },
+  {
+    "type": "relation",
+    "relation_type": "do_eat",
+    "text": "疾病：咯血，宜吃，食物：燕窝"
+  },
+  {
+    "type": "relation",
+    "relation_type": "do_eat",
+    "text": "疾病：肺栓塞，宜吃，食物：芝麻"
+  },
+  {
+    "type": "relation",
+    "relation_type": "do_eat",
+    "text": "疾病：心室扑动和心室颤动，宜吃，食物：乌骨鸡"
+  },
+  {
+    "type": "relation",
+    "relation_type": "do_eat",
+    "text": "疾病：心室扑动和心室颤动，宜吃，食物：青豆"
+  },
+  {
+    "type": "relation",
+    "relation_type": "do_eat",
+    "text": "疾病：呼吸道异物，宜吃，食物：南瓜子仁"
+  },
+  {
+    "type": "relation",
+    "relation_type": "do_eat",
+    "text": "疾病：军团病，宜吃，食物：栗子（熟）"
+  },
+  {
+    "type": "relation",
+    "relation_type": "do_eat",
+    "text": "疾病：急性呼吸衰竭，宜吃，食物：芝麻"
+  },
+  {
+    "type": "relation",
+    "relation_type": "do_eat",
+    "text": "疾病：肺脓肿，宜吃，食物：鹿肉"
+  },
+  {
+    "type": "relation",
+    "relation_type": "do_eat",
+    "text": "疾病：Goodpasture综合征，宜吃，食物：芝麻"
+  },
+  {
+    "type": "relation",
+    "relation_type": "do_eat",
+    "text": "疾病：急性呼吸衰竭，宜吃，食物：栗子（熟）"
+  },
+  {
+    "type": "relation",
+    "relation_type": "do_eat",
+    "text": "疾病：过敏性肺炎，宜吃，食物：南瓜子仁"
+  },
+  {
+    "type": "relation",
+    "relation_type": "do_eat",
+    "text": "疾病：Goodpasture综合征，宜吃，食物：栗子（熟）"
+  },
+  {
+    "type": "relation",
+    "relation_type": "do_eat",
+    "text": "疾病：二硫化碳中毒，宜吃，食物：苦瓜"
+  },
+  {
+    "type": "relation",
+    "relation_type": "do_eat",
+    "text": "疾病：心室扑动和心室颤动，宜吃，食物：核桃"
+  },
+  {
+    "type": "relation",
+    "relation_type": "do_eat",
+    "text": "疾病：肺转移瘤，宜吃，食物：莲子"
+  },
+  {
+    "type": "relation",
+    "relation_type": "do_eat",
+    "text": "疾病：放射性肺炎，宜吃，食物：南瓜"
+  },
+  {
+    "type": "relation",
+    "relation_type": "do_eat",
+    "text": "疾病：肺炎性假瘤，宜吃，食物：莲子"
+  },
+  {
+    "type": "relation",
+    "relation_type": "do_eat",
+    "text": "疾病：二硫化碳中毒，宜吃，食物：生菜"
+  },
+  {
+    "type": "relation",
+    "relation_type": "do_eat",
+    "text": "疾病：肺栓塞，宜吃，食物：鹿肉"
+  },
+  {
+    "type": "relation",
+    "relation_type": "do_eat",
+    "text": "疾病：大叶性肺炎，宜吃，食物：栗子（熟）"
+  },
+  {
+    "type": "relation",
+    "relation_type": "do_eat",
+    "text": "疾病：老年肺炎，宜吃，食物：南瓜子仁"
+  },
+  {
+    "type": "relation",
+    "relation_type": "do_eat",
+    "text": "疾病：呼吸道异物，宜吃，食物：葵花子仁"
+  },
+  {
+    "type": "relation",
+    "relation_type": "do_eat",
+    "text": "疾病：肺炎杆菌肺炎，宜吃，食物：鹿肉"
+  },
+  {
+    "type": "relation",
+    "relation_type": "do_eat",
+    "text": "疾病：肺放线菌病，宜吃，食物：南瓜"
+  },
+  {
+    "type": "relation",
+    "relation_type": "do_eat",
+    "text": "疾病：流行性感冒，宜吃，食物：栗子（熟）"
+  },
+  {
+    "type": "relation",
+    "relation_type": "do_eat",
+    "text": "疾病：放射性肺炎，宜吃，食物：豆浆"
+  },
+  {
+    "type": "relation",
+    "relation_type": "do_eat",
+    "text": "疾病：感染性休克，宜吃，食物：鸡蛋"
+  },
+  {
+    "type": "relation",
+    "relation_type": "do_eat",
+    "text": "疾病：肺炎杆菌肺炎，宜吃，食物：鸡肝"
+  },
+  {
+    "type": "relation",
+    "relation_type": "do_eat",
+    "text": "疾病：呼吸道合胞病毒肺炎，宜吃，食物：葵花子仁"
+  },
+  {
+    "type": "relation",
+    "relation_type": "do_eat",
+    "text": "疾病：肺曲菌病，宜吃，食物：油麦菜"
+  },
+  {
+    "type": "relation",
+    "relation_type": "do_eat",
+    "text": "疾病：大叶性肺炎，宜吃，食物：鲫鱼"
+  },
+  {
+    "type": "relation",
+    "relation_type": "do_eat",
+    "text": "疾病：喘息样支气管炎，宜吃，食物：鸡蛋"
+  },
+  {
+    "type": "relation",
+    "relation_type": "do_eat",
+    "text": "疾病：咯血，宜吃，食物：松子仁"
+  },
+  {
+    "type": "relation",
+    "relation_type": "do_eat",
+    "text": "疾病：非典，宜吃，食物：鸡肝"
+  },
+  {
+    "type": "relation",
+    "relation_type": "do_eat",
+    "text": "疾病：肺炎，宜吃，食物：鸭肉"
+  },
+  {
+    "type": "relation",
+    "relation_type": "do_eat",
+    "text": "疾病：肺曲菌病，宜吃，食物：鲤鱼"
+  },
+  {
+    "type": "relation",
+    "relation_type": "do_eat",
+    "text": "疾病：肺曲菌病，宜吃，食物：鸡蛋"
+  },
+  {
+    "type": "relation",
+    "relation_type": "do_eat",
+    "text": "疾病：大叶性肺炎，宜吃，食物：油菜"
+  },
+  {
+    "type": "relation",
+    "relation_type": "do_eat",
+    "text": "疾病：金黄色葡萄球菌肺炎，宜吃，食物：芝麻"
+  },
+  {
+    "type": "relation",
+    "relation_type": "no_eat",
+    "text": "疾病：感冒，忌吃，食物：油条"
+  },
+  {
+    "type": "relation",
+    "relation_type": "no_eat",
+    "text": "疾病：急性呼吸窘迫综合征，忌吃，食物：白扁豆"
+  },
+  {
+    "type": "relation",
+    "relation_type": "no_eat",
+    "text": "疾病：肺炎球菌肺炎，忌吃，食物：辣椒(红、尖、干)"
+  },
+  {
+    "type": "relation",
+    "relation_type": "no_eat",
+    "text": "疾病：呼吸道异物，忌吃，食物：花生"
+  },
+  {
+    "type": "relation",
+    "relation_type": "no_eat",
+    "text": "疾病：流行性感冒，忌吃，食物：猪小排（猪肋排）"
+  },
+  {
+    "type": "relation",
+    "relation_type": "no_eat",
+    "text": "疾病：军团病，忌吃，食物：白酒"
+  },
+  {
+    "type": "relation",
+    "relation_type": "no_eat",
+    "text": "疾病：卡氏肺囊虫肺炎，忌吃，食物：白砂糖"
+  },
+  {
+    "type": "relation",
+    "relation_type": "no_eat",
+    "text": "疾病：金黄色葡萄球菌肺炎，忌吃，食物：猪小排（猪肋排）"
+  },
+  {
+    "type": "relation",
+    "relation_type": "no_eat",
+    "text": "疾病：肺炎杆菌肺炎，忌吃，食物：辣椒(青、尖)"
+  },
+  {
+    "type": "relation",
+    "relation_type": "no_eat",
+    "text": "疾病：肺脓肿，忌吃，食物：海螺"
+  },
+  {
+    "type": "relation",
+    "relation_type": "no_eat",
+    "text": "疾病：军团菌病，忌吃，食物：啤酒"
+  },
+  {
+    "type": "relation",
+    "relation_type": "no_eat",
+    "text": "疾病：呼吸性细支气管相关的间质性肺疾病，忌吃，食物：白扁豆"
+  },
+  {
+    "type": "relation",
+    "relation_type": "no_eat",
+    "text": "疾病：肺炎杆菌肺炎，忌吃，食物：香菜"
+  },
+  {
+    "type": "relation",
+    "relation_type": "no_eat",
+    "text": "疾病：肺癌，忌吃，食物：白扁豆"
+  },
+  {
+    "type": "relation",
+    "relation_type": "no_eat",
+    "text": "疾病：肺曲菌病，忌吃，食物：白酒"
+  },
+  {
+    "type": "relation",
+    "relation_type": "no_eat",
+    "text": "疾病：苯中毒，忌吃，食物：海虾"
+  },
+  {
+    "type": "relation",
+    "relation_type": "no_eat",
+    "text": "疾病：肺放线菌病，忌吃，食物：啤酒"
+  },
+  {
+    "type": "relation",
+    "relation_type": "no_eat",
+    "text": "疾病：大楼病综合征，忌吃，食物：辣椒(青、尖)"
+  },
+  {
+    "type": "relation",
+    "relation_type": "no_eat",
+    "text": "疾病：肺脓肿，忌吃，食物：海蟹"
+  },
+  {
+    "type": "relation",
+    "relation_type": "no_eat",
+    "text": "疾病：大叶性肺炎，忌吃，食物：韭菜"
+  },
+  {
+    "type": "relation",
+    "relation_type": "no_eat",
+    "text": "疾病：急性呼吸窘迫综合征，忌吃，食物：猪小排（猪肋排）"
+  },
+  {
+    "type": "relation",
+    "relation_type": "no_eat",
+    "text": "疾病：过敏性休克，忌吃，食物：蜂蜜"
+  },
+  {
+    "type": "relation",
+    "relation_type": "no_eat",
+    "text": "疾病：军团病，忌吃，食物：猪油（板油）"
+  },
+  {
+    "type": "relation",
+    "relation_type": "no_eat",
+    "text": "疾病：感染性休克，忌吃，食物：螃蟹"
+  },
+  {
+    "type": "relation",
+    "relation_type": "no_eat",
+    "text": "疾病：老年肺炎，忌吃，食物：海蟹"
+  },
+  {
+    "type": "relation",
+    "relation_type": "no_eat",
+    "text": "疾病：军团病，忌吃，食物：啤酒"
+  },
+  {
+    "type": "relation",
+    "relation_type": "no_eat",
+    "text": "疾病：过敏性肺炎，忌吃，食物：猪油（板油）"
+  },
+  {
+    "type": "relation",
+    "relation_type": "no_eat",
+    "text": "疾病：硫化氢中毒，忌吃，食物：白扁豆"
+  },
+  {
+    "type": "relation",
+    "relation_type": "no_eat",
+    "text": "疾病：肺炎，忌吃，食物：猪油（板油）"
+  },
+  {
+    "type": "relation",
+    "relation_type": "no_eat",
+    "text": "疾病：退行性黄韧带肥厚，忌吃，食物：三文鱼"
+  },
+  {
+    "type": "relation",
+    "relation_type": "no_eat",
+    "text": "疾病：二硫化碳中毒，忌吃，食物：啤酒"
+  },
+  {
+    "type": "relation",
+    "relation_type": "no_eat",
+    "text": "疾病：百日咳，忌吃，食物：海螺"
+  },
+  {
+    "type": "relation",
+    "relation_type": "no_eat",
+    "text": "疾病：老年肺炎，忌吃，食物：海螺"
+  },
+  {
+    "type": "relation",
+    "relation_type": "no_eat",
+    "text": "疾病：退行性黄韧带肥厚，忌吃，食物：沙丁鱼"
+  },
+  {
+    "type": "relation",
+    "relation_type": "no_eat",
+    "text": "疾病：肺放线菌病，忌吃，食物：洋葱"
+  },
+  {
+    "type": "relation",
+    "relation_type": "no_eat",
+    "text": "疾病：成人呼吸窘迫综合征，忌吃，食物：啤酒"
+  },
+  {
+    "type": "relation",
+    "relation_type": "no_eat",
+    "text": "疾病：老年肺炎，忌吃，食物：海虾"
+  },
+  {
+    "type": "relation",
+    "relation_type": "no_eat",
+    "text": "疾病：硫化氢中毒，忌吃，食物：啤酒"
+  },
+  {
+    "type": "relation",
+    "relation_type": "no_eat",
+    "text": "疾病：大楼病综合征，忌吃，食物：韭菜"
+  },
+  {
+    "type": "relation",
+    "relation_type": "no_eat",
+    "text": "疾病：感染性休克，忌吃，食物：田螺"
+  },
+  {
+    "type": "relation",
+    "relation_type": "no_eat",
+    "text": "疾病：心室扑动和心室颤动，忌吃，食物：咸鱼"
+  },
+  {
+    "type": "relation",
+    "relation_type": "no_eat",
+    "text": "疾病：肺念珠菌病，忌吃，食物：奶油"
+  },
+  {
+    "type": "relation",
+    "relation_type": "no_eat",
+    "text": "疾病：喘息样支气管炎，忌吃，食物：猪肉(肥瘦)"
+  },
+  {
+    "type": "relation",
+    "relation_type": "no_eat",
+    "text": "疾病：结核性脓胸，忌吃，食物：白扁豆"
+  },
+  {
+    "type": "relation",
+    "relation_type": "no_eat",
+    "text": "疾病：心室扑动和心室颤动，忌吃，食物：花生仁（炸）"
+  },
+  {
+    "type": "relation",
+    "relation_type": "no_eat",
+    "text": "疾病：过敏性肺炎，忌吃，食物：猪小排（猪肋排）"
+  },
+  {
+    "type": "relation",
+    "relation_type": "no_eat",
+    "text": "疾病：放射性肺炎，忌吃，食物：洋葱"
+  },
+  {
+    "type": "relation",
+    "relation_type": "no_eat",
+    "text": "疾病：肺大泡，忌吃，食物：油豆腐"
+  },
+  {
+    "type": "relation",
+    "relation_type": "no_eat",
+    "text": "疾病：肺癌，忌吃，食物：腐竹"
+  },
+  {
+    "type": "relation",
+    "relation_type": "no_eat",
+    "text": "疾病：肺栓塞，忌吃，食物：鱼腥草"
+  },
+  {
+    "type": "relation",
+    "relation_type": "no_eat",
+    "text": "疾病：过敏性肺炎，忌吃，食物：蟹黄"
+  },
+  {
+    "type": "relation",
+    "relation_type": "no_eat",
+    "text": "疾病：非典，忌吃，食物：鱼腥草"
+  },
+  {
+    "type": "relation",
+    "relation_type": "no_eat",
+    "text": "疾病：过敏性休克，忌吃，食物：猪油（板油）"
+  },
+  {
+    "type": "relation",
+    "relation_type": "no_eat",
+    "text": "疾病：脱疽，忌吃，食物：三文鱼"
+  },
+  {
+    "type": "relation",
+    "relation_type": "no_eat",
+    "text": "疾病：肺大泡，忌吃，食物：杏仁"
+  },
+  {
+    "type": "relation",
+    "relation_type": "no_eat",
+    "text": "疾病：喘息样支气管炎，忌吃，食物：海螺"
+  },
+  {
+    "type": "relation",
+    "relation_type": "no_eat",
+    "text": "疾病：二硫化碳中毒，忌吃，食物：辣椒(红、尖、干)"
+  },
+  {
+    "type": "relation",
+    "relation_type": "no_eat",
+    "text": "疾病：百日咳，忌吃，食物：海蟹"
+  },
+  {
+    "type": "relation",
+    "relation_type": "no_eat",
+    "text": "疾病：急性呼吸窘迫综合征，忌吃，食物：猪里脊肉"
+  },
+  {
+    "type": "relation",
+    "relation_type": "no_eat",
+    "text": "疾病：肺炎性假瘤，忌吃，食物：杏仁"
+  },
+  {
+    "type": "relation",
+    "relation_type": "no_eat",
+    "text": "疾病：苯中毒，忌吃，食物：辣椒(青、尖)"
+  },
+  {
+    "type": "relation",
+    "relation_type": "no_eat",
+    "text": "疾病：Goodpasture综合征，忌吃，食物：沙丁鱼"
+  },
+  {
+    "type": "relation",
+    "relation_type": "no_eat",
+    "text": "疾病：咯血，忌吃，食物：猪小排（猪肋排）"
+  },
+  {
+    "type": "relation",
+    "relation_type": "no_eat",
+    "text": "疾病：肺曲菌病，忌吃，食物：韭菜"
+  },
+  {
+    "type": "relation",
+    "relation_type": "no_eat",
+    "text": "疾病：肺气肿，忌吃，食物：羊肉(瘦)"
+  },
+  {
+    "type": "relation",
+    "relation_type": "no_eat",
+    "text": "疾病：肺转移瘤，忌吃，食物：白酒"
+  },
+  {
+    "type": "relation",
+    "relation_type": "no_eat",
+    "text": "疾病：急性肺脓肿，忌吃，食物：啤酒"
+  },
+  {
+    "type": "relation",
+    "relation_type": "no_eat",
+    "text": "疾病：大叶性肺炎，忌吃，食物：洋葱"
+  },
+  {
+    "type": "relation",
+    "relation_type": "no_eat",
+    "text": "疾病：肺炎球菌肺炎，忌吃，食物：啤酒"
+  },
+  {
+    "type": "relation",
+    "relation_type": "no_eat",
+    "text": "疾病：肺转移瘤，忌吃，食物：海蟹"
+  },
+  {
+    "type": "relation",
+    "relation_type": "no_eat",
+    "text": "疾病：感染性休克，忌吃，食物：白扁豆"
+  },
+  {
+    "type": "relation",
+    "relation_type": "no_eat",
+    "text": "疾病：汞中毒，忌吃，食物：猪小排（猪肋排）"
+  },
+  {
+    "type": "relation",
+    "relation_type": "no_eat",
+    "text": "疾病：呼吸道合胞病毒肺炎，忌吃，食物：海虾"
+  },
+  {
+    "type": "relation",
+    "relation_type": "no_eat",
+    "text": "疾病：成人呼吸窘迫综合征，忌吃，食物：辣椒(红、尖、干)"
+  },
+  {
+    "type": "relation",
+    "relation_type": "no_eat",
+    "text": "疾病：肺念珠菌病，忌吃，食物：啤酒"
+  },
+  {
+    "type": "relation",
+    "relation_type": "no_eat",
+    "text": "疾病：非典，忌吃，食物：海蟹"
+  },
+  {
+    "type": "relation",
+    "relation_type": "no_eat",
+    "text": "疾病：汞中毒，忌吃，食物：猪里脊肉"
+  },
+  {
+    "type": "relation",
+    "relation_type": "no_eat",
+    "text": "疾病：结核性脓胸，忌吃，食物：白酒"
+  },
+  {
+    "type": "relation",
+    "relation_type": "no_eat",
+    "text": "疾病：肺气肿，忌吃，食物：圆白菜"
+  },
+  {
+    "type": "relation",
+    "relation_type": "no_eat",
+    "text": "疾病：肺大泡，忌吃，食物：白酒"
+  },
+  {
+    "type": "relation",
+    "relation_type": "no_eat",
+    "text": "疾病：军团菌病，忌吃，食物：白酒"
+  },
+  {
+    "type": "relation",
+    "relation_type": "no_eat",
+    "text": "疾病：肺炎球菌肺炎，忌吃，食物：白酒"
+  },
+  {
+    "type": "relation",
+    "relation_type": "no_eat",
+    "text": "疾病：军团菌病，忌吃，食物：烤鸭"
+  },
+  {
+    "type": "relation",
+    "relation_type": "no_eat",
+    "text": "疾病：急性肺脓肿，忌吃，食物：白酒"
+  },
+  {
+    "type": "relation",
+    "relation_type": "no_eat",
+    "text": "疾病：二硫化碳中毒，忌吃，食物：洋葱"
+  },
+  {
+    "type": "relation",
+    "relation_type": "no_eat",
+    "text": "疾病：肺出血－肾炎综合征，忌吃，食物：韭菜"
+  },
+  {
+    "type": "relation",
+    "relation_type": "no_eat",
+    "text": "疾病：呼吸道合胞病毒肺炎，忌吃，食物：海螺"
+  },
+  {
+    "type": "relation",
+    "relation_type": "no_eat",
+    "text": "疾病：肺炎，忌吃，食物：杏仁"
+  },
+  {
+    "type": "relation",
+    "relation_type": "no_eat",
+    "text": "疾病：非典，忌吃，食物：海虾"
+  },
+  {
+    "type": "relation",
+    "relation_type": "no_eat",
+    "text": "疾病：老年肺炎，忌吃，食物：白扁豆"
+  },
+  {
+    "type": "relation",
+    "relation_type": "no_eat",
+    "text": "疾病：急性呼吸衰竭，忌吃，食物：白酒"
+  },
+  {
+    "type": "relation",
+    "relation_type": "no_eat",
+    "text": "疾病：肺炎杆菌肺炎，忌吃，食物：洋葱"
+  },
+  {
+    "type": "relation",
+    "relation_type": "no_eat",
+    "text": "疾病：Goodpasture综合征，忌吃，食物：白扁豆"
+  },
+  {
+    "type": "relation",
+    "relation_type": "no_eat",
+    "text": "疾病：百日咳，忌吃，食物：螃蟹"
+  },
+  {
+    "type": "relation",
+    "relation_type": "no_eat",
+    "text": "疾病：急性呼吸窘迫综合征，忌吃，食物：猪油（板油）"
+  },
+  {
+    "type": "relation",
+    "relation_type": "no_eat",
+    "text": "疾病：免疫缺陷者肺炎，忌吃，食物：猪油（板油）"
+  },
+  {
+    "type": "relation",
+    "relation_type": "no_eat",
+    "text": "疾病：肺炎，忌吃，食物：白扁豆"
+  },
+  {
+    "type": "relation",
+    "relation_type": "no_eat",
+    "text": "疾病：流行性感冒，忌吃，食物：猪里脊肉"
+  },
+  {
+    "type": "relation",
+    "relation_type": "no_eat",
+    "text": "疾病：急性肺脓肿，忌吃，食物：猪油（板油）"
+  },
+  {
+    "type": "relation",
+    "relation_type": "no_eat",
+    "text": "疾病：呼吸性细支气管相关的间质性肺疾病，忌吃，食物：猪油（板油）"
+  },
+  {
+    "type": "relation",
+    "relation_type": "acompany_with",
+    "text": "疾病：过敏性肺炎，并发症，疾病：蜂窝肺综合征"
+  },
+  {
+    "type": "relation",
+    "relation_type": "acompany_with",
+    "text": "疾病：肺气肿，并发症，疾病：自发性气胸"
+  },
+  {
+    "type": "relation",
+    "relation_type": "acompany_with",
+    "text": "疾病：呼吸道合胞病毒肺炎，并发症，疾病：喉炎"
+  },
+  {
+    "type": "relation",
+    "relation_type": "acompany_with",
+    "text": "疾病：免疫缺陷者肺炎，并发症，疾病：病毒性肺炎"
+  },
+  {
+    "type": "relation",
+    "relation_type": "acompany_with",
+    "text": "疾病：咖啡因与氨茶碱中毒，并发症，疾病：休克"
+  },
+  {
+    "type": "relation",
+    "relation_type": "acompany_with",
+    "text": "疾病：脱疽，并发症，疾病：心气虚"
+  },
+  {
+    "type": "relation",
+    "relation_type": "acompany_with",
+    "text": "疾病：肺癌，并发症，疾病：呼吸衰竭"
+  },
+  {
+    "type": "relation",
+    "relation_type": "acompany_with",
+    "text": "疾病：军团病，并发症，疾病：休克"
+  },
+  {
+    "type": "relation",
+    "relation_type": "acompany_with",
+    "text": "疾病：哮喘，并发症，疾病：气胸"
+  },
+  {
+    "type": "relation",
+    "relation_type": "acompany_with",
+    "text": "疾病：肺脓肿，并发症，疾病：气胸"
+  },
+  {
+    "type": "relation",
+    "relation_type": "acompany_with",
+    "text": "疾病：流行性感冒，并发症，疾病：细菌性肺炎"
+  },
+  {
+    "type": "relation",
+    "relation_type": "acompany_with",
+    "text": "疾病：减压病，并发症，疾病：急性出血性坏死性肠炎"
+  },
+  {
+    "type": "relation",
+    "relation_type": "acompany_with",
+    "text": "疾病：退行性黄韧带肥厚，并发症，疾病：椎管狭窄"
+  },
+  {
+    "type": "relation",
+    "relation_type": "acompany_with",
+    "text": "疾病：成人呼吸窘迫综合征，并发症，疾病：细菌性肺炎"
+  },
+  {
+    "type": "relation",
+    "relation_type": "acompany_with",
+    "text": "疾病：气管、支气管狭窄，并发症，疾病：气管食管瘘"
+  },
+  {
+    "type": "relation",
+    "relation_type": "acompany_with",
+    "text": "疾病：肺炎性假瘤，并发症，疾病：咯血"
+  },
+  {
+    "type": "relation",
+    "relation_type": "acompany_with",
+    "text": "疾病：硫化氢中毒，并发症，疾病：共济失调"
+  },
+  {
+    "type": "relation",
+    "relation_type": "acompany_with",
+    "text": "疾病：肺念珠菌病，并发症，疾病：菌血症"
+  },
+  {
+    "type": "relation",
+    "relation_type": "acompany_with",
+    "text": "疾病：减压病，并发症，疾病：结肠闭锁"
+  },
+  {
+    "type": "relation",
+    "relation_type": "acompany_with",
+    "text": "疾病：肺隐球菌病，并发症，疾病：脑膜炎"
+  },
+  {
+    "type": "relation",
+    "relation_type": "acompany_with",
+    "text": "疾病：特发性肺纤维化，并发症，疾病：肺心病"
+  },
+  {
+    "type": "relation",
+    "relation_type": "acompany_with",
+    "text": "疾病：肺大疱，并发症，疾病：张力性气胸"
+  },
+  {
+    "type": "relation",
+    "relation_type": "acompany_with",
+    "text": "疾病：咯血，并发症，疾病：休克"
+  },
+  {
+    "type": "relation",
+    "relation_type": "acompany_with",
+    "text": "疾病：二硫化碳中毒，并发症，疾病：昏迷"
+  },
+  {
+    "type": "relation",
+    "relation_type": "acompany_with",
+    "text": "疾病：小儿急性支气管炎，并发症，疾病：中耳炎"
+  },
+  {
+    "type": "relation",
+    "relation_type": "acompany_with",
+    "text": "疾病：硫化氢中毒，并发症，疾病：昏迷"
+  },
+  {
+    "type": "relation",
+    "relation_type": "acompany_with",
+    "text": "疾病：新生儿窒息，并发症，疾病：气胸"
+  },
+  {
+    "type": "relation",
+    "relation_type": "acompany_with",
+    "text": "疾病：肺气肿，并发症，疾病：胃溃疡"
+  },
+  {
+    "type": "relation",
+    "relation_type": "acompany_with",
+    "text": "疾病：肺炎，并发症，疾病：支气管肺炎"
+  },
+  {
+    "type": "relation",
+    "relation_type": "acompany_with",
+    "text": "疾病：热带性肺嗜酸粒细胞浸润症，并发症，疾病：水肿"
+  },
+  {
+    "type": "relation",
+    "relation_type": "acompany_with",
+    "text": "疾病：呼吸衰竭，并发症，疾病：休克"
+  },
+  {
+    "type": "relation",
+    "relation_type": "acompany_with",
+    "text": "疾病：金黄色葡萄球菌肺炎，并发症，疾病：脓胸"
+  },
+  {
+    "type": "relation",
+    "relation_type": "acompany_with",
+    "text": "疾病：硫化氢中毒，并发症，疾病：肺水肿"
+  },
+  {
+    "type": "relation",
+    "relation_type": "acompany_with",
+    "text": "疾病：流行性感冒，并发症，疾病：昏迷"
+  },
+  {
+    "type": "relation",
+    "relation_type": "acompany_with",
+    "text": "疾病：缺血缺氧性脑病，并发症，疾病：癫痫"
+  },
+  {
+    "type": "relation",
+    "relation_type": "acompany_with",
+    "text": "疾病：汞中毒，并发症，疾病：肾功能衰竭"
+  },
+  {
+    "type": "relation",
+    "relation_type": "acompany_with",
+    "text": "疾病：硫化氢中毒，并发症，疾病：意识障碍"
+  },
+  {
+    "type": "relation",
+    "relation_type": "acompany_with",
+    "text": "疾病：肺炎球菌肺炎，并发症，疾病：败血症"
+  },
+  {
+    "type": "relation",
+    "relation_type": "acompany_with",
+    "text": "疾病：小儿感冒，并发症，疾病：中耳炎"
+  },
+  {
+    "type": "relation",
+    "relation_type": "acompany_with",
+    "text": "疾病：矽肺，并发症，疾病：肺气肿"
+  },
+  {
+    "type": "relation",
+    "relation_type": "acompany_with",
+    "text": "疾病：镉中毒，并发症，疾病：水肿"
+  },
+  {
+    "type": "relation",
+    "relation_type": "acompany_with",
+    "text": "疾病：肺癌，并发症，疾病：肺不张"
+  },
+  {
+    "type": "relation",
+    "relation_type": "acompany_with",
+    "text": "疾病：硫化氢中毒，并发症，疾病：头痛"
+  },
+  {
+    "type": "relation",
+    "relation_type": "acompany_with",
+    "text": "疾病：肺出血－肾炎综合征，并发症，疾病：便血"
+  },
+  {
+    "type": "relation",
+    "relation_type": "acompany_with",
+    "text": "疾病：外源性过敏性肺泡炎，并发症，疾病：肺心病"
+  },
+  {
+    "type": "relation",
+    "relation_type": "acompany_with",
+    "text": "疾病：乳房导管内乳头状瘤，并发症，疾病：乳头溢液"
+  },
+  {
+    "type": "relation",
+    "relation_type": "acompany_with",
+    "text": "疾病：小儿感冒，并发症，疾病：喉炎"
+  },
+  {
+    "type": "relation",
+    "relation_type": "acompany_with",
+    "text": "疾病：硫化氢中毒，并发症，疾病：心绞痛"
+  },
+  {
+    "type": "relation",
+    "relation_type": "acompany_with",
+    "text": "疾病：特发性含铁血黄素沉着症，并发症，疾病：缺铁性贫血"
+  },
+  {
+    "type": "relation",
+    "relation_type": "acompany_with",
+    "text": "疾病：军团病，并发症，疾病：腹膜炎"
+  },
+  {
+    "type": "relation",
+    "relation_type": "acompany_with",
+    "text": "疾病：非典，并发症，疾病：败血症"
+  },
+  {
+    "type": "relation",
+    "relation_type": "acompany_with",
+    "text": "疾病：军团病，并发症，疾病：呼吸衰竭"
+  },
+  {
+    "type": "relation",
+    "relation_type": "acompany_with",
+    "text": "疾病：硫化氢中毒，并发症，疾病：急性呼吸窘迫综合征"
+  },
+  {
+    "type": "relation",
+    "relation_type": "acompany_with",
+    "text": "疾病：铍中毒，并发症，疾病：肺水肿"
+  },
+  {
+    "type": "relation",
+    "relation_type": "acompany_with",
+    "text": "疾病：乳酸性酸中毒，并发症，疾病：昏迷"
+  },
+  {
+    "type": "relation",
+    "relation_type": "acompany_with",
+    "text": "疾病：军团病，并发症，疾病：脑水肿"
+  },
+  {
+    "type": "relation",
+    "relation_type": "acompany_with",
+    "text": "疾病：小儿急性喉炎，并发症，疾病：呼吸道感染"
+  },
+  {
+    "type": "relation",
+    "relation_type": "acompany_with",
+    "text": "疾病：免疫缺陷者肺炎，并发症，疾病：放射性肺炎"
+  },
+  {
+    "type": "relation",
+    "relation_type": "acompany_with",
+    "text": "疾病：肺癌，并发症，疾病：血胸"
+  },
+  {
+    "type": "relation",
+    "relation_type": "acompany_with",
+    "text": "疾病：肺癌，并发症，疾病：肺炎"
+  },
+  {
+    "type": "relation",
+    "relation_type": "acompany_with",
+    "text": "疾病：热带性肺嗜酸粒细胞浸润症，并发症，疾病：心肌炎"
+  },
+  {
+    "type": "relation",
+    "relation_type": "acompany_with",
+    "text": "疾病：特发性阻塞性细支气管炎伴机化性肺炎，并发症，疾病：过敏性肺炎"
+  },
+  {
+    "type": "relation",
+    "relation_type": "acompany_with",
+    "text": "疾病：非典，并发症，疾病：消化道出血"
+  },
+  {
+    "type": "relation",
+    "relation_type": "acompany_with",
+    "text": "疾病：军团菌病，并发症，疾病：心肌炎"
+  },
+  {
+    "type": "relation",
+    "relation_type": "acompany_with",
+    "text": "疾病：小儿肺炎，并发症，疾病：呼吸衰竭"
+  },
+  {
+    "type": "relation",
+    "relation_type": "acompany_with",
+    "text": "疾病：肺曲菌病，并发症，疾病：过敏性鼻炎"
+  },
+  {
+    "type": "relation",
+    "relation_type": "acompany_with",
+    "text": "疾病：苯中毒，并发症，疾病：贫血"
+  },
+  {
+    "type": "relation",
+    "relation_type": "acompany_with",
+    "text": "疾病：急性肺脓肿，并发症，疾病：肺脓肿"
+  },
+  {
+    "type": "relation",
+    "relation_type": "acompany_with",
+    "text": "疾病：肺泡蛋白沉着症，并发症，疾病：呼吸衰竭"
+  },
+  {
+    "type": "relation",
+    "relation_type": "acompany_with",
+    "text": "疾病：呼吸道异物，并发症，疾病：肺脓肿"
+  },
+  {
+    "type": "relation",
+    "relation_type": "acompany_with",
+    "text": "疾病：免疫缺陷者肺炎，并发症，疾病：细菌性肺炎"
+  },
+  {
+    "type": "relation",
+    "relation_type": "acompany_with",
+    "text": "疾病：肺大泡，并发症，疾病：自发性气胸"
+  },
+  {
+    "type": "relation",
+    "relation_type": "acompany_with",
+    "text": "疾病：流行性感冒，并发症，疾病：心律失常"
+  },
+  {
+    "type": "relation",
+    "relation_type": "acompany_with",
+    "text": "疾病：肺癌，并发症，疾病：脓胸"
+  },
+  {
+    "type": "relation",
+    "relation_type": "acompany_with",
+    "text": "疾病：呼吸性细支气管相关的间质性肺疾病，并发症，疾病：气胸"
+  },
+  {
+    "type": "relation",
+    "relation_type": "acompany_with",
+    "text": "疾病：心室扑动和心室颤动，并发症，疾病：心性猝死综合征"
+  },
+  {
+    "type": "relation",
+    "relation_type": "acompany_with",
+    "text": "疾病：脱屑性间质性肺炎，并发症，疾病：气胸"
+  },
+  {
+    "type": "relation",
+    "relation_type": "acompany_with",
+    "text": "疾病：减压病，并发症，疾病：十二指肠先天性缺如、闭锁和狭窄"
+  },
+  {
+    "type": "relation",
+    "relation_type": "acompany_with",
+    "text": "疾病：气管肿瘤，并发症，疾病：气管食管瘘"
+  },
+  {
+    "type": "relation",
+    "relation_type": "acompany_with",
+    "text": "疾病：鼾症，并发症，疾病：心律失常"
+  },
+  {
+    "type": "relation",
+    "relation_type": "cure_way",
+    "text": "疾病：肺癌，治疗方式，治疗方式：药物治疗"
+  },
+  {
+    "type": "relation",
+    "relation_type": "cure_way",
+    "text": "疾病：急性呼吸衰竭，治疗方式，治疗方式：药物治疗"
+  },
+  {
+    "type": "relation",
+    "relation_type": "cure_way",
+    "text": "疾病：肺念珠菌病，治疗方式，治疗方式：抗真菌治疗，对症治疗，"
+  },
+  {
+    "type": "relation",
+    "relation_type": "cure_way",
+    "text": "疾病：呼吸道异物，治疗方式，治疗方式：手术治疗"
+  },
+  {
+    "type": "relation",
+    "relation_type": "cure_way",
+    "text": "疾病：军团菌病，治疗方式，治疗方式：药物治疗"
+  },
+  {
+    "type": "relation",
+    "relation_type": "cure_way",
+    "text": "疾病：二硫化碳中毒，治疗方式，治疗方式：药物治疗"
+  },
+  {
+    "type": "relation",
+    "relation_type": "cure_way",
+    "text": "疾病：肺曲菌病，治疗方式，治疗方式：抗曲霉菌药物治疗"
+  },
+  {
+    "type": "relation",
+    "relation_type": "cure_way",
+    "text": "疾病：过敏性休克，治疗方式，治疗方式：一旦发生就地抢救"
+  },
+  {
+    "type": "relation",
+    "relation_type": "cure_way",
+    "text": "疾病：脱囊，治疗方式，治疗方式：药物治疗"
+  },
+  {
+    "type": "relation",
+    "relation_type": "cure_way",
+    "text": "疾病：肺癌，治疗方式，治疗方式：化疗"
+  },
+  {
+    "type": "relation",
+    "relation_type": "cure_way",
+    "text": "疾病：肺水肿，治疗方式，治疗方式：支持性治疗"
+  },
+  {
+    "type": "relation",
+    "relation_type": "cure_way",
+    "text": "疾病：呼吸衰竭，治疗方式，治疗方式：支持性治疗"
+  },
+  {
+    "type": "relation",
+    "relation_type": "cure_way",
+    "text": "疾病：肺炎球菌肺炎，治疗方式，治疗方式：药物治疗"
+  },
+  {
+    "type": "relation",
+    "relation_type": "cure_way",
+    "text": "疾病：单纯性肺嗜酸粒细胞浸润症，治疗方式，治疗方式：药物治疗"
+  },
+  {
+    "type": "relation",
+    "relation_type": "cure_way",
+    "text": "疾病：肺水肿，治疗方式，治疗方式：药物治疗"
+  },
+  {
+    "type": "relation",
+    "relation_type": "cure_way",
+    "text": "疾病：感冒，治疗方式，治疗方式：对症治疗"
+  },
+  {
+    "type": "relation",
+    "relation_type": "cure_way",
+    "text": "疾病：肺炎，治疗方式，治疗方式：支持性治疗"
+  },
+  {
+    "type": "relation",
+    "relation_type": "cure_way",
+    "text": "疾病：汞中毒，治疗方式，治疗方式：支持性治疗"
+  },
+  {
+    "type": "relation",
+    "relation_type": "cure_way",
+    "text": "疾病：非典，治疗方式，治疗方式：支持性治疗"
+  },
+  {
+    "type": "relation",
+    "relation_type": "cure_way",
+    "text": "疾病：成人呼吸窘迫综合征，治疗方式，治疗方式：药物治疗"
+  },
+  {
+    "type": "relation",
+    "relation_type": "cure_way",
+    "text": "疾病：肺癌，治疗方式，治疗方式：手术治疗"
+  },
+  {
+    "type": "relation",
+    "relation_type": "cure_way",
+    "text": "疾病：肺出血－肾炎综合征，治疗方式，治疗方式：康复治疗"
+  },
+  {
+    "type": "relation",
+    "relation_type": "cure_way",
+    "text": "疾病：急性肺脓肿，治疗方式，治疗方式：抗生素药物治疗"
+  },
+  {
+    "type": "relation",
+    "relation_type": "cure_way",
+    "text": "疾病：肺气肿，治疗方式，治疗方式：药物治疗"
+  },
+  {
+    "type": "relation",
+    "relation_type": "cure_way",
+    "text": "疾病：肺癌，治疗方式，治疗方式：放射治疗"
+  },
+  {
+    "type": "relation",
+    "relation_type": "cure_way",
+    "text": "疾病：汞中毒，治疗方式，治疗方式：药物治疗"
+  },
+  {
+    "type": "relation",
+    "relation_type": "cure_way",
+    "text": "疾病：百日咳，治疗方式，治疗方式：支持性治疗"
+  },
+  {
+    "type": "relation",
+    "relation_type": "cure_way",
+    "text": "疾病：肺泡蛋白质沉积症，治疗方式，治疗方式：支气管肺泡灌洗"
+  },
+  {
+    "type": "relation",
+    "relation_type": "cure_way",
+    "text": "疾病：肺大泡，治疗方式，治疗方式：康复治疗"
+  },
+  {
+    "type": "relation",
+    "relation_type": "cure_way",
+    "text": "疾病：急性呼吸衰竭，治疗方式，治疗方式：支持性治疗"
+  },
+  {
+    "type": "relation",
+    "relation_type": "cure_way",
+    "text": "疾病：急性肺脓肿，治疗方式，治疗方式：支持性治疗"
+  },
+  {
+    "type": "relation",
+    "relation_type": "cure_way",
+    "text": "疾病：退行性黄韧带肥厚，治疗方式，治疗方式：康针灸推拿及康复治疗"
+  },
+  {
+    "type": "relation",
+    "relation_type": "cure_way",
+    "text": "疾病：苯中毒，治疗方式，治疗方式：支持性治疗"
+  },
+  {
+    "type": "relation",
+    "relation_type": "cure_way",
+    "text": "疾病：大量羊水吸入，治疗方式，治疗方式：药物治疗"
+  },
+  {
+    "type": "relation",
+    "relation_type": "cure_way",
+    "text": "疾病：退行性黄韧带肥厚，治疗方式，治疗方式：支持性治疗"
+  },
+  {
+    "type": "relation",
+    "relation_type": "cure_way",
+    "text": "疾病：大叶性肺炎，治疗方式，治疗方式：并发症治疗"
+  },
+  {
+    "type": "relation",
+    "relation_type": "cure_way",
+    "text": "疾病：百日咳，治疗方式，治疗方式：药物治疗"
+  },
+  {
+    "type": "relation",
+    "relation_type": "cure_way",
+    "text": "疾病：肺炎，治疗方式，治疗方式：药物治疗"
+  },
+  {
+    "type": "relation",
+    "relation_type": "cure_way",
+    "text": "疾病：呼吸道合胞病毒肺炎，治疗方式，治疗方式：支持性治疗"
+  },
+  {
+    "type": "relation",
+    "relation_type": "cure_way",
+    "text": "疾病：急性肺脓肿，治疗方式，治疗方式：必要时手术治疗"
+  },
+  {
+    "type": "relation",
+    "relation_type": "cure_way",
+    "text": "疾病：镉中毒，治疗方式，治疗方式：药物治疗"
+  },
+  {
+    "type": "relation",
+    "relation_type": "cure_way",
+    "text": "疾病：肺炎性假瘤，治疗方式，治疗方式：手术治疗"
+  },
+  {
+    "type": "relation",
+    "relation_type": "cure_way",
+    "text": "疾病：减压病，治疗方式，治疗方式：支持性治疗"
+  },
+  {
+    "type": "relation",
+    "relation_type": "cure_way",
+    "text": "疾病：过敏性肺炎，治疗方式，治疗方式：药物治疗"
+  },
+  {
+    "type": "relation",
+    "relation_type": "cure_way",
+    "text": "疾病：呼吸道合胞病毒肺炎，治疗方式，治疗方式：药物治疗"
+  },
+  {
+    "type": "relation",
+    "relation_type": "cure_way",
+    "text": "疾病：肺-胸膜阿米巴病，治疗方式，治疗方式：手术治疗"
+  },
+  {
+    "type": "relation",
+    "relation_type": "cure_way",
+    "text": "疾病：脱疽，治疗方式，治疗方式：药物治疗"
+  },
+  {
+    "type": "relation",
+    "relation_type": "cure_way",
+    "text": "疾病：急性呼吸窘迫综合征，治疗方式，治疗方式：药物治疗"
+  },
+  {
+    "type": "relation",
+    "relation_type": "cure_way",
+    "text": "疾病：大楼病综合征，治疗方式，治疗方式：支持性治疗"
+  },
+  {
+    "type": "relation",
+    "relation_type": "cure_way",
+    "text": "疾病：脱囊，治疗方式，治疗方式：康复治疗"
+  },
+  {
+    "type": "relation",
+    "relation_type": "cure_way",
+    "text": "疾病：心室扑动和心室颤动，治疗方式，治疗方式：支持性治疗"
+  },
+  {
+    "type": "relation",
+    "relation_type": "cure_way",
+    "text": "疾病：大叶性肺炎，治疗方式，治疗方式：对症支持性治疗"
+  },
+  {
+    "type": "relation",
+    "relation_type": "cure_way",
+    "text": "疾病：肺隐球菌病，治疗方式，治疗方式：药物治疗"
+  },
+  {
+    "type": "relation",
+    "relation_type": "cure_way",
+    "text": "疾病：乳房导管内乳头状瘤，治疗方式，治疗方式：药物治疗"
+  },
+  {
+    "type": "relation",
+    "relation_type": "cure_way",
+    "text": "疾病：肺栓塞，治疗方式，治疗方式：外科治疗"
+  },
+  {
+    "type": "relation",
+    "relation_type": "cure_way",
+    "text": "疾病：脱疽，治疗方式，治疗方式：支持性治疗"
+  },
+  {
+    "type": "relation",
+    "relation_type": "cure_way",
+    "text": "疾病：肺转移瘤，治疗方式，治疗方式：支持性治疗"
+  },
+  {
+    "type": "relation",
+    "relation_type": "cure_way",
+    "text": "疾病：肺出血－肾炎综合征，治疗方式，治疗方式：药物治疗"
+  },
+  {
+    "type": "relation",
+    "relation_type": "cure_way",
+    "text": "疾病：肺大疱，治疗方式，治疗方式：手术治疗"
+  },
+  {
+    "type": "relation",
+    "relation_type": "cure_way",
+    "text": "疾病：肺栓塞，治疗方式，治疗方式：药物治疗"
+  },
+  {
+    "type": "relation",
+    "relation_type": "belongs_to",
+    "text": "疾病：呼吸道合胞病毒肺炎，所属科室，科室：呼吸内科"
+  },
+  {
+    "type": "relation",
+    "relation_type": "belongs_to",
+    "text": "疾病：百日咳，所属科室，科室：小儿内科"
+  },
+  {
+    "type": "relation",
+    "relation_type": "belongs_to",
+    "text": "疾病：肺炎性假瘤，所属科室，科室：心胸外科"
+  },
+  {
+    "type": "relation",
+    "relation_type": "belongs_to",
+    "text": "疾病：球孢子菌病，所属科室，科室：传染科"
+  },
+  {
+    "type": "relation",
+    "relation_type": "belongs_to",
+    "text": "疾病：乳房导管内乳头状瘤，所属科室，科室：肿瘤外科"
+  },
+  {
+    "type": "relation",
+    "relation_type": "belongs_to",
+    "text": "疾病：喘息样支气管炎，所属科室，科室：呼吸内科"
+  },
+  {
+    "type": "relation",
+    "relation_type": "belongs_to",
+    "text": "疾病：感冒，所属科室，科室：呼吸内科"
+  },
+  {
+    "type": "relation",
+    "relation_type": "belongs_to",
+    "text": "疾病：热带性肺嗜酸粒细胞浸润症，所属科室，科室：呼吸内科"
+  },
+  {
+    "type": "relation",
+    "relation_type": "belongs_to",
+    "text": "疾病：肺脓肿，所属科室，科室：呼吸内科"
+  },
+  {
+    "type": "relation",
+    "relation_type": "belongs_to",
+    "text": "疾病：气胸，所属科室，科室：呼吸内科"
+  },
+  {
+    "type": "relation",
+    "relation_type": "belongs_to",
+    "text": "疾病：单纯性肺嗜酸粒细胞浸润症，所属科室，科室：呼吸内科"
+  },
+  {
+    "type": "relation",
+    "relation_type": "belongs_to",
+    "text": "疾病：迁延性肺嗜酸粒细胞浸润症，所属科室，科室：呼吸内科"
+  },
+  {
+    "type": "relation",
+    "relation_type": "belongs_to",
+    "text": "疾病：肺炎，所属科室，科室：呼吸内科"
+  },
+  {
+    "type": "relation",
+    "relation_type": "belongs_to",
+    "text": "疾病：急性呼吸衰竭，所属科室，科室：呼吸内科"
+  },
+  {
+    "type": "relation",
+    "relation_type": "belongs_to",
+    "text": "疾病：肺炎球菌肺炎，所属科室，科室：呼吸内科"
+  },
+  {
+    "type": "relation",
+    "relation_type": "belongs_to",
+    "text": "疾病：缺血缺氧性脑病，所属科室，科室：儿科综合"
+  },
+  {
+    "type": "relation",
+    "relation_type": "belongs_to",
+    "text": "疾病：肺水肿，所属科室，科室：呼吸内科"
+  },
+  {
+    "type": "relation",
+    "relation_type": "belongs_to",
+    "text": "疾病：肺癌，所属科室，科室：肿瘤内科"
+  },
+  {
+    "type": "relation",
+    "relation_type": "belongs_to",
+    "text": "疾病：过敏性休克，所属科室，科室：急诊科"
+  },
+  {
+    "type": "relation",
+    "relation_type": "belongs_to",
+    "text": "疾病：老年肺炎，所属科室，科室：呼吸内科"
+  },
+  {
+    "type": "relation",
+    "relation_type": "belongs_to",
+    "text": "疾病：大量羊水吸入，所属科室，科室：小儿内科"
+  },
+  {
+    "type": "relation",
+    "relation_type": "belongs_to",
+    "text": "疾病：肺隐球菌病，所属科室，科室：呼吸内科"
+  },
+  {
+    "type": "relation",
+    "relation_type": "belongs_to",
+    "text": "疾病：特发性阻塞性细支气管炎伴机化性肺炎，所属科室，科室：呼吸内科"
+  },
+  {
+    "type": "relation",
+    "relation_type": "belongs_to",
+    "text": "疾病：咯血，所属科室，科室：呼吸内科"
+  },
+  {
+    "type": "relation",
+    "relation_type": "belongs_to",
+    "text": "疾病：肺炎杆菌肺炎，所属科室，科室：呼吸内科"
+  },
+  {
+    "type": "relation",
+    "relation_type": "belongs_to",
+    "text": "疾病：卡氏肺囊虫肺炎，所属科室，科室：呼吸内科"
+  },
+  {
+    "type": "relation",
+    "relation_type": "belongs_to",
+    "text": "疾病：肺泡蛋白质沉积症，所属科室，科室：呼吸内科"
+  },
+  {
+    "type": "relation",
+    "relation_type": "belongs_to",
+    "text": "疾病：气管肿瘤，所属科室，科室：肿瘤内科"
+  },
+  {
+    "type": "relation",
+    "relation_type": "belongs_to",
+    "text": "疾病：流行性感冒，所属科室，科室：呼吸内科"
+  },
+  {
+    "type": "relation",
+    "relation_type": "belongs_to",
+    "text": "疾病：免疫缺陷者肺炎，所属科室，科室：呼吸内科"
+  },
+  {
+    "type": "relation",
+    "relation_type": "belongs_to",
+    "text": "疾病：肺念珠菌病，所属科室，科室：呼吸内科"
+  },
+  {
+    "type": "relation",
+    "relation_type": "belongs_to",
+    "text": "疾病：汞中毒，所属科室，科室：急诊科"
+  },
+  {
+    "type": "relation",
+    "relation_type": "belongs_to",
+    "text": "疾病：鼾症，所属科室，科室：呼吸内科"
+  },
+  {
+    "type": "relation",
+    "relation_type": "belongs_to",
+    "text": "疾病：呼吸道异物，所属科室，科室：呼吸内科"
+  },
+  {
+    "type": "relation",
+    "relation_type": "belongs_to",
+    "text": "疾病：过敏性肺炎，所属科室，科室：呼吸内科"
+  },
+  {
+    "type": "relation",
+    "relation_type": "belongs_to",
+    "text": "疾病：气管先天性疾病，所属科室，科室：心胸外科"
+  },
+  {
+    "type": "relation",
+    "relation_type": "belongs_to",
+    "text": "疾病：军团菌病，所属科室，科室：呼吸内科"
+  },
+  {
+    "type": "relation",
+    "relation_type": "belongs_to",
+    "text": "疾病：成人呼吸窘迫综合征，所属科室，科室：呼吸内科"
+  },
+  {
+    "type": "relation",
+    "relation_type": "belongs_to",
+    "text": "疾病：硫化氢中毒，所属科室，科室：急诊科"
+  },
+  {
+    "type": "relation",
+    "relation_type": "belongs_to",
+    "text": "疾病：咖啡因与氨茶碱中毒，所属科室，科室：急诊科"
+  },
+  {
+    "type": "relation",
+    "relation_type": "common_drug",
+    "text": "疾病：感冒，常用药物，药品：利巴韦林颗粒"
+  },
+  {
+    "type": "relation",
+    "relation_type": "common_drug",
+    "text": "疾病：肺炎杆菌肺炎，常用药物，药品：头孢氨苄胶囊"
+  },
+  {
+    "type": "relation",
+    "relation_type": "common_drug",
+    "text": "疾病：单纯性肺嗜酸粒细胞浸润症，常用药物，药品：头孢泊肟酯胶囊"
+  },
+  {
+    "type": "relation",
+    "relation_type": "common_drug",
+    "text": "疾病：过敏性休克，常用药物，药品：盐酸苯海拉明注射液"
+  },
+  {
+    "type": "relation",
+    "relation_type": "common_drug",
+    "text": "疾病：肺炎性假瘤，常用药物，药品：托西酸舒他西林胶囊"
+  },
+  {
+    "type": "relation",
+    "relation_type": "common_drug",
+    "text": "疾病：肺脓肿，常用药物，药品：回生甘露丸"
+  },
+  {
+    "type": "relation",
+    "relation_type": "common_drug",
+    "text": "疾病：肺炎球菌肺炎，常用药物，药品：阿奇霉素片"
+  },
+  {
+    "type": "relation",
+    "relation_type": "common_drug",
+    "text": "疾病：Goodpasture综合征，常用药物，药品：雷公藤多苷片"
+  },
+  {
+    "type": "relation",
+    "relation_type": "common_drug",
+    "text": "疾病：肺气肿，常用药物，药品：氨茶碱片"
+  },
+  {
+    "type": "relation",
+    "relation_type": "common_drug",
+    "text": "疾病：肺栓塞，常用药物，药品：注射用尿激酶"
+  },
+  {
+    "type": "relation",
+    "relation_type": "common_drug",
+    "text": "疾病：肺水肿，常用药物，药品：呋塞米片"
+  },
+  {
+    "type": "relation",
+    "relation_type": "common_drug",
+    "text": "疾病：肺转移瘤，常用药物，药品：转移因子口服溶液"
+  },
+  {
+    "type": "relation",
+    "relation_type": "common_drug",
+    "text": "疾病：Goodpasture综合征，常用药物，药品：甲泼尼龙片"
+  },
+  {
+    "type": "relation",
+    "relation_type": "common_drug",
+    "text": "疾病：肺出血－肾炎综合征，常用药物，药品：甲泼尼龙片"
+  },
+  {
+    "type": "relation",
+    "relation_type": "common_drug",
+    "text": "疾病：肺-胸膜阿米巴病，常用药物，药品：甲硝唑片"
+  },
+  {
+    "type": "relation",
+    "relation_type": "common_drug",
+    "text": "疾病：肺栓塞，常用药物，药品：双嘧达莫片"
+  },
+  {
+    "type": "relation",
+    "relation_type": "common_drug",
+    "text": "疾病：肺放线菌病，常用药物，药品：盐酸克林霉素棕榈酸酯分散片"
+  },
+  {
+    "type": "relation",
+    "relation_type": "common_drug",
+    "text": "疾病：大楼病综合征，常用药物，药品：云南花粉片"
+  },
+  {
+    "type": "relation",
+    "relation_type": "common_drug",
+    "text": "疾病：肺癌，常用药物，药品：槐耳颗粒"
+  },
+  {
+    "type": "relation",
+    "relation_type": "common_drug",
+    "text": "疾病：肺-胸膜阿米巴病，常用药物，药品：替硝唑片"
+  },
+  {
+    "type": "relation",
+    "relation_type": "common_drug",
+    "text": "疾病：肺癌，常用药物，药品：复方万年青胶囊"
+  },
+  {
+    "type": "relation",
+    "relation_type": "common_drug",
+    "text": "疾病：二硫化碳中毒，常用药物，药品：十一味金色丸"
+  },
+  {
+    "type": "relation",
+    "relation_type": "common_drug",
+    "text": "疾病：心室扑动和心室颤动，常用药物，药品：盐酸普萘洛尔片"
+  },
+  {
+    "type": "relation",
+    "relation_type": "common_drug",
+    "text": "疾病：肺脓肿，常用药物，药品：阿莫西林克拉维酸钾(4:1)分散片"
+  },
+  {
+    "type": "relation",
+    "relation_type": "common_drug",
+    "text": "疾病：蠕形螨病，常用药物，药品：曲安奈德益康唑乳膏"
+  },
+  {
+    "type": "relation",
+    "relation_type": "common_drug",
+    "text": "疾病：成人呼吸窘迫综合征，常用药物，药品：注射用还原型谷胱甘肽钠"
+  },
+  {
+    "type": "relation",
+    "relation_type": "common_drug",
+    "text": "疾病：肺念珠菌病，常用药物，药品：克霉唑阴道片"
+  },
+  {
+    "type": "relation",
+    "relation_type": "common_drug",
+    "text": "疾病：心室扑动和心室颤动，常用药物，药品：地高辛酏剂"
+  },
+  {
+    "type": "relation",
+    "relation_type": "common_drug",
+    "text": "疾病：肺曲菌病，常用药物，药品：乳酸左氧氟沙星片"
+  },
+  {
+    "type": "relation",
+    "relation_type": "common_drug",
+    "text": "疾病：脱囊，常用药物，药品：维生素B2片"
+  },
+  {
+    "type": "relation",
+    "relation_type": "common_drug",
+    "text": "疾病：单纯性肺嗜酸粒细胞浸润症，常用药物，药品：头孢氨苄甲氧苄啶片"
+  },
+  {
+    "type": "relation",
+    "relation_type": "common_drug",
+    "text": "疾病：肺炎性假瘤，常用药物，药品：注射用盐酸头孢替安"
+  },
+  {
+    "type": "relation",
+    "relation_type": "common_drug",
+    "text": "疾病：肺炎，常用药物，药品：阿奇霉素片"
+  },
+  {
+    "type": "relation",
+    "relation_type": "common_drug",
+    "text": "疾病：苯中毒，常用药物，药品：布美他尼片"
+  },
+  {
+    "type": "relation",
+    "relation_type": "common_drug",
+    "text": "疾病：苯中毒，常用药物，药品：十一味金色丸"
+  },
+  {
+    "type": "relation",
+    "relation_type": "common_drug",
+    "text": "疾病：呼吸性细支气管相关的间质性肺疾病，常用药物，药品：清热消炎宁片"
+  },
+  {
+    "type": "relation",
+    "relation_type": "common_drug",
+    "text": "疾病：过敏性休克，常用药物，药品：注射用氢化可的松琥珀酸钠"
+  },
+  {
+    "type": "relation",
+    "relation_type": "common_drug",
+    "text": "疾病：成人呼吸窘迫综合征，常用药物，药品：人血白蛋白"
+  },
+  {
+    "type": "relation",
+    "relation_type": "common_drug",
+    "text": "疾病：放射性肺炎，常用药物，药品：乳酸左氧氟沙星片"
+  },
+  {
+    "type": "relation",
+    "relation_type": "common_drug",
+    "text": "疾病：镉中毒，常用药物，药品：布美他尼片"
+  },
+  {
+    "type": "relation",
+    "relation_type": "drugs_of",
+    "text": "Producer：黄河中药益脉康软胶囊，生产药品，药品：益脉康软胶囊"
+  },
+  {
+    "type": "relation",
+    "relation_type": "drugs_of",
+    "text": "Producer：长红制药人工牛黄甲硝唑胶囊，生产药品，药品：人工牛黄甲硝唑胶囊"
+  },
+  {
+    "type": "relation",
+    "relation_type": "drugs_of",
+    "text": "Producer：伊顺药业板蓝根滴丸，生产药品，药品：板蓝根滴丸"
+  },
+  {
+    "type": "relation",
+    "relation_type": "drugs_of",
+    "text": "Producer：鲁抗赛特西洛他唑片，生产药品，药品：西洛他唑片"
+  },
+  {
+    "type": "relation",
+    "relation_type": "drugs_of",
+    "text": "Producer：999茵栀黄口服液，生产药品，药品：茵栀黄口服液"
+  },
+  {
+    "type": "relation",
+    "relation_type": "drugs_of",
+    "text": "Producer：鲁抗阿莫西林颗粒，生产药品，药品：阿莫西林颗粒"
+  },
+  {
+    "type": "relation",
+    "relation_type": "drugs_of",
+    "text": "Producer：显锋科技盐酸林可霉素胶囊，生产药品，药品：盐酸林可霉素胶囊"
+  },
+  {
+    "type": "relation",
+    "relation_type": "drugs_of",
+    "text": "Producer：重庆芸峰甘露消渴胶囊，生产药品，药品：甘露消渴胶囊"
+  },
+  {
+    "type": "relation",
+    "relation_type": "drugs_of",
+    "text": "Producer：马应龙地奥司明片，生产药品，药品：地奥司明片"
+  },
+  {
+    "type": "relation",
+    "relation_type": "drugs_of",
+    "text": "Producer：培磊能，生产药品，药品：甲磺酸二氢麦角碱缓释胶囊"
+  },
+  {
+    "type": "relation",
+    "relation_type": "drugs_of",
+    "text": "Producer：赛治，生产药品，药品：甲巯咪唑片"
+  },
+  {
+    "type": "relation",
+    "relation_type": "drugs_of",
+    "text": "Producer：莱恩药业硫酸阿托品注射液，生产药品，药品：硫酸阿托品注射液"
+  },
+  {
+    "type": "relation",
+    "relation_type": "drugs_of",
+    "text": "Producer：石药阿莫西林颗粒，生产药品，药品：阿莫西林颗粒"
+  },
+  {
+    "type": "relation",
+    "relation_type": "drugs_of",
+    "text": "Producer：润弘制药硫酸阿托品注射液，生产药品，药品：硫酸阿托品注射液"
+  },
+  {
+    "type": "relation",
+    "relation_type": "drugs_of",
+    "text": "Producer：茂祥制药补金片，生产药品，药品：补金片"
+  },
+  {
+    "type": "relation",
+    "relation_type": "drugs_of",
+    "text": "Producer：三门峡广宇脑乐静口服液，生产药品，药品：脑乐静口服液"
+  },
+  {
+    "type": "relation",
+    "relation_type": "drugs_of",
+    "text": "Producer：康缘药业克林霉素磷酸酯注射，生产药品，药品：克林霉素磷酸酯注射液"
+  },
+  {
+    "type": "relation",
+    "relation_type": "drugs_of",
+    "text": "Producer：震元石杉碱甲片，生产药品，药品：石杉碱甲片"
+  },
+  {
+    "type": "relation",
+    "relation_type": "drugs_of",
+    "text": "Producer：强健乳康片，生产药品，药品：乳康片"
+  },
+  {
+    "type": "relation",
+    "relation_type": "drugs_of",
+    "text": "Producer：安徽同泰乳宁片，生产药品，药品：乳宁片"
+  }
+]

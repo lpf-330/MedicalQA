@@ -9,12 +9,9 @@
 文件名作为资源配置的唯一标识。
 """
 
-from typing import Dict, Any, Type
+from typing import Dict, Any
 import importlib
-import os
 from pathlib import Path
-
-from src.config.pool_config import PoolConfig
 
 
 def load_resource_config(config_name: str) -> Dict[str, Any]:

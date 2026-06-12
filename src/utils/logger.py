@@ -6,9 +6,137 @@
 
 import logging
 import sys
-from typing import Optional, Dict, Any
+from contextvars import ContextVar
 from pathlib import Path
-from datetime import datetime
+from typing import Any, Dict, Iterable, Mapping, Optional
+
+
+_LOG_CONTEXT: ContextVar[Dict[str, str]] = ContextVar("medicalqa_log_context", default={})
+
+
+def set_log_context(
+    *,
+    session_id: str = "",
+    request_id: str = "",
+    task_id: str = "",
+    business_type: str = "",
+) -> None:
+    current_context = dict(_LOG_CONTEXT.get())
+    next_context = {
+        **current_context,
+        "session_id": session_id or current_context.get("session_id", ""),
+        "request_id": request_id or current_context.get("request_id", ""),
+        "task_id": task_id or current_context.get("task_id", ""),
+        "business_type": business_type or current_context.get("business_type", ""),
+    }
+    _LOG_CONTEXT.set(next_context)
+
+
+def clear_log_context() -> None:
+    _LOG_CONTEXT.set({})
+
+
+def get_log_context() -> Dict[str, str]:
+    return dict(_LOG_CONTEXT.get())
+
+
+def format_log_context() -> str:
+    context = get_log_context()
+    return _format_fields(context)
+
+
+def _format_fields(fields: Mapping[str, Any]) -> str:
+    return ", ".join(f"{key}={value}" for key, value in fields.items())
+
+
+def _format_context_with(fields: Mapping[str, Any]) -> str:
+    context = get_log_context()
+    merged_fields = {**context, **fields}
+    return _format_fields(merged_fields)
+
+
+def truncate_for_log(value: str, max_len: int = 500) -> str:
+    """Truncate a string for safe logging, adding '...' if truncated."""
+    if len(value) <= max_len:
+        return value
+    return value[:max_len] + "..."
+
+
+def log_arch_event(
+    target_logger: Any,
+    *,
+    component: str,
+    stage: str,
+    event: str,
+    status: str = "success",
+    duration_ms: float | None = None,
+    design_id: str = "",
+    **fields: Any,
+) -> None:
+    event_fields: Dict[str, Any] = {
+        "component": component,
+        "stage": stage,
+        "event": event,
+        "status": status,
+    }
+    if duration_ms is not None:
+        event_fields["duration_ms"] = f"{duration_ms:.2f}"
+    if design_id:
+        event_fields["design_id"] = design_id
+    event_fields.update(fields)
+    target_logger.info(f"[ARCH_FLOW] {_format_context_with(event_fields)}")
+
+
+def log_llm_input_final(
+    target_logger: Any,
+    *,
+    component: str,
+    model_operation: str,
+    messages: Iterable[Mapping[str, Any]],
+    prompt: str,
+    **fields: Any,
+) -> None:
+    materialized_messages = list(messages)
+    common_fields = {
+        "component": component,
+        "model_operation": model_operation,
+        "message_count": len(materialized_messages),
+        "prompt_length": len(prompt),
+        **fields,
+    }
+    target_logger.info(f"[LLM_INPUT_FINAL_BEGIN] {_format_context_with(common_fields)}")
+    for index, message in enumerate(materialized_messages):
+        role = message.get("role", "")
+        content = message.get("content", "")
+        message_fields = {
+            "component": component,
+            "model_operation": model_operation,
+            "message_index": index,
+            "role": role,
+            "content_length": len(content),
+            "content": content,
+        }
+        target_logger.info(f"[LLM_INPUT_FINAL_MESSAGE] {_format_context_with(message_fields)}")
+    prompt_fields = {
+        "component": component,
+        "model_operation": model_operation,
+        "prompt_length": len(prompt),
+        "prompt": prompt,
+    }
+    target_logger.info(f"[LLM_INPUT_FINAL_PROMPT] {_format_context_with(prompt_fields)}")
+    target_logger.info(f"[LLM_INPUT_FINAL_END] {_format_context_with(common_fields)}")
+
+
+class ContextVarFilter(logging.Filter):
+    """将 ContextVar 中的关联 ID 注入到每条日志记录中"""
+
+    def filter(self, record: logging.LogRecord) -> bool:
+        context = get_log_context()
+        record.session_id = context.get("session_id", "")
+        record.request_id = context.get("request_id", "")
+        record.task_id = context.get("task_id", "")
+        record.business_type = context.get("business_type", "")
+        return True
 
 
 class Logger:

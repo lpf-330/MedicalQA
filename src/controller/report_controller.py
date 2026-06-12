@@ -4,23 +4,20 @@
 该模块定义了ReportController类，是健康报告生成的API接口控制器。
 """
 
-from typing import TYPE_CHECKING, Optional, Dict
+from typing import TYPE_CHECKING, Dict, AsyncGenerator
 import uuid
 from datetime import datetime
-import time
 import json
 import logging
 
 if TYPE_CHECKING:
     from src.service.report_service import ReportService
-    from src.orchestration.agent.data_classes import AgentContext, AgentResult
 
 from fastapi import HTTPException
 from starlette.responses import StreamingResponse
 
-from src.schemas.report_request import ReportRequest, ReportRequestBody
-from src.schemas.report_response import ReportResponse, ReportResponseData
-from src.utils.logger import get_logger
+from src.schemas.report_request import ReportRequest
+from src.utils.logger import get_logger, set_log_context, clear_log_context, log_arch_event
 from src.utils.exception_handler import MedicalQAException, ErrorCode
 
 logger = get_logger(__name__)
@@ -78,19 +75,22 @@ class ReportController:
         Raises:
             HTTPException: 请求参数错误时抛出
         """
-        start_time = time.time()
-
         try:
             logger.info("=" * 60)
-            logger.info(f"[ReportController] 收到健康报告生成请求")
+            logger.info("[ReportController] 收到健康报告生成请求")
             logger.info(f"  request_id: {request.request_id}")
             logger.info("=" * 60)
+
+            logger.info(f"[REQUEST_BODY] request_id={request.request_id}, task_id={request.body.task_id if request.body else ''}, "
+                        f"has_monitoring_data={request.body.monitoring_data is not None if request.body else False}, "
+                        f"has_user_profile={request.body.user_profile is not None if request.body else False}, "
+                        f"session_id={request.get_session_id()}")
 
             business_logger.info(f"[请求] request_id={request.request_id}, task_id={request.get_task_id()}")
 
             # 验证请求参数
             self._validate_request(request)
-            logger.info(f"[ReportController] 请求验证通过")
+            logger.info("[ReportController] 请求验证通过")
 
             # 生成session_id（如果没有提供）
             session_id = request.get_session_id()
@@ -98,15 +98,30 @@ class ReportController:
                 session_id = self._generate_session_id()
 
             # 构建AgentContext
-            agent_context = self._report_service._build_agent_context(request)
+            agent_context = self._report_service.build_agent_context(request)
             if not agent_context.session_id:
                 agent_context.session_id = session_id
 
             logger.info(f"[ReportController] 开始流式处理: session_id={session_id}")
 
+            set_log_context(
+                session_id=session_id,
+                request_id=request.request_id,
+                task_id=request.body.task_id if request.body and request.body.task_id else "",
+                business_type="report",
+            )
+            log_arch_event(
+                logger,
+                component="ReportController",
+                stage="CONTROLLER",
+                event="generate_report",
+                status="start",
+                design_id="ARCH-1.1",
+            )
+
             # 调用服务层处理报告生成流
             return StreamingResponse(
-                self._report_service.process_report_stream(agent_context),
+                self._log_sse_chunks(self._report_service.process_report_stream(agent_context)),
                 media_type="text/event-stream"
             )
 
@@ -114,7 +129,6 @@ class ReportController:
             raise
 
         except MedicalQAException as e:
-            elapsed = time.time() - start_time
             logger.error(f"[ReportController] 业务异常: error_code={e.error_code}, message={e.message}")
             business_logger.warning(f"[请求失败] request_id={request.request_id}, error={e.message}")
             return StreamingResponse(
@@ -123,11 +137,10 @@ class ReportController:
             )
 
         except Exception as e:
-            elapsed = time.time() - start_time
             logger.exception(f"[ReportController] 未知异常: {str(e)}")
             business_logger.error(f"[请求异常] request_id={request.request_id}, error={str(e)}")
             return StreamingResponse(
-                iter([self._format_sse_error(500, f"系统内部错误: {str(e)}")]),
+                iter([self._format_sse_error(500, "系统内部错误，请稍后重试")]),
                 media_type="text/event-stream"
             )
 
@@ -146,6 +159,7 @@ class ReportController:
         """
         # 验证body不为空
         if not request.body:
+            logger.warning(f"[VALIDATION_FAIL] field=body, reason=body不能为空, request_id={request.request_id}")
             raise HTTPException(
                 status_code=400,
                 detail={"error_code": ErrorCode.PARAM_MISSING.value, "error_message": "body不能为空"}
@@ -153,6 +167,7 @@ class ReportController:
 
         # 验证task_id不为空
         if not request.body.task_id:
+            logger.warning(f"[VALIDATION_FAIL] field=task_id, reason=task_id不能为空, request_id={request.request_id}")
             raise HTTPException(
                 status_code=400,
                 detail={"error_code": ErrorCode.PARAM_MISSING.value, "error_message": "task_id不能为空"}
@@ -160,6 +175,7 @@ class ReportController:
 
         # 验证monitoring_data不为空
         if not request.body.monitoring_data:
+            logger.warning(f"[VALIDATION_FAIL] field=monitoring_data, reason=monitoring_data不能为空, request_id={request.request_id}")
             raise HTTPException(
                 status_code=400,
                 detail={"error_code": ErrorCode.PARAM_MISSING.value, "error_message": "monitoring_data不能为空"}
@@ -167,6 +183,7 @@ class ReportController:
 
         # 验证user_profile不为空
         if not request.body.user_profile:
+            logger.warning(f"[VALIDATION_FAIL] field=user_profile, reason=user_profile不能为空, request_id={request.request_id}")
             raise HTTPException(
                 status_code=400,
                 detail={"error_code": ErrorCode.PARAM_MISSING.value, "error_message": "user_profile不能为空"}
@@ -184,6 +201,7 @@ class ReportController:
         )
 
         if not has_monitoring_data:
+            logger.warning(f"[VALIDATION_FAIL] field=monitoring_indicators, reason=至少需要包含一项监测指标, request_id={request.request_id}")
             raise HTTPException(
                 status_code=400,
                 detail={"error_code": ErrorCode.PARAM_INVALID.value, "error_message": "监测数据至少需要包含一项监测指标（心率、血糖、灌注指数、血氧、睡眠、血压）"}
@@ -235,6 +253,17 @@ class ReportController:
         payload = json.dumps({"error_code": error_code, "error_message": error_message}, ensure_ascii=False)
         return f"event: error\ndata: {payload}\n\n"
 
+    async def _log_sse_chunks(self, generator: AsyncGenerator[str, None]) -> AsyncGenerator[str, None]:
+        chunk_count = 0
+        try:
+            async for chunk in generator:
+                chunk_count += 1
+                logger.debug(f"[SSE_CHUNK] index={chunk_count}, length={len(chunk)}")
+                yield chunk
+        finally:
+            logger.info(f"[SSE_STREAM_END] total_chunks={chunk_count}")
+            clear_log_context()
+
     def _generate_session_id(self) -> str:
         """
         生成唯一会话ID
@@ -244,7 +273,9 @@ class ReportController:
         Returns:
             str: 唯一的会话ID
         """
-        return f"session_{uuid.uuid4().hex[:16]}_{datetime.now().strftime('%Y%m%d%H%M%S')}"
+        session_id = f"session_{uuid.uuid4().hex[:16]}_{datetime.now().strftime('%Y%m%d%H%M%S')}"
+        logger.info(f"[SESSION_ID_GENERATED] session_id={session_id}")
+        return session_id
 
     def __repr__(self) -> str:
         """
@@ -254,3 +285,32 @@ class ReportController:
             str: ReportController的字符串表示
         """
         return f"ReportController(report_service={self._report_service})"
+
+
+# FastAPI 路由注册
+from fastapi import APIRouter, Request
+from src.schemas.report_request import ReportRequest, ReportRequestBody
+
+router = APIRouter(prefix="/api/v1", tags=["report"])
+
+
+@router.post("/report")
+async def generate_report(body: ReportRequestBody, request_id: str = "default", user_id: str = None, request: Request = None):
+    """
+    健康报告生成API
+
+    Args:
+        body: 报告请求体（包含task_id, monitoring_data, user_profile等）
+        request_id: 请求ID（可选）
+        user_id: 用户ID（可选）
+
+    Returns:
+        健康报告生成结果
+    """
+    report_request = ReportRequest(
+        request_id=request_id,
+        user_id=user_id,
+        body=body
+    )
+    controller = request.app.state.report_controller
+    return controller.generate_report(report_request)

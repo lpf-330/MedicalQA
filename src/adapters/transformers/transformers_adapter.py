@@ -6,11 +6,13 @@ Transformers适配器接口
 为项目各层级、各类提供统一的Transformers模型操作接口。
 """
 
-from abc import ABC, abstractmethod
-from typing import Any, Dict, List
+from abc import abstractmethod
+from typing import Dict, List
+
+from src.adapters.base_adapter import BaseAdapter
 
 
-class TransformersAdapter(ABC):
+class TransformersAdapter(BaseAdapter):
     """
     Transformers适配器接口
 
@@ -22,6 +24,16 @@ class TransformersAdapter(ABC):
         result = adapter.predict(text="患者出现发热症状")
         adapter.unload_model()
     """
+
+    @abstractmethod
+    def is_initialized(self) -> bool:
+        """
+        检查适配器是否已初始化
+        
+        Returns:
+            bool: 是否已初始化（模型已加载）
+        """
+        pass
 
     @abstractmethod
     def load_model(

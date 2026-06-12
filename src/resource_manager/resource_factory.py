@@ -54,7 +54,7 @@ class ResourceFactory(ABC):
             
         Example:
             >>> factory = Neo4jResourceFactory()
-            >>> config = Neo4jResourceConfig(...)
+            >>> config = Neo4jConnectionConfig(...)
             >>> resource = factory.create(config)
             >>> resource.get_type()
             'neo4j_database'

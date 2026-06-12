@@ -6,11 +6,13 @@ Neo4j适配器接口
 为项目各层级、各类提供统一的Neo4j数据库操作接口。
 """
 
-from abc import ABC, abstractmethod
+from abc import abstractmethod
 from typing import Any, Dict, List
 
+from src.adapters.base_adapter import BaseAdapter
 
-class Neo4jAdapter(ABC):
+
+class Neo4jAdapter(BaseAdapter):
     """
     Neo4j适配器接口
     
@@ -22,6 +24,16 @@ class Neo4jAdapter(ABC):
         results = adapter.execute_query("MATCH (d:Disease) RETURN d LIMIT 10")
         adapter.disconnect()
     """
+    
+    @abstractmethod
+    def is_initialized(self) -> bool:
+        """
+        检查适配器是否已初始化
+        
+        Returns:
+            bool: 是否已初始化（已连接）
+        """
+        pass
     
     @abstractmethod
     def connect(self) -> None:

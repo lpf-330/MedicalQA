@@ -5,7 +5,11 @@
 该模块定义了StateMachine类，为每一个agent策略提供状态机支持。
 """
 
+import logging
+import time
 from typing import Dict, List, Optional
+
+logger = logging.getLogger(__name__)
 
 
 class StateMachine:
@@ -58,6 +62,7 @@ class StateMachine:
 
         self._session_id: str = session_id
         self._state_transition_map: Dict[str, List[str]] = state_transition_map or {}
+        logger.info(f"[StateMachine.__init__] 状态机初始化: session_id={session_id}, state_count={len(self._state_transition_map)}")
 
     @property
     def session_id(self) -> str:
@@ -79,7 +84,7 @@ class StateMachine:
         """
         return self._state_transition_map.copy()
 
-    def transition(self, current_state: str, target_state: str) -> str:
+    def transition(self, current_state: str, target_state: str, trigger: str = "state_handler", reason: str = "") -> str:
         """
         变更当前状态到目标状态
 
@@ -88,6 +93,8 @@ class StateMachine:
         Args:
             current_state: 当前状态
             target_state: 目标状态
+            trigger: 触发条件，默认为"state_handler"
+            reason: 状态转换原因，默认为空字符串
 
         Returns:
             str: 目标状态
@@ -99,18 +106,33 @@ class StateMachine:
             >>> sm.transition("INIT", "ANALYZING")
             "ANALYZING"
         """
+        start_time = time.time()
         if not current_state:
             raise ValueError("current_state不能为空")
         if not target_state:
             raise ValueError("target_state不能为空")
 
-        # 验证状态转换的合法性
+        if current_state == target_state:
+            elapsed = time.time() - start_time
+            logger.debug(f"[StateMachine.transition] 状态保持不变: session_id={self._session_id}, state={current_state}")
+            logger.info(f"[FSM_TRANSITION] session_id={self._session_id}, from={current_state}, to={target_state}, trigger={trigger}, reason={reason}, success=True, duration={elapsed:.2f}s")
+            logger.info(f"[STATE_TRANSITION] from={current_state}, to={target_state}, trigger={trigger}, reason={reason}, success=True, duration={elapsed:.2f}s")
+            return target_state
+
         if not self.validate_state(current_state, target_state):
+            elapsed = time.time() - start_time
+            logger.error(f"[StateMachine.transition] 状态转换不合法: session_id={self._session_id}, {current_state} -> {target_state}, 可达状态={self.get_reachable_state(current_state)}")
+            logger.info(f"[FSM_TRANSITION] session_id={self._session_id}, from={current_state}, to={target_state}, trigger={trigger}, reason={reason}, success=False, reachable_states={self.get_reachable_state(current_state)}, duration={elapsed:.2f}s")
+            logger.info(f"[STATE_TRANSITION] from={current_state}, to={target_state}, trigger={trigger}, reason={reason}, success=False, duration={elapsed:.2f}s")
             raise ValueError(
                 f"状态转换不合法：无法从 '{current_state}' 转换到 '{target_state}'。"
                 f"当前状态可转换到的状态：{self.get_reachable_state(current_state)}"
             )
 
+        elapsed = time.time() - start_time
+        logger.info(f"[StateMachine.transition] 状态转换: session_id={self._session_id}, {current_state} -> {target_state}")
+        logger.info(f"[FSM_TRANSITION] session_id={self._session_id}, from={current_state}, to={target_state}, trigger={trigger}, reason={reason}, success=True, duration={elapsed:.2f}s")
+        logger.info(f"[STATE_TRANSITION] from={current_state}, to={target_state}, trigger={trigger}, reason={reason}, success=True, duration={elapsed:.2f}s")
         return target_state
 
     def validate_state(self, current_state: str, target_state: str) -> bool:
@@ -139,7 +161,9 @@ class StateMachine:
         reachable_states = self.get_reachable_state(current_state)
 
         # 检查目标状态是否在可到达状态列表中
-        return target_state in reachable_states
+        result = target_state in reachable_states
+        logger.info(f"[FSM_VALIDATE] session_id={self._session_id}, from={current_state}, to={target_state}, valid={result}, reachable_states={reachable_states}")
+        return result
 
     def get_reachable_state(self, current_state: str) -> List[str]:
         """
@@ -173,26 +197,26 @@ class StateMachine:
 
         Args:
             from_state: 起始状态
-            to_states: 可转换到的状态列表
+            to_states: 可转换到的状态列表（可以为空，表示终止状态）
 
         Raises:
-            ValueError: 参数为空时抛出
+            ValueError: from_state为空时抛出
 
         Example:
             >>> sm.add_state_transition("INIT", ["ANALYZING", "LOADING"])
+            >>> sm.add_state_transition("COMPLETED", [])  # 终止状态
         """
         if not from_state:
             raise ValueError("from_state不能为空")
-        if not to_states:
-            raise ValueError("to_states不能为空")
 
-        # 如果起始状态已存在，合并状态列表
         if from_state in self._state_transition_map:
             existing_states = set(self._state_transition_map[from_state])
-            new_states = set(to_states)
+            new_states = set(to_states) if to_states else set()
             self._state_transition_map[from_state] = list(existing_states | new_states)
         else:
-            self._state_transition_map[from_state] = to_states.copy()
+            self._state_transition_map[from_state] = to_states.copy() if to_states else []
+        
+        logger.debug(f"[StateMachine.add_state_transition] 添加状态转换规则: session_id={self._session_id}, {from_state} -> {to_states}")
 
     def remove_state(self, state: str) -> None:
         """

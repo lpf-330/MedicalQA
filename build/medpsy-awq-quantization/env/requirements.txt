@@ -1,0 +1,10 @@
+autoawq
+transformers>=4.40.0
+accelerate
+datasets
+neo4j
+scikit-learn
+pyyaml
+torch>=2.1.0
+sentencepiece
+safetensors

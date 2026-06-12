@@ -152,7 +152,7 @@ class MCPStandardProxy(MCPTool):
     """
 
     @abstractmethod
-    def get_MCP_protocol_version(self) -> str:
+    def get_mcp_protocol_version(self) -> str:
         """
         获取MCP代理支持的协议版本信息
 

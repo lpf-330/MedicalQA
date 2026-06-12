@@ -11,7 +11,7 @@
 """
 
 from abc import ABC, abstractmethod
-from typing import Generic, TypeVar, Any, Dict, List, Iterator
+from typing import Generic, TypeVar, List, Optional
 
 I = TypeVar('I')
 O = TypeVar('O')
@@ -43,9 +43,9 @@ class ModelBusinessService(ABC, Generic[I, O]):
         >>> class ConsultModelService(ModelBusinessService[List[Dict], str]):
         ...     def call_model(self, messages: List[Dict]) -> str:
         ...         # 在处理请求时获取资源，处理完成后自动释放
-        ...         with GlobalResourceManager.acquire("vllm_model", "vllm_config") as handle:
-        ...             client = handle.get_client()
-        ...             return client.generate(messages)
+        ...         with GlobalResourceManager.acquire(ResourceType.REASONING_MODEL, ConfigId.REASONING_CONFIG) as handle:
+        ...             adapter = handle.get_client()
+        ...             return adapter.generate(messages=messages)
 
     泛型参数：
         I: 模型调用的输入数据类型（通常是消息列表）
@@ -53,7 +53,7 @@ class ModelBusinessService(ABC, Generic[I, O]):
     """
 
     @abstractmethod
-    def _init_Model(self) -> None:
+    def _init_model(self) -> None:
         """
         初始化模型
 
@@ -65,7 +65,7 @@ class ModelBusinessService(ABC, Generic[I, O]):
             资源应在call_model方法中临时获取，使用后立即释放。
 
         子类实现示例：
-            >>> def _init_Model(self) -> None:
+            >>> def _init_model(self) -> None:
             ...     # 初始化模型配置
             ...     self._validate_config()
             ...     # 不在此获取资源，资源在call_model中临时获取
@@ -105,7 +105,35 @@ class ModelBusinessService(ABC, Generic[I, O]):
         """
         pass
 
-    def release(self) -> None:
+    @abstractmethod
+    def call_model_batch(self, prompts: List[str], max_tokens: Optional[int] = None, timeout: Optional[int] = None) -> List[str]:
+        """
+        批量调用模型服务
+
+        将多个prompt一次性提交给模型引擎进行批量推理，
+        利用推理引擎的continuous batching机制共享forward pass，减少引擎运行次数。
+
+        Args:
+            prompts: 输入提示列表，每个元素是一个独立的评估prompt
+            max_tokens: 最大生成token数，默认从配置类读取
+            timeout: 单个prompt超时时间（秒），默认从配置类读取
+
+        Returns:
+            List[str]: 每个prompt对应的生成结果列表
+
+        Raises:
+            ParamException: 参数错误时抛出
+            BusinessException: 业务逻辑错误时抛出
+            ResourceException: 资源访问错误时抛出
+
+        Example:
+            >>> prompts = ["评估维度1...", "评估维度2...", "评估维度3..."]
+            >>> results = model_service.call_model_batch(prompts, max_tokens=256)
+            >>> print(len(results))  # 3
+        """
+        pass
+
+    def release_model(self) -> None:
         """
         释放模型资源
 
@@ -113,7 +141,7 @@ class ModelBusinessService(ABC, Generic[I, O]):
         子类可以覆盖此方法以实现特定的清理逻辑。
 
         Example:
-            >>> model_service.release()
+            >>> model_service.release_model()
         """
         pass
 

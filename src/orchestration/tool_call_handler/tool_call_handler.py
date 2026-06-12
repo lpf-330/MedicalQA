@@ -31,12 +31,16 @@ class ToolCallHandler(ABC, Generic[I, O]):
         1. 创建ToolCallHandler实例
         2. 调用_init_tool初始化MCP代理tool
         3. 调用call_tool执行tool调用（如果未初始化会自动初始化）
-        4. 调用release释放tool资源
+        4. 调用release_tool释放tool资源
 
     自动重新初始化机制：
         - call_tool方法会检查工具是否已初始化
         - 如果未初始化，会自动调用_ensure_initialized进行初始化
         - 这确保了即使release被调用后，后续请求仍能正常工作
+
+    两种初始化路径（互斥）：
+        - _init_tool(tool): 测试场景显式注入MCP代理实例，调用后_ensure_initialized不再触发
+        - _ensure_initialized(): 运行时懒加载，从MCPProxyFactory获取缓存的代理实例
 
     泛型参数：
         I: tool调用的输入数据类型
@@ -91,7 +95,7 @@ class ToolCallHandler(ABC, Generic[I, O]):
         pass
 
     @abstractmethod
-    def release(self) -> None:
+    def release_tool(self) -> None:
         """
         释放tool功能实例
 
@@ -99,13 +103,27 @@ class ToolCallHandler(ABC, Generic[I, O]):
         该方法应该是幂等的，即多次调用不会产生副作用。
 
         注意：
-            调用release后，后续的call_tool会自动重新初始化工具。
+            调用release_tool后，后续的call_tool会自动重新初始化工具。
 
         Example:
-            >>> handler.release()
+            >>> handler.release_tool()
         """
         pass
 
+    @abstractmethod
+    def _ensure_initialized(self) -> None:
+        """
+        确保工具已初始化
+
+        如果工具未初始化，会自动进行初始化。
+        该方法在call_tool中被调用，确保即使release被调用后，后续请求仍能正常工作。
+
+        Example:
+            >>> self._ensure_initialized()
+        """
+        pass
+
+    @abstractmethod
     def is_initialized(self) -> bool:
         """
         检查工具是否已初始化
@@ -117,7 +135,7 @@ class ToolCallHandler(ABC, Generic[I, O]):
             >>> if not handler.is_initialized():
             ...     handler._init_tool(tool)
         """
-        return False
+        pass
 
     def __repr__(self) -> str:
         """返回ToolCallHandler的字符串表示"""

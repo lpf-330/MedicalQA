@@ -7,74 +7,24 @@
 
 import logging
 import time
-from dataclasses import dataclass, field
 from typing import Any, Dict, List, Optional
-
+from src.config.business.report_service_config import get_runtime_config
 from src.orchestration.chain.chain import Chain
 from src.orchestration.chain.data_classes import ChainContext, ChainResult
+from src.orchestration.chain.multi_analysis_chain.multi_analysis_context import MultiAnalysisContextBody
+from src.orchestration.chain.multi_analysis_chain.multi_analysis_result import MultiAnalysisResultData
+from src.orchestration.chain.multi_analysis_chain.multi_analysis_resource import MultiAnalysisResource
 from src.orchestration.tool_call_handler.Impl.intent_classification_handler import IntentClassificationHandler
 
 logger = logging.getLogger(__name__)
 
+# 报告业务配置（dataclass，模块级创建安全）
+class _LazyReportConfig:
+    """延迟加载配置代理，每次属性访问时从ConfigManager获取真实配置"""
+    def __getattr__(self, name):
+        return getattr(get_runtime_config(), name)
 
-@dataclass
-class MultiAnalysisContextBody:
-    """
-    多维度分析Chain策略专属输入数据类
-
-    Attributes:
-        validated_data: 校验后的数据
-        degradation_level: 降级级别
-    """
-    validated_data: Dict = field(default_factory=dict)
-    degradation_level: int = 0
-
-    def to_dict(self) -> Dict[str, Any]:
-        """转换为字典"""
-        return {
-            "validated_data": self.validated_data,
-            "degradation_level": self.degradation_level
-        }
-
-
-@dataclass
-class MultiAnalysisResultData:
-    """
-    多维度分析Chain策略专属输出数据类
-
-    Attributes:
-        anomalies: 异常指标列表，包含指标名、异常类型、异常值、参考范围
-        risk_factors: 风险因子列表，包含因子名、风险等级、依据
-        medical_entities: 医疗实体列表
-        analysis_summary: 分析摘要
-    """
-    anomalies: List[Dict] = field(default_factory=list)
-    risk_factors: List[Dict] = field(default_factory=list)
-    medical_entities: List[Dict] = field(default_factory=list)
-    analysis_summary: str = ""
-
-    def to_dict(self) -> Dict[str, Any]:
-        """转换为字典"""
-        return {
-            "anomalies": self.anomalies,
-            "risk_factors": self.risk_factors,
-            "medical_entities": self.medical_entities,
-            "analysis_summary": self.analysis_summary
-        }
-
-
-@dataclass
-class MultiAnalysisResource:
-    """
-    多维度分析Chain策略专属资源类
-
-    Attributes:
-        intent_handler: 意图分类Handler（复用健康咨询的Handler）
-        vector_encode_service: 向量编码服务（复用健康咨询的Service）
-    """
-    intent_handler: Optional[IntentClassificationHandler] = None
-    vector_encode_service: Optional[Any] = None
-
+_report_config = _LazyReportConfig()
 
 class MultiAnalysisChain(Chain[ChainContext[MultiAnalysisContextBody], ChainResult[MultiAnalysisResultData]]):
     """
@@ -97,6 +47,10 @@ class MultiAnalysisChain(Chain[ChainContext[MultiAnalysisContextBody], ChainResu
         """
         self._resource = resource
         self._handler_degraded = False
+
+        # 延迟获取临床标准值（依赖ConfigManager已加载）
+        from src.config.config_manager import ConfigManager
+        self._clinical = ConfigManager().clinical_standards
 
     def execute(self, chain_context: ChainContext[MultiAnalysisContextBody]) -> ChainResult[MultiAnalysisResultData]:
         """
@@ -131,7 +85,8 @@ class MultiAnalysisChain(Chain[ChainContext[MultiAnalysisContextBody], ChainResu
 
         # 步骤3：医疗实体提取
         medical_entities = self._extract_medical_entities(body.validated_data)
-        logger.info(f"[MultiAnalysisChain] 医疗实体提取完成: entity_count={len(medical_entities)}")
+        entity_count = sum(len(v) for v in medical_entities.values()) if isinstance(medical_entities, dict) else 0
+        logger.info(f"[MultiAnalysisChain] 医疗实体提取完成: entity_count={entity_count}")
 
         # 步骤4：特殊规则应用
         special_risks = self._apply_special_rules(anomalies, risk_factors, body.validated_data)
@@ -150,9 +105,10 @@ class MultiAnalysisChain(Chain[ChainContext[MultiAnalysisContextBody], ChainResu
         )
 
         elapsed = time.time() - start_time
+        entity_count = sum(len(v) for v in medical_entities.values()) if isinstance(medical_entities, dict) else 0
         logger.info(f"[MultiAnalysisChain] Chain执行完成: session_id={chain_context.session_id}, "
                    f"anomalies={len(anomalies)}, risk_factors={len(risk_factors)}, "
-                   f"medical_entities={len(medical_entities)}, elapsed={elapsed:.2f}s")
+                   f"medical_entities={entity_count}, elapsed={elapsed:.2f}s")
 
         return ChainResult(session_id=chain_context.session_id, data=result_data)
 
@@ -178,6 +134,12 @@ class MultiAnalysisChain(Chain[ChainContext[MultiAnalysisContextBody], ChainResu
         monitoring_data = validated_data.get("monitoring_data", {})
 
         # 血压异常检测（从latest维度获取最新数据）
+        bp_std = self._clinical.get("blood_pressure", {})
+        bp_hyp_sys = bp_std.get("hypertension_systolic", 140)
+        bp_hyp_dia = bp_std.get("hypertension_diastolic", 90)
+        bp_hypo_sys = bp_std.get("hypotension_systolic", 90)
+        bp_hypo_dia = bp_std.get("hypotension_diastolic", 60)
+
         blood_pressure = monitoring_data.get("blood_pressure", {})
         if isinstance(blood_pressure, dict) and blood_pressure.get("latest"):
             latest_bp_list = blood_pressure["latest"]
@@ -188,22 +150,29 @@ class MultiAnalysisChain(Chain[ChainContext[MultiAnalysisContextBody], ChainResu
                 diastolic = latest_bp.get("diastolic")
 
                 if systolic is not None and diastolic is not None:
-                    if systolic >= 140 or diastolic >= 90:
+                    if systolic >= bp_hyp_sys or diastolic >= bp_hyp_dia:
                         anomalies.append({
                             "indicator_name": "血压",
                             "anomaly_type": "高血压",
                             "anomaly_value": f"{systolic}/{diastolic} mmHg",
-                            "reference_range": "收缩压<140 mmHg 且 舒张压<90 mmHg"
+                            "reference_range": f"收缩压<{bp_hyp_sys} mmHg 且 舒张压<{bp_hyp_dia} mmHg"
                         })
-                    elif systolic < 90 or diastolic < 60:
+                        logger.info(f"[ANOMALY_EXTRACT] indicator=血压, type=高血压, value={systolic}/{diastolic}, reference=收缩压<{bp_hyp_sys}且舒张压<{bp_hyp_dia}")
+                    elif systolic < bp_hypo_sys or diastolic < bp_hypo_dia:
                         anomalies.append({
                             "indicator_name": "血压",
                             "anomaly_type": "低血压",
                             "anomaly_value": f"{systolic}/{diastolic} mmHg",
-                            "reference_range": "收缩压≥90 mmHg 且 舒张压≥60 mmHg"
+                            "reference_range": f"收缩压≥{bp_hypo_sys} mmHg 且 舒张压≥{bp_hypo_dia} mmHg"
                         })
+                        logger.info(f"[ANOMALY_EXTRACT] indicator=血压, type=低血压, value={systolic}/{diastolic}, reference=收缩压≥{bp_hypo_sys}且舒张压≥{bp_hypo_dia}")
 
         # 血糖异常检测（从latest维度获取最新数据）
+        bg_std = self._clinical.get("blood_glucose", {})
+        bg_fasting_high = bg_std.get("fasting_high", 7.0)
+        bg_fasting_low = bg_std.get("fasting_low", 3.9)
+        bg_postprandial_high = bg_std.get("postprandial_high", 11.1)
+
         blood_glucose = monitoring_data.get("blood_glucose", {})
         if isinstance(blood_glucose, dict) and blood_glucose.get("latest"):
             latest_glucose_list = blood_glucose["latest"]
@@ -214,30 +183,37 @@ class MultiAnalysisChain(Chain[ChainContext[MultiAnalysisContextBody], ChainResu
 
                 if glucose_value is not None:
                     if glucose_type == "fasting" or glucose_type == "空腹":
-                        if glucose_value >= 7.0:
+                        if glucose_value >= bg_fasting_high:
                             anomalies.append({
                                 "indicator_name": "空腹血糖",
                                 "anomaly_type": "高血糖",
                                 "anomaly_value": f"{glucose_value} mmol/L",
-                                "reference_range": "<7.0 mmol/L"
+                                "reference_range": f"<{bg_fasting_high} mmol/L"
                             })
-                        elif glucose_value < 3.9:
+                            logger.info(f"[ANOMALY_EXTRACT] indicator=空腹血糖, type=高血糖, value={glucose_value}, reference=<{bg_fasting_high}")
+                        elif glucose_value < bg_fasting_low:
                             anomalies.append({
                                 "indicator_name": "空腹血糖",
                                 "anomaly_type": "低血糖",
                                 "anomaly_value": f"{glucose_value} mmol/L",
-                                "reference_range": "≥3.9 mmol/L"
+                                "reference_range": f"≥{bg_fasting_low} mmol/L"
                             })
+                            logger.info(f"[ANOMALY_EXTRACT] indicator=空腹血糖, type=低血糖, value={glucose_value}, reference=≥{bg_fasting_low}")
                     else:
-                        if glucose_value >= 11.1:
+                        if glucose_value >= bg_postprandial_high:
                             anomalies.append({
                                 "indicator_name": "餐后血糖",
                                 "anomaly_type": "高血糖",
                                 "anomaly_value": f"{glucose_value} mmol/L",
-                                "reference_range": "<11.1 mmol/L"
+                                "reference_range": f"<{bg_postprandial_high} mmol/L"
                             })
+                            logger.info(f"[ANOMALY_EXTRACT] indicator=餐后血糖, type=高血糖, value={glucose_value}, reference=<{bg_postprandial_high}")
 
         # 心率异常检测（从latest维度获取最新数据）
+        hr_std = self._clinical.get("heart_rate", {})
+        hr_tachycardia = hr_std.get("tachycardia", 100)
+        hr_bradycardia = hr_std.get("bradycardia", 60)
+
         heart_rate = monitoring_data.get("heart_rate", {})
         if isinstance(heart_rate, dict) and heart_rate.get("latest"):
             latest_hr_list = heart_rate["latest"]
@@ -246,22 +222,27 @@ class MultiAnalysisChain(Chain[ChainContext[MultiAnalysisContextBody], ChainResu
                 hr_value = latest_hr.get("value")
 
                 if hr_value is not None:
-                    if hr_value > 100:
+                    if hr_value > hr_tachycardia:
                         anomalies.append({
                             "indicator_name": "心率",
                             "anomaly_type": "心动过速",
                             "anomaly_value": f"{hr_value} 次/分",
-                            "reference_range": "60-100 次/分"
+                            "reference_range": f"{hr_bradycardia}-{hr_tachycardia} 次/分"
                         })
-                    elif hr_value < 60:
+                        logger.info(f"[ANOMALY_EXTRACT] indicator=心率, type=心动过速, value={hr_value}, reference={hr_bradycardia}-{hr_tachycardia}")
+                    elif hr_value < hr_bradycardia:
                         anomalies.append({
                             "indicator_name": "心率",
                             "anomaly_type": "心动过缓",
                             "anomaly_value": f"{hr_value} 次/分",
-                            "reference_range": "60-100 次/分"
+                            "reference_range": f"{hr_bradycardia}-{hr_tachycardia} 次/分"
                         })
+                        logger.info(f"[ANOMALY_EXTRACT] indicator=心率, type=心动过缓, value={hr_value}, reference={hr_bradycardia}-{hr_tachycardia}")
 
         # 血氧异常检测（从latest维度获取最新数据）
+        bo_std = self._clinical.get("blood_oxygen", {})
+        bo_hypoxemia = bo_std.get("hypoxemia", 95)
+
         blood_oxygen = monitoring_data.get("blood_oxygen", {})
         if isinstance(blood_oxygen, dict) and blood_oxygen.get("latest"):
             latest_oxygen_list = blood_oxygen["latest"]
@@ -269,15 +250,19 @@ class MultiAnalysisChain(Chain[ChainContext[MultiAnalysisContextBody], ChainResu
                 latest_oxygen = latest_oxygen_list[-1] if isinstance(latest_oxygen_list[-1], dict) else {}
                 oxygen_value = latest_oxygen.get("value")
 
-                if oxygen_value is not None and oxygen_value < 95:
+                if oxygen_value is not None and oxygen_value < bo_hypoxemia:
                     anomalies.append({
                         "indicator_name": "血氧饱和度",
                         "anomaly_type": "低氧",
                         "anomaly_value": f"{oxygen_value}%",
-                        "reference_range": "≥95%"
+                        "reference_range": f"≥{bo_hypoxemia}%"
                     })
+                    logger.info(f"[ANOMALY_EXTRACT] indicator=血氧饱和度, type=低氧, value={oxygen_value}%, reference=≥{bo_hypoxemia}%")
 
         # 灌注指数异常检测（从latest维度获取最新数据）
+        pi_std = self._clinical.get("perfusion_index", {})
+        pi_low = pi_std.get("low", 1.0)
+
         perfusion_index = monitoring_data.get("perfusion_index", {})
         if isinstance(perfusion_index, dict) and perfusion_index.get("latest"):
             latest_pi_list = perfusion_index["latest"]
@@ -285,15 +270,20 @@ class MultiAnalysisChain(Chain[ChainContext[MultiAnalysisContextBody], ChainResu
                 latest_pi = latest_pi_list[-1] if isinstance(latest_pi_list[-1], dict) else {}
                 pi_value = latest_pi.get("value")
 
-                if pi_value is not None and pi_value < 1.0:
+                if pi_value is not None and pi_value < pi_low:
                     anomalies.append({
                         "indicator_name": "灌注指数",
                         "anomaly_type": "低灌注",
                         "anomaly_value": f"{pi_value} PI",
-                        "reference_range": "≥1.0 PI"
+                        "reference_range": f"≥{pi_low} PI"
                     })
+                    logger.info(f"[ANOMALY_EXTRACT] indicator=灌注指数, type=低灌注, value={pi_value}, reference=≥{pi_low}")
 
         # 睡眠异常检测（从latest维度获取最新数据）
+        sleep_std = self._clinical.get("sleep", {})
+        sleep_insufficient = sleep_std.get("insufficient", 6)
+        sleep_excessive = sleep_std.get("excessive", 9)
+
         sleep = monitoring_data.get("sleep", {})
         if isinstance(sleep, dict) and sleep.get("latest"):
             latest_sleep_list = sleep["latest"]
@@ -302,20 +292,22 @@ class MultiAnalysisChain(Chain[ChainContext[MultiAnalysisContextBody], ChainResu
                 sleep_value = latest_sleep.get("value")
 
                 if sleep_value is not None:
-                    if sleep_value < 6:
+                    if sleep_value < sleep_insufficient:
                         anomalies.append({
                             "indicator_name": "睡眠",
                             "anomaly_type": "睡眠不足",
                             "anomaly_value": f"{sleep_value} 小时",
-                            "reference_range": "6-9 小时"
+                            "reference_range": f"{sleep_insufficient}-{sleep_excessive} 小时"
                         })
-                    elif sleep_value > 9:
+                        logger.info(f"[ANOMALY_EXTRACT] indicator=睡眠, type=睡眠不足, value={sleep_value}, reference={sleep_insufficient}-{sleep_excessive}")
+                    elif sleep_value > sleep_excessive:
                         anomalies.append({
                             "indicator_name": "睡眠",
                             "anomaly_type": "睡眠过多",
                             "anomaly_value": f"{sleep_value} 小时",
-                            "reference_range": "6-9 小时"
+                            "reference_range": f"{sleep_insufficient}-{sleep_excessive} 小时"
                         })
+                        logger.info(f"[ANOMALY_EXTRACT] indicator=睡眠, type=睡眠过多, value={sleep_value}, reference={sleep_insufficient}-{sleep_excessive}")
 
         return anomalies
 
@@ -339,40 +331,53 @@ class MultiAnalysisChain(Chain[ChainContext[MultiAnalysisContextBody], ChainResu
         risk_factors = []
         user_profile = validated_data.get("user_profile", {})
 
-        # 高龄风险（根据出生日期计算年龄）
+        # 高龄风险阈值
+        ra_std = self._clinical.get("risk_assessment", {})
+        elderly_age = ra_std.get("elderly_age", 65)
+        multi_disease_count = ra_std.get("multi_disease_count", 3)
+
+        # 高龄风险（根据出生日期计算年龄，优先birth_date，回退到age字段）
         birth_date = user_profile.get("birth_date")
+        age = None
         if birth_date:
             try:
                 from datetime import datetime
                 birth = datetime.strptime(birth_date, "%Y-%m-%d")
                 today = datetime.now()
                 age = today.year - birth.year - ((today.month, today.day) < (birth.month, birth.day))
-                if age >= 65:
-                    risk_factors.append({
-                        "factor_name": "高龄",
-                        "risk_level": "中",
-                        "basis": f"年龄{age}岁，属于老年人群"
-                    })
             except (ValueError, TypeError):
                 pass
+        if age is None:
+            profile_age = user_profile.get("age")
+            if isinstance(profile_age, (int, float)) and profile_age > 0:
+                age = int(profile_age)
+        if age is not None and age >= elderly_age:
+            risk_factors.append({
+                "factor_name": "高龄",
+                "risk_level": "中",
+                "basis": f"年龄{age}岁，属于老年人群"
+            })
+            logger.info(f"[RISK_FACTOR_EXTRACT] factor=高龄, level=中, basis=年龄{age}岁，属于老年人群")
 
         # 既往病史风险（字符串类型）
         past_medical_history = user_profile.get("past_medical_history", "")
         if past_medical_history and past_medical_history.strip():
             # 统计既往病史中的疾病数量（简单统计逗号分隔）
             diseases = [d.strip() for d in past_medical_history.replace("、", ",").replace("，", ",").split(",") if d.strip()]
-            if len(diseases) >= 3:
+            if len(diseases) >= multi_disease_count:
                 risk_factors.append({
                     "factor_name": "多病共存",
                     "risk_level": "高",
                     "basis": f"既往病史包含多种疾病：{past_medical_history}"
                 })
+                logger.info(f"[RISK_FACTOR_EXTRACT] factor=多病共存, level=高, basis=既往病史包含多种疾病：{past_medical_history}")
             elif len(diseases) > 0:
                 risk_factors.append({
                     "factor_name": "既往病史",
                     "risk_level": "中",
                     "basis": f"既往病史：{past_medical_history}"
                 })
+                logger.info(f"[RISK_FACTOR_EXTRACT] factor=既往病史, level=中, basis=既往病史：{past_medical_history}")
 
         # 家族遗传风险（字符串类型）
         family_history = user_profile.get("family_history", "")
@@ -382,6 +387,7 @@ class MultiAnalysisChain(Chain[ChainContext[MultiAnalysisContextBody], ChainResu
                 "risk_level": "中",
                 "basis": f"有家族病史：{family_history}"
             })
+            logger.info(f"[RISK_FACTOR_EXTRACT] factor=家族遗传, level=中, basis=有家族病史：{family_history}")
 
         # 过敏史风险（字符串类型）
         allergy_history = user_profile.get("allergy_history", "")
@@ -391,6 +397,7 @@ class MultiAnalysisChain(Chain[ChainContext[MultiAnalysisContextBody], ChainResu
                 "risk_level": "低",
                 "basis": f"有过敏史：{allergy_history}"
             })
+            logger.info(f"[RISK_FACTOR_EXTRACT] factor=过敏史, level=低, basis=有过敏史：{allergy_history}")
 
         # 手术史风险（字符串类型）
         surgical_history = user_profile.get("surgical_history", "")
@@ -400,77 +407,115 @@ class MultiAnalysisChain(Chain[ChainContext[MultiAnalysisContextBody], ChainResu
                 "risk_level": "低",
                 "basis": f"有手术史：{surgical_history}"
             })
+            logger.info(f"[RISK_FACTOR_EXTRACT] factor=手术史, level=低, basis=有手术史：{surgical_history}")
 
         return risk_factors
 
-    def _extract_medical_entities(self, validated_data: Dict) -> List[Dict]:
+    def _extract_medical_entities(self, validated_data: Dict) -> Dict[str, List]:
         """
         医疗实体提取
 
-        调用IntentClassificationHandler的extract_entities方法
-        如果Handler不可用，使用规则引擎降级
+        通过intent_handler（NER模型）进行实体提取，NER不可用时回退到规则引擎降级
 
         Args:
             validated_data: 校验后的数据
 
         Returns:
-            医疗实体列表
+            医疗实体字典，按类型分类存储
         """
-        medical_entities = []
+        entities_list = []
 
-        # 构建待提取的文本
         text_parts = []
         user_profile = validated_data.get("user_profile", {})
 
-        # 添加既往病史（字符串类型）
         past_medical_history = user_profile.get("past_medical_history", "")
         if past_medical_history and past_medical_history.strip():
             text_parts.append(f"既往病史：{past_medical_history}")
 
-        # 添加家族病史（字符串类型）
         family_history = user_profile.get("family_history", "")
         if family_history and family_history.strip():
             text_parts.append(f"家族病史：{family_history}")
 
-        # 添加过敏史（字符串类型）
         allergy_history = user_profile.get("allergy_history", "")
         if allergy_history and allergy_history.strip():
             text_parts.append(f"过敏史：{allergy_history}")
 
-        # 添加手术史（字符串类型）
         surgical_history = user_profile.get("surgical_history", "")
         if surgical_history and surgical_history.strip():
             text_parts.append(f"手术史：{surgical_history}")
 
         if not text_parts:
             logger.info("[MultiAnalysisChain] 无需提取医疗实体的文本内容")
-            return medical_entities
+            return {"diseases": [], "symptoms": [], "medications": [], "examinations": [], "other": []}
 
         text = "。".join(text_parts)
 
-        # 尝试使用Handler提取实体
-        try:
-            if self._resource.intent_handler is not None:
-                logger.info(f"[MultiAnalysisChain] 使用Handler提取医疗实体: text_length={len(text)}")
-                extract_result = self._resource.intent_handler.call_tool({
-                    "method": "extract_entities",
-                    "text": text
-                })
-
-                if isinstance(extract_result, list):
-                    medical_entities = extract_result
+        ner_extracted = False
+        ner_handler = self._resource.ner_handler if self._resource else None
+        if ner_handler is not None:
+            try:
+                handler_result = ner_handler.call_tool({"method": "extract_entities", "text": text})
+                if isinstance(handler_result, list):
+                    entities_list = handler_result
+                elif isinstance(handler_result, dict):
+                    entities_list = handler_result.get("entities", [])
                 else:
-                    medical_entities = extract_result.get("entities", [])
+                    entities_list = []
+                critical_types = {"disease", "dis", "symptom", "sym", "medication", "dru", "drug"}
+                has_critical_entity = any(
+                    e.get("entity_type", "").lower() in critical_types
+                    for e in entities_list
+                )
+                if len(entities_list) >= 2 and has_critical_entity:
+                    ner_extracted = True
+                    logger.info(f"[MultiAnalysisChain] NER模型提取医疗实体成功: entity_count={len(entities_list)}")
+                else:
+                    reason = "实体过少" if len(entities_list) < 2 else "缺少关键医疗实体(disease/symptom/medication)"
+                    logger.warning(f"[MultiAnalysisChain] NER模型输出质量不足(entity_count={len(entities_list)}, has_critical={has_critical_entity}), 原因={reason}, 回退到规则引擎")
+            except Exception as e:
+                logger.warning(f"[MultiAnalysisChain] NER模型提取实体失败，回退到规则引擎: {str(e)}")
 
-                logger.info(f"[MultiAnalysisChain] Handler提取医疗实体成功: entity_count={len(medical_entities)}")
+        if not ner_extracted:
+            logger.info(f"[MultiAnalysisChain] 使用规则引擎提取医疗实体: text_length={len(text)}")
+            entities_list = self._extract_entities_by_rules(text)
+
+        # NER模型返回的BIO标签映射（如B-DIS、I-DIS等）+ 常见别名
+        disease_types = ["disease", "疾病", "disease_entity", "疾病实体", "dis", "b-dis", "i-dis", "body_part"]
+        symptom_types = ["symptom", "症状", "symptom_entity", "症状实体", "sym", "b-sym", "i-sym"]
+        medication_types = ["medication", "药物", "drug", "medication_entity", "药物实体", "med", "b-med", "i-med", "b-dru", "i-dru"]
+        procedure_types = ["procedure", "检查", "examination", "检查项目", "procedure_entity", "检查实体", "pro", "b-pro", "i-pro", "medical_item", "surgery"]
+
+        # 所有已知类型的小写集合，用于筛选"other"类别
+        all_known_types = set(disease_types + symptom_types + medication_types + procedure_types)
+
+        medical_entities = {
+            "diseases": [e for e in entities_list if e.get("entity_type", "").lower() in disease_types],
+            "symptoms": [e for e in entities_list if e.get("entity_type", "").lower() in symptom_types],
+            "medications": [e for e in entities_list if e.get("entity_type", "").lower() in medication_types],
+            "examinations": [e for e in entities_list if e.get("entity_type", "").lower() in procedure_types],
+            "other": [e for e in entities_list if e.get("entity_type", "").lower() not in all_known_types]
+        }
+
+        logger.info(f"[MultiAnalysisChain] 实体分类结果: diseases={len(medical_entities['diseases'])}, "
+                   f"symptoms={len(medical_entities['symptoms'])}, "
+                   f"medications={len(medical_entities['medications'])}, "
+                   f"examinations={len(medical_entities['examinations'])}, "
+                   f"other={len(medical_entities.get('other', []))}")
+        for e in entities_list:
+            entity_name = e.get('name', e.get('entity_name', '未知'))
+            entity_type = e.get('entity_type', '未知')
+            # 确定分类归属
+            if entity_type.lower() in disease_types:
+                category = "diseases"
+            elif entity_type.lower() in symptom_types:
+                category = "symptoms"
+            elif entity_type.lower() in medication_types:
+                category = "medications"
+            elif entity_type.lower() in procedure_types:
+                category = "examinations"
             else:
-                logger.warning("[MultiAnalysisChain] intent_handler未初始化，使用规则引擎降级")
-                self._handler_degraded = True
-                medical_entities = self._extract_entities_by_rules(text)
-        except Exception as e:
-            logger.error(f"[MultiAnalysisChain] Handler提取医疗实体失败，使用规则引擎降级: {str(e)}")
-            self._handler_degraded = True
-            medical_entities = self._extract_entities_by_rules(text)
+                category = "other"
+            logger.info(f"[ENTITY_CLASSIFY] name={entity_name}, entity_type={entity_type}, category={category}")
 
         return medical_entities
 
@@ -488,34 +533,55 @@ class MultiAnalysisChain(Chain[ChainContext[MultiAnalysisContextBody], ChainResu
 
         # 常见疾病关键词
         disease_keywords = [
-            "高血压", "糖尿病", "冠心病", "脑卒中", "慢性肾病",
-            "肝炎", "胃炎", "肺炎", "哮喘", "关节炎",
-            "肿瘤", "癌症", "心脏病", "中风"
+            "高血压", "2型糖尿病", "糖尿病", "1型糖尿病", "冠心病", "脑卒中", "慢性肾病",
+            "肝炎", "胃炎", "肺炎", "哮喘", "关节炎", "高血脂", "高血糖",
+            "肿瘤", "癌症", "心脏病", "中风", "心绞痛", "心肌梗死", "心衰",
+            "肾功能不全", "肝硬化", "胃溃疡", "肠炎", "甲亢", "甲减",
+            "骨质疏松", "痛风", "贫血", "慢性支气管炎", "肺气肿",
         ]
 
         # 常见症状关键词
         symptom_keywords = [
             "头痛", "头晕", "恶心", "呕吐", "腹痛",
             "咳嗽", "发热", "乏力", "胸闷", "心悸",
-            "失眠", "便秘", "腹泻", "水肿", "出血"
+            "失眠", "便秘", "腹泻", "水肿", "出血",
+            "口渴", "多尿", "多饮", "气短", "胸痛",
+            "心慌", "耳鸣", "视力模糊", "肢体麻木",
         ]
 
-        # 提取疾病实体
-        for keyword in disease_keywords:
+        # 常见药物关键词
+        medication_keywords = [
+            "硝苯地平", "二甲双胍", "阿司匹林", "阿托伐他汀",
+            "氨氯地平", "缬沙坦", "氯沙坦", "美托洛尔",
+            "格列美脲", "胰岛素", "阿卡波糖", "瑞格列奈",
+        ]
+
+        # 提取疾病实体（长关键词优先匹配）
+        rule_confidence = _report_config.rule_engine_confidence
+        for keyword in sorted(disease_keywords, key=len, reverse=True):
             if keyword in text:
                 entities.append({
                     "entity_name": keyword,
                     "entity_type": "Disease",
-                    "confidence": 0.8
+                    "confidence": rule_confidence
                 })
 
         # 提取症状实体
-        for keyword in symptom_keywords:
+        for keyword in sorted(symptom_keywords, key=len, reverse=True):
             if keyword in text:
                 entities.append({
                     "entity_name": keyword,
                     "entity_type": "Symptom",
-                    "confidence": 0.8
+                    "confidence": rule_confidence
+                })
+
+        # 提取药物实体
+        for keyword in medication_keywords:
+            if keyword in text:
+                entities.append({
+                    "entity_name": keyword,
+                    "entity_type": "Medication",
+                    "confidence": rule_confidence
                 })
 
         logger.info(f"[MultiAnalysisChain] 规则引擎提取医疗实体完成: entity_count={len(entities)}")
@@ -555,6 +621,9 @@ class MultiAnalysisChain(Chain[ChainContext[MultiAnalysisContextBody], ChainResu
                 "risk_level": "高",
                 "basis": "高龄合并高血压，心血管事件风险显著增加"
             })
+            logger.info("[SPECIAL_RULE] rule=高龄+高血压, triggered=True, result=心血管高风险")
+        else:
+            logger.info(f"[SPECIAL_RULE] rule=高龄+高血压, triggered=False, has_elderly_risk={has_elderly_risk}, has_hypertension={has_hypertension}")
 
         # 检查是否存在糖尿病病史（字符串类型）
         user_profile = validated_data.get("user_profile", {})
@@ -571,6 +640,9 @@ class MultiAnalysisChain(Chain[ChainContext[MultiAnalysisContextBody], ChainResu
                 "risk_level": "高",
                 "basis": "糖尿病合并肥胖，代谢综合征风险显著增加"
             })
+            logger.info("[SPECIAL_RULE] rule=糖尿病+肥胖, triggered=True, result=代谢综合征风险")
+        else:
+            logger.info(f"[SPECIAL_RULE] rule=糖尿病+肥胖, triggered=False, has_diabetes={has_diabetes}, has_obesity={has_obesity}")
 
         # 检查是否存在多病共存
         has_multi_disease = any(
@@ -584,31 +656,32 @@ class MultiAnalysisChain(Chain[ChainContext[MultiAnalysisContextBody], ChainResu
                 "risk_level": "高",
                 "basis": "多病共存，需综合评估用药相互作用和疾病相互影响"
             })
+            logger.info("[SPECIAL_RULE] rule=多病共存, triggered=True, result=综合评估风险")
+        else:
+            logger.info("[SPECIAL_RULE] rule=多病共存, triggered=False")
 
         return special_risks
 
-    def _generate_analysis_summary(self, anomalies: List[Dict], risk_factors: List[Dict], medical_entities: List[Dict]) -> str:
+    def _generate_analysis_summary(self, anomalies: List[Dict], risk_factors: List[Dict], medical_entities: Dict[str, List]) -> str:
         """
         生成分析摘要
 
         Args:
             anomalies: 异常指标列表
             risk_factors: 风险因子列表
-            medical_entities: 医疗实体列表
+            medical_entities: 医疗实体字典
 
         Returns:
             分析摘要
         """
         summary_parts = []
 
-        # 异常指标摘要
         if anomalies:
             anomaly_summary = "、".join([f"{a['indicator_name']}({a['anomaly_type']})" for a in anomalies])
             summary_parts.append(f"检测到{len(anomalies)}项异常指标：{anomaly_summary}")
         else:
             summary_parts.append("未检测到异常指标")
 
-        # 风险因子摘要
         if risk_factors:
             high_risks = [rf for rf in risk_factors if rf["risk_level"] == "高"]
             medium_risks = [rf for rf in risk_factors if rf["risk_level"] == "中"]
@@ -626,21 +699,28 @@ class MultiAnalysisChain(Chain[ChainContext[MultiAnalysisContextBody], ChainResu
         else:
             summary_parts.append("未识别到风险因子")
 
-        # 医疗实体摘要
-        if medical_entities:
-            disease_entities = [e for e in medical_entities if e.get("entity_type") == "Disease"]
-            symptom_entities = [e for e in medical_entities if e.get("entity_type") == "Symptom"]
+        if medical_entities and isinstance(medical_entities, dict):
+            disease_entities = medical_entities.get("diseases", [])
+            symptom_entities = medical_entities.get("symptoms", [])
+            medication_entities = medical_entities.get("medications", [])
+            procedure_entities = medical_entities.get("examinations", [])
+            other_entities = medical_entities.get("other", [])
 
             entity_summary_parts = []
             if disease_entities:
                 entity_summary_parts.append(f"{len(disease_entities)}种疾病")
             if symptom_entities:
                 entity_summary_parts.append(f"{len(symptom_entities)}种症状")
+            if medication_entities:
+                entity_summary_parts.append(f"{len(medication_entities)}种药物")
+            if procedure_entities:
+                entity_summary_parts.append(f"{len(procedure_entities)}种检查项目")
+            if other_entities:
+                entity_summary_parts.append(f"{len(other_entities)}种其他实体")
 
             if entity_summary_parts:
                 summary_parts.append(f"提取到{'、'.join(entity_summary_parts)}相关实体")
 
-        # 降级提示
         if self._handler_degraded:
             summary_parts.append("（注：医疗实体提取使用规则引擎降级模式）")
 

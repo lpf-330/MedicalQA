@@ -7,6 +7,7 @@ from typing import Any, Dict, Optional
 from src.mcp.proxy.interfaces import MCPFakeProxy
 from src.mcp.proxy.data_classes import ToolInfo, ToolMethod, DirectConnectionInfo
 from src.tools.intent_classification_tool import IntentClassificationTool
+from src.utils.logger import log_arch_event
 
 logger = logging.getLogger(__name__)
 
@@ -15,6 +16,7 @@ class IntentClassificationProxy(MCPFakeProxy):
 
     def __init__(self, config: Dict[str, Any]):
         self._config = config
+        logger.info("[PROXY_INIT] IntentClassificationProxy初始化: resource_config=managed_by_resource_pool")
         self._tool: Optional[IntentClassificationTool] = None
         self._call_count = 0
         self._total_time = 0.0
@@ -29,12 +31,6 @@ class IntentClassificationProxy(MCPFakeProxy):
                     description="意图分类",
                     params=[],
                     return_type=dict
-                ),
-                ToolMethod(
-                    name="extract_entities",
-                    description="实体抽取",
-                    params=[],
-                    return_type=list
                 )
             ]
         )
@@ -46,16 +42,22 @@ class IntentClassificationProxy(MCPFakeProxy):
 
         logger.info("[IntentClassificationProxy] _init_tool started")
         start_time = time.time()
+        tool = None
         try:
-            self._tool = IntentClassificationTool(
-                model_path=self._config.get("model_path"),
-                device=self._config.get("device", "cpu"),
-                max_length=self._config.get("max_length", 128)
-            )
-            self._tool._init_resource()
+            tool = IntentClassificationTool()
+            tool._init_resource()
+            self._tool = tool
+            log_arch_event(logger, component="IntentClassificationProxy", stage="MCP", event="init_tool", status="success", design_id="ARCH-4.3", tool="IntentClassificationTool")
+            logger.info("[MCP_PROXY_INIT] type=FAKE, tool=IntentClassificationTool")
             elapsed = time.time() - start_time
-            logger.info(f"[IntentClassificationProxy] _init_tool completed, elapsed={elapsed:.3f}s, model_path={self._config.get('model_path')}")
+            logger.info(f"[IntentClassificationProxy] _init_tool completed, elapsed={elapsed:.3f}s")
         except Exception as e:
+            if tool is not None:
+                try:
+                    tool.release_source()
+                except Exception as cleanup_error:
+                    logger.warning(f"[IntentClassificationProxy] _init_tool cleanup failed: {cleanup_error}")
+            self._tool = None
             elapsed = time.time() - start_time
             logger.error(f"[IntentClassificationProxy] _init_tool failed, elapsed={elapsed:.3f}s, error={str(e)}")
             raise
@@ -67,6 +69,7 @@ class IntentClassificationProxy(MCPFakeProxy):
             if self._tool is not None:
                 self._tool.release_source()
                 self._tool = None
+            log_arch_event(logger, component="IntentClassificationProxy", stage="MCP", event="release_tool", status="success", design_id="ARCH-4.3", tool="IntentClassificationTool")
             elapsed = time.time() - start_time
             logger.info(f"[IntentClassificationProxy] release_tool completed, elapsed={elapsed:.3f}s")
         except Exception as e:
@@ -89,13 +92,12 @@ class IntentClassificationProxy(MCPFakeProxy):
             
             if method_name == "classify_intent":
                 result = self._tool.classify_intent(**tool_params)
-            elif method_name == "extract_entities":
-                result = self._tool.extract_entities(**tool_params)
             else:
                 raise AttributeError(f"Method {method_name} not found")
 
             self._call_count += 1
             elapsed = time.time() - start_time
+            log_arch_event(logger, component="IntentClassificationProxy", stage="MCP", event="proxy_call", status="success", design_id="ARCH-4.3", method_name=method_name, elapsed=f"{elapsed:.3f}s")
             logger.info(f"[IntentClassificationProxy] call completed, method_name={method_name}, elapsed={elapsed:.3f}s")
             return result
         except Exception as e:
@@ -112,8 +114,8 @@ class IntentClassificationProxy(MCPFakeProxy):
     def get_direct_connection_info(self) -> DirectConnectionInfo:
         logger.debug("[IntentClassificationProxy] get_direct_connection_info called")
         return DirectConnectionInfo(
-            type="intent_model",
-            endpoint=self._config.get("model_path", "local_tool_instance")
+            type="local",
+            endpoint="local_tool_instance"
         )
 
     def set_mock_response(self, method_name: str, response: Any) -> None:

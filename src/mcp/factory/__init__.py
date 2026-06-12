@@ -4,7 +4,7 @@ MCP代理层factory包
 该包定义了MCP代理层的工厂类和配置类。
 """
 
-from src.mcp.factory.config import (
+from src.mcp.factory.tool_proxy_config import (
     ProxyType,
     ToolProxyConfig
 )

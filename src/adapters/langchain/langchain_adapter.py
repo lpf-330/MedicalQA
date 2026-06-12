@@ -9,8 +9,10 @@ Langchain适配器接口
 from abc import ABC, abstractmethod
 from typing import Any, Dict
 
+from src.adapters.base_adapter import BaseAdapter
 
-class LangchainAdapter(ABC):
+
+class LangchainAdapter(BaseAdapter):
     """
     Langchain适配器接口
     
@@ -21,6 +23,16 @@ class LangchainAdapter(ABC):
         chain = adapter.create_chain("llm_chain", config)
         result = chain.run(question="什么是糖尿病？")
     """
+    
+    @abstractmethod
+    def is_initialized(self) -> bool:
+        """
+        检查适配器是否已初始化
+        
+        Returns:
+            bool: 是否已初始化
+        """
+        pass
     
     @abstractmethod
     def create_chain(

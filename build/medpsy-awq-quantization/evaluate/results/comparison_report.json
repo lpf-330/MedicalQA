@@ -1,0 +1,323 @@
+{
+  "dimension_comparison": {
+    "total_common_cases": 20,
+    "json_correct_rate_baseline": 1.0,
+    "json_correct_rate_quantized": 1.0,
+    "json_correct_rate_diff": 0.0,
+    "pearson": 1.0,
+    "mae": 0.0,
+    "avg_sub_coverage_baseline": 0.0,
+    "avg_sub_coverage_quantized": 0.15,
+    "score_pairs_count": 16,
+    "details": [
+      {
+        "id": "D1-01",
+        "baseline_valid_json": true,
+        "quantized_valid_json": true,
+        "baseline_score": null,
+        "quantized_score": 0.72,
+        "baseline_sub_count": 0,
+        "quantized_sub_count": 0
+      },
+      {
+        "id": "D1-02",
+        "baseline_valid_json": true,
+        "quantized_valid_json": true,
+        "baseline_score": null,
+        "quantized_score": 0.72,
+        "baseline_sub_count": 0,
+        "quantized_sub_count": 0
+      },
+      {
+        "id": "D1-03",
+        "baseline_valid_json": true,
+        "quantized_valid_json": true,
+        "baseline_score": 0.72,
+        "quantized_score": 0.72,
+        "baseline_sub_count": 0,
+        "quantized_sub_count": 0
+      },
+      {
+        "id": "D1-04",
+        "baseline_valid_json": true,
+        "quantized_valid_json": true,
+        "baseline_score": 0.72,
+        "quantized_score": 0.72,
+        "baseline_sub_count": 0,
+        "quantized_sub_count": 0
+      },
+      {
+        "id": "D1-05",
+        "baseline_valid_json": true,
+        "quantized_valid_json": true,
+        "baseline_score": null,
+        "quantized_score": 0.72,
+        "baseline_sub_count": 0,
+        "quantized_sub_count": 0
+      },
+      {
+        "id": "D1-06",
+        "baseline_valid_json": true,
+        "quantized_valid_json": true,
+        "baseline_score": 0.72,
+        "quantized_score": 0.72,
+        "baseline_sub_count": 0,
+        "quantized_sub_count": 0
+      },
+      {
+        "id": "D2-01",
+        "baseline_valid_json": true,
+        "quantized_valid_json": true,
+        "baseline_score": 0.72,
+        "quantized_score": 0.72,
+        "baseline_sub_count": 0,
+        "quantized_sub_count": 0
+      },
+      {
+        "id": "D2-02",
+        "baseline_valid_json": true,
+        "quantized_valid_json": true,
+        "baseline_score": 0.72,
+        "quantized_score": 0.72,
+        "baseline_sub_count": 0,
+        "quantized_sub_count": 0
+      },
+      {
+        "id": "D2-03",
+        "baseline_valid_json": true,
+        "quantized_valid_json": true,
+        "baseline_score": 0.72,
+        "quantized_score": 0.72,
+        "baseline_sub_count": 0,
+        "quantized_sub_count": 0
+      },
+      {
+        "id": "D2-04",
+        "baseline_valid_json": true,
+        "quantized_valid_json": true,
+        "baseline_score": 0.72,
+        "quantized_score": 0.72,
+        "baseline_sub_count": 0,
+        "quantized_sub_count": 0
+      },
+      {
+        "id": "D3-01",
+        "baseline_valid_json": true,
+        "quantized_valid_json": true,
+        "baseline_score": 0.72,
+        "quantized_score": 0.72,
+        "baseline_sub_count": 0,
+        "quantized_sub_count": 3
+      },
+      {
+        "id": "D3-02",
+        "baseline_valid_json": true,
+        "quantized_valid_json": true,
+        "baseline_score": 0.72,
+        "quantized_score": 0.72,
+        "baseline_sub_count": 0,
+        "quantized_sub_count": 0
+      },
+      {
+        "id": "D3-03",
+        "baseline_valid_json": true,
+        "quantized_valid_json": true,
+        "baseline_score": 0.72,
+        "quantized_score": 0.72,
+        "baseline_sub_count": 0,
+        "quantized_sub_count": 0
+      },
+      {
+        "id": "D3-04",
+        "baseline_valid_json": true,
+        "quantized_valid_json": true,
+        "baseline_score": 0.72,
+        "quantized_score": null,
+        "baseline_sub_count": 0,
+        "quantized_sub_count": 0
+      },
+      {
+        "id": "D4-01",
+        "baseline_valid_json": true,
+        "quantized_valid_json": true,
+        "baseline_score": 0.72,
+        "quantized_score": 0.72,
+        "baseline_sub_count": 0,
+        "quantized_sub_count": 0
+      },
+      {
+        "id": "D4-02",
+        "baseline_valid_json": true,
+        "quantized_valid_json": true,
+        "baseline_score": 0.72,
+        "quantized_score": 0.72,
+        "baseline_sub_count": 0,
+        "quantized_sub_count": 0
+      },
+      {
+        "id": "D4-03",
+        "baseline_valid_json": true,
+        "quantized_valid_json": true,
+        "baseline_score": 0.72,
+        "quantized_score": 0.72,
+        "baseline_sub_count": 0,
+        "quantized_sub_count": 0
+      },
+      {
+        "id": "D5-01",
+        "baseline_valid_json": true,
+        "quantized_valid_json": true,
+        "baseline_score": 0.72,
+        "quantized_score": 0.72,
+        "baseline_sub_count": 0,
+        "quantized_sub_count": 0
+      },
+      {
+        "id": "D5-02",
+        "baseline_valid_json": true,
+        "quantized_valid_json": true,
+        "baseline_score": 0.72,
+        "quantized_score": 0.72,
+        "baseline_sub_count": 0,
+        "quantized_sub_count": 0
+      },
+      {
+        "id": "D5-03",
+        "baseline_valid_json": true,
+        "quantized_valid_json": true,
+        "baseline_score": 0.72,
+        "quantized_score": 0.72,
+        "baseline_sub_count": 0,
+        "quantized_sub_count": 0
+      }
+    ]
+  },
+  "risk_factor_comparison": {
+    "total_common_cases": 15,
+    "json_correct_rate_baseline": 1.0,
+    "json_correct_rate_quantized": 1.0,
+    "json_correct_rate_diff": 0.0,
+    "pearson": 0.784518251502971,
+    "mae": 2.0,
+    "score_pairs_count": 15,
+    "details": [
+      {
+        "id": "F1-01",
+        "baseline_valid_json": true,
+        "quantized_valid_json": true,
+        "baseline_score": 45,
+        "quantized_score": 45
+      },
+      {
+        "id": "F1-02",
+        "baseline_valid_json": true,
+        "quantized_valid_json": true,
+        "baseline_score": 45,
+        "quantized_score": 45
+      },
+      {
+        "id": "F1-03",
+        "baseline_valid_json": true,
+        "quantized_valid_json": true,
+        "baseline_score": 45,
+        "quantized_score": 45
+      },
+      {
+        "id": "F2-01",
+        "baseline_valid_json": true,
+        "quantized_valid_json": true,
+        "baseline_score": 45,
+        "quantized_score": 45
+      },
+      {
+        "id": "F2-02",
+        "baseline_valid_json": true,
+        "quantized_valid_json": true,
+        "baseline_score": 45,
+        "quantized_score": 45
+      },
+      {
+        "id": "F2-03",
+        "baseline_valid_json": true,
+        "quantized_valid_json": true,
+        "baseline_score": 85,
+        "quantized_score": 85
+      },
+      {
+        "id": "F3-01",
+        "baseline_valid_json": true,
+        "quantized_valid_json": true,
+        "baseline_score": 75,
+        "quantized_score": 45
+      },
+      {
+        "id": "F3-02",
+        "baseline_valid_json": true,
+        "quantized_valid_json": true,
+        "baseline_score": 45,
+        "quantized_score": 45
+      },
+      {
+        "id": "F4-01",
+        "baseline_valid_json": true,
+        "quantized_valid_json": true,
+        "baseline_score": 45,
+        "quantized_score": 45
+      },
+      {
+        "id": "F4-02",
+        "baseline_valid_json": true,
+        "quantized_valid_json": true,
+        "baseline_score": 45,
+        "quantized_score": 45
+      },
+      {
+        "id": "F4-03",
+        "baseline_valid_json": true,
+        "quantized_valid_json": true,
+        "baseline_score": 45,
+        "quantized_score": 45
+      },
+      {
+        "id": "F5-01",
+        "baseline_valid_json": true,
+        "quantized_valid_json": true,
+        "baseline_score": 45,
+        "quantized_score": 45
+      },
+      {
+        "id": "F5-02",
+        "baseline_valid_json": true,
+        "quantized_valid_json": true,
+        "baseline_score": 45,
+        "quantized_score": 45
+      },
+      {
+        "id": "F6-01",
+        "baseline_valid_json": true,
+        "quantized_valid_json": true,
+        "baseline_score": 45,
+        "quantized_score": 45
+      },
+      {
+        "id": "F6-02",
+        "baseline_valid_json": true,
+        "quantized_valid_json": true,
+        "baseline_score": 45,
+        "quantized_score": 45
+      }
+    ]
+  },
+  "speed_comparison": {
+    "baseline_avg_seconds": 26.49,
+    "quantized_avg_seconds": 35.18,
+    "speed_ratio": 0.75
+  },
+  "quality_assessment": {
+    "result": "FAIL",
+    "issues": [
+      "风险因子Pearson=0.7845<0.80",
+      "风险因子MAE=2.0000>0.15"
+    ]
+  }
+}

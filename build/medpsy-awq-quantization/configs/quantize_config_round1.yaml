@@ -1,0 +1,28 @@
+# MedPsy-4B AWQ 第一轮量化配置
+# 复用Qwen3-4B-AWQ已验证的参数
+
+model_path: "/home/project/MedicalQA/base_models/MedPsy-4B"
+output_path: "/home/project/MedicalQA/build/medpsy-awq-quantization/output/MedPsy-4B-AWQ"
+calibration_data_path: "/home/project/MedicalQA/build/medpsy-awq-quantization/calibration/data/calibration_dataset.json"
+
+# AWQ量化参数
+quant_config:
+  bits: 4
+  group_size: 128
+  zero_point: true
+  version: "gemm"
+
+# 校准参数
+calib_config:
+  max_calib_samples: 128
+  max_calib_seq_len: 512
+
+# 模型加载参数
+model_config:
+  dtype: "bfloat16"
+  device_map: "auto"
+  trust_remote_code: true
+
+# 输出格式
+save_config:
+  safetensors: true

@@ -6,22 +6,15 @@
 定义意图识别模型的配置参数和资源池配置。
 """
 
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from typing import Any, Dict
-from pathlib import Path
 
 from src.config.base_config import BaseResourceConfig
 from src.config.pool_config import PoolConfig
 
 
-def _get_default_model_path() -> str:
-    """获取默认模型路径"""
-    project_root = Path(__file__).parent.parent.parent.parent
-    return str(project_root / "base_models" / "Apollo-0.5B")
-
-
 @dataclass
-class IntentModelResourceConfig(BaseResourceConfig):
+class IntentModelConfig(BaseResourceConfig):
     """
     意图模型资源配置类
 
@@ -36,10 +29,10 @@ class IntentModelResourceConfig(BaseResourceConfig):
 
     config_id: str = "intent_model_config"
     resource_type: str = "intent_model"
-    model_path: str = field(default_factory=_get_default_model_path)
-    model_name: str = "FreedomIntelligence/Apollo-0.5B"
-    device: str = "cuda"
-    max_length: int = 512
+    model_path: str = ""
+    model_name: str = ""
+    device: str = ""
+    max_length: int = 1
 
     def validate(self) -> bool:
         """
@@ -74,13 +67,8 @@ class IntentModelResourceConfig(BaseResourceConfig):
         return base_dict
 
 
-resource_config = IntentModelResourceConfig()
+resource_config = IntentModelConfig()
 
 resource_type = "intent_model"
 
-pool_config = PoolConfig(
-    max_size=1,
-    min_idle=1,
-    idle_timeout=600000,
-    max_wait_time=30000
-)
+pool_config = PoolConfig()

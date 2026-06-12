@@ -7,73 +7,22 @@
 
 import logging
 import time
-from dataclasses import dataclass, field
 from typing import Any, Dict, List
-
+from src.config.business.report_service_config import get_runtime_config
 from src.orchestration.chain.chain import Chain
 from src.orchestration.chain.data_classes import ChainContext, ChainResult
+from src.orchestration.chain.data_prepare_chain.data_prepare_context import DataPrepareContextBody
+from src.orchestration.chain.data_prepare_chain.data_prepare_result import DataPrepareResultData
+from src.orchestration.chain.data_prepare_chain.data_prepare_resource import DataPrepareResource
 
 logger = logging.getLogger(__name__)
 
+class _LazyReportConfig:
+    """延迟加载配置代理，每次属性访问时从ConfigManager获取真实配置"""
+    def __getattr__(self, name):
+        return getattr(get_runtime_config(), name)
 
-@dataclass
-class DataPrepareContextBody:
-    """
-    数据准备Chain策略专属输入数据类
-
-    Attributes:
-        monitoring_data: 监测数据（心率、血糖、灌注指数、血氧、睡眠、血压），每项包含4个时间维度
-        user_profile: 用户档案（user_id, gender, birth_date, height, weight, past_medical_history, family_history, allergy_history, surgical_history, medical_compliance）
-        task_id: 任务ID
-    """
-    monitoring_data: Dict[str, Any] = field(default_factory=dict)
-    user_profile: Dict[str, Any] = field(default_factory=dict)
-    task_id: str = ""
-
-    def to_dict(self) -> Dict[str, Any]:
-        """转换为字典"""
-        return {
-            "monitoring_data": self.monitoring_data,
-            "user_profile": self.user_profile,
-            "task_id": self.task_id
-        }
-
-
-@dataclass
-class DataPrepareResultData:
-    """
-    数据准备Chain策略专属输出数据类
-
-    Attributes:
-        validated_data: 校验后的数据
-        degradation_level: 降级级别（0-3）
-        missing_fields: 缺失字段列表
-        data_completeness: 数据完整度（0.0-1.0）
-    """
-    validated_data: Dict[str, Any] = field(default_factory=dict)
-    degradation_level: int = 0
-    missing_fields: List[str] = field(default_factory=list)
-    data_completeness: float = 0.0
-
-    def to_dict(self) -> Dict[str, Any]:
-        """转换为字典"""
-        return {
-            "validated_data": self.validated_data,
-            "degradation_level": self.degradation_level,
-            "missing_fields": self.missing_fields,
-            "data_completeness": self.data_completeness
-        }
-
-
-@dataclass
-class DataPrepareResource:
-    """
-    数据准备Chain策略专属资源类
-
-    暂无外部资源依赖
-    """
-    pass
-
+_report_config = _LazyReportConfig()
 
 class DataPrepareChain(Chain[ChainContext[DataPrepareContextBody], ChainResult[DataPrepareResultData]]):
     """
@@ -146,7 +95,7 @@ class DataPrepareChain(Chain[ChainContext[DataPrepareContextBody], ChainResult[D
 
             # 2. 数据标准化
             validated_data = self._standardize_data(body)
-            logger.info(f"[DataPrepareChain] 数据标准化完成")
+            logger.info("[DataPrepareChain] 数据标准化完成")
 
             # 3. 空值处理和缺失字段标记
             validated_data, missing_fields = self._handle_missing_fields(validated_data, missing_fields)
@@ -259,9 +208,6 @@ class DataPrepareChain(Chain[ChainContext[DataPrepareContextBody], ChainResult[D
         """
         standardized = {}
 
-        # 时间维度列表
-        time_dimensions = ["latest", "daily_stats", "weekly_stats", "monthly_stats"]
-
         # 心率标准化（统一为bpm）
         if "heart_rate" in monitoring_data:
             hr_data = monitoring_data["heart_rate"]
@@ -320,12 +266,17 @@ class DataPrepareChain(Chain[ChainContext[DataPrepareContextBody], ChainResult[D
         time_dimensions = ["latest", "daily_stats", "weekly_stats", "monthly_stats"]
 
         for dimension in time_dimensions:
+            current_data = data.get("current")
             if dimension in data:
                 dimension_data = data[dimension]
-                if dimension_data is not None:
+                if dimension == "latest" and not dimension_data and current_data is not None:
+                    standardized[dimension] = current_data if isinstance(current_data, list) else [current_data]
+                elif dimension_data is not None:
                     standardized[dimension] = dimension_data
                 else:
                     standardized[dimension] = []
+            elif dimension == "latest" and current_data is not None:
+                standardized[dimension] = current_data if isinstance(current_data, list) else [current_data]
             else:
                 standardized[dimension] = []
 
@@ -375,6 +326,20 @@ class DataPrepareChain(Chain[ChainContext[DataPrepareContextBody], ChainResult[D
         if "birth_date" in user_profile:
             standardized["birth_date"] = str(user_profile["birth_date"]) if user_profile["birth_date"] else None
 
+        # 从birth_date计算age；若外部已提供age，则保留该值作为兜底
+        birth_date = standardized.get("birth_date", "")
+        if birth_date:
+            try:
+                from datetime import datetime
+                birth = datetime.strptime(birth_date, "%Y-%m-%d")
+                today = datetime.now()
+                age = today.year - birth.year - ((today.month, today.day) < (birth.month, birth.day))
+                standardized["age"] = age
+            except (ValueError, TypeError):
+                standardized["age"] = user_profile.get("age", -1)
+        else:
+            standardized["age"] = user_profile.get("age", -1)
+
         # 身高
         if "height" in user_profile:
             try:
@@ -389,19 +354,29 @@ class DataPrepareChain(Chain[ChainContext[DataPrepareContextBody], ChainResult[D
             except (ValueError, TypeError):
                 standardized["weight"] = None
 
-        # 既往病史（字符串类型）
-        if "past_medical_history" in user_profile:
-            medical_history = user_profile["past_medical_history"]
+        # 既往病史（字符串类型，按配置截断）
+        if "past_medical_history" in user_profile or "medical_history" in user_profile:
+            medical_history = user_profile.get("past_medical_history")
+            if medical_history is None:
+                medical_history = user_profile.get("medical_history")
             if medical_history is not None:
-                standardized["past_medical_history"] = str(medical_history)
+                history_str = str(medical_history)
+                limit = _report_config.past_medical_history_limit
+                if len(history_str) > limit:
+                    history_str = history_str[:limit] + "..."
+                standardized["past_medical_history"] = history_str
             else:
                 standardized["past_medical_history"] = ""
 
-        # 家族病史（字符串类型）
+        # 家族病史（字符串类型，按配置截断）
         if "family_history" in user_profile:
             family_history = user_profile["family_history"]
             if family_history is not None:
-                standardized["family_history"] = str(family_history)
+                history_str = str(family_history)
+                limit = _report_config.family_history_limit
+                if len(history_str) > limit:
+                    history_str = history_str[:limit] + "..."
+                standardized["family_history"] = history_str
             else:
                 standardized["family_history"] = ""
 
@@ -422,8 +397,10 @@ class DataPrepareChain(Chain[ChainContext[DataPrepareContextBody], ChainResult[D
                 standardized["surgical_history"] = ""
 
         # 用药医嘱（字符串类型）
-        if "medical_compliance" in user_profile:
-            medical_compliance = user_profile["medical_compliance"]
+        if "medical_compliance" in user_profile or "medication_history" in user_profile:
+            medical_compliance = user_profile.get("medical_compliance")
+            if medical_compliance is None:
+                medical_compliance = user_profile.get("medication_history")
             if medical_compliance is not None:
                 standardized["medical_compliance"] = str(medical_compliance)
             else:
@@ -431,9 +408,9 @@ class DataPrepareChain(Chain[ChainContext[DataPrepareContextBody], ChainResult[D
 
         # 保留其他原始数据
         for key, value in user_profile.items():
-            if key not in ["user_id", "gender", "birth_date", "height", "weight",
-                          "past_medical_history", "family_history", "allergy_history",
-                          "surgical_history", "medical_compliance"]:
+            if key not in ["user_id", "gender", "birth_date", "age", "height", "weight",
+                          "past_medical_history", "medical_history", "family_history", "allergy_history",
+                          "surgical_history", "medical_compliance", "medication_history"]:
                 standardized[key] = value
 
         return standardized
@@ -453,47 +430,53 @@ class DataPrepareChain(Chain[ChainContext[DataPrepareContextBody], ChainResult[D
         monitoring_data = validated_data.get("monitoring_data", {})
 
         # 检查6项监测指标
-        for field in self.CORE_MONITORING_FIELDS:
-            if field not in monitoring_data or not monitoring_data[field]:
-                missing_fields.append(f"monitoring_data.{field}")
-            elif isinstance(monitoring_data[field], dict):
+        for monitoring_field in self.CORE_MONITORING_FIELDS:
+            if monitoring_field not in monitoring_data or not monitoring_data[monitoring_field]:
+                missing_fields.append(f"monitoring_data.{monitoring_field}")
+            elif isinstance(monitoring_data[monitoring_field], dict):
                 # 检查是否有有效的时间维度数据
                 has_valid_data = False
                 for dimension in ["latest", "daily_stats", "weekly_stats", "monthly_stats"]:
-                    if dimension in monitoring_data[field] and monitoring_data[field][dimension]:
+                    if dimension in monitoring_data[monitoring_field] and monitoring_data[monitoring_field][dimension]:
                         has_valid_data = True
                         break
                 if not has_valid_data:
-                    missing_fields.append(f"monitoring_data.{field}")
+                    missing_fields.append(f"monitoring_data.{monitoring_field}")
 
         # 检查用户档案中的核心字段
         user_profile = validated_data.get("user_profile", {})
-        for field in self.CORE_PROFILE_FIELDS:
-            if field not in user_profile or not user_profile[field]:
-                missing_fields.append(f"user_profile.{field}")
+        for profile_field in self.CORE_PROFILE_FIELDS:
+            if profile_field not in user_profile or not user_profile[profile_field]:
+                missing_fields.append(f"user_profile.{profile_field}")
 
         # 为缺失的核心字段设置默认值
-        for field in self.CORE_MONITORING_FIELDS:
-            if field not in monitoring_data:
-                validated_data["monitoring_data"][field] = {
+        for monitoring_field in self.CORE_MONITORING_FIELDS:
+            if monitoring_field not in monitoring_data:
+                validated_data["monitoring_data"][monitoring_field] = {
                     "latest": [],
                     "daily_stats": [],
                     "weekly_stats": [],
                     "monthly_stats": []
                 }
 
-        for field in self.CORE_PROFILE_FIELDS:
-            if field not in user_profile:
-                if field in ["height", "weight"]:
-                    validated_data["user_profile"][field] = None
+        for profile_field in self.CORE_PROFILE_FIELDS:
+            if profile_field not in user_profile:
+                if profile_field in ["height", "weight"]:
+                    validated_data["user_profile"][profile_field] = None
                 else:
-                    validated_data["user_profile"][field] = ""
+                    validated_data["user_profile"][profile_field] = ""
 
         # 为病史字段设置默认值
         history_fields = ["past_medical_history", "family_history", "allergy_history", "surgical_history", "medical_compliance"]
-        for field in history_fields:
-            if field not in user_profile:
-                validated_data["user_profile"][field] = ""
+        for history_field in history_fields:
+            if history_field not in user_profile:
+                validated_data["user_profile"][history_field] = ""
+
+        # 记录缺失字段详情日志
+        if missing_fields:
+            core_missing = [f for f in missing_fields if any(core_field in f for core_field in self.CORE_MONITORING_FIELDS + self.CORE_PROFILE_FIELDS)]
+            other_missing = [f for f in missing_fields if f not in core_missing]
+            logger.info(f"[DataPrepareChain] [MISSING_FIELDS] total={len(missing_fields)}, core_missing={core_missing}, other_missing={other_missing}")
 
         return validated_data, missing_fields
 
@@ -516,14 +499,14 @@ class DataPrepareChain(Chain[ChainContext[DataPrepareContextBody], ChainResult[D
         monitoring_data = validated_data.get("monitoring_data", {})
         for key, value in monitoring_data.items():
             total_fields += 1
-            if value is not None and value != [] and value != {}:
+            if value is not None and value != "" and value != [] and value != {} and value != "未知" and value != -1:
                 filled_fields += 1
 
         # 统计用户档案字段
         user_profile = validated_data.get("user_profile", {})
         for key, value in user_profile.items():
             total_fields += 1
-            if value is not None and value != [] and value != {}:
+            if value is not None and value != "" and value != [] and value != {} and value != "未知" and value != -1:
                 filled_fields += 1
 
         # 计算完整度
@@ -538,10 +521,10 @@ class DataPrepareChain(Chain[ChainContext[DataPrepareContextBody], ChainResult[D
         计算降级级别
 
         降级级别规则：
-        - 0级：数据完整度≥90%，所有核心字段都有数据
-        - 1级：数据完整度70%-89%，部分核心字段缺失
-        - 2级：数据完整度50%-69%，多个核心字段缺失
-        - 3级：数据完整度<50%，大量核心字段缺失
+        - 0级：数据完整度≥高阈值，所有核心字段都有数据
+        - 1级：数据完整度≥高阈值但有核心字段缺失，或完整度中阈值-高阈值且核心字段缺失<=轻度
+        - 2级：数据完整度低阈值-中阈值，核心字段缺失<=中度
+        - 3级：数据完整度<低阈值，或核心字段缺失>中度
 
         Args:
             data_completeness: 数据完整度
@@ -552,16 +535,39 @@ class DataPrepareChain(Chain[ChainContext[DataPrepareContextBody], ChainResult[D
         """
         # 统计缺失的核心字段数量
         core_missing_count = 0
-        for field in missing_fields:
-            if any(core_field in field for core_field in self.CORE_MONITORING_FIELDS + self.CORE_PROFILE_FIELDS):
+        for missing_field in missing_fields:
+            if any(core_field in missing_field for core_field in self.CORE_MONITORING_FIELDS + self.CORE_PROFILE_FIELDS):
                 core_missing_count += 1
 
+        # 从配置读取降级阈值
+        completeness_high = _report_config.degradation_completeness_high
+        completeness_medium = _report_config.degradation_completeness_medium
+        completeness_low = _report_config.degradation_completeness_low
+        core_missing_mild = _report_config.degradation_core_missing_mild
+        core_missing_moderate = _report_config.degradation_core_missing_moderate
+
         # 根据完整度和核心字段缺失情况判断降级级别
-        if data_completeness >= 0.9 and core_missing_count == 0:
+        if core_missing_count > core_missing_moderate:
+            rule_desc = f"completeness={data_completeness:.2f}, core_missing_count={core_missing_count}, rule=核心字段缺失>{core_missing_moderate}, level=3"
+            logger.info(f"[DataPrepareChain] [DEGRADATION_CALC] {rule_desc}")
+            return 3
+        if data_completeness >= completeness_high and core_missing_count == 0:
+            rule_desc = f"completeness={data_completeness:.2f}, core_missing_count={core_missing_count}, rule=≥{completeness_high:.0%}且核心字段无缺失, level=0"
+            logger.info(f"[DataPrepareChain] [DEGRADATION_CALC] {rule_desc}")
             return 0
-        elif data_completeness >= 0.7 and core_missing_count <= 2:
+        elif data_completeness >= completeness_high and core_missing_count > 0:
+            rule_desc = f"completeness={data_completeness:.2f}, core_missing_count={core_missing_count}, rule=≥{completeness_high:.0%}但核心字段有缺失, level=1"
+            logger.info(f"[DataPrepareChain] [DEGRADATION_CALC] {rule_desc}")
             return 1
-        elif data_completeness >= 0.5 and core_missing_count <= 4:
+        elif data_completeness >= completeness_medium and core_missing_count <= core_missing_mild:
+            rule_desc = f"completeness={data_completeness:.2f}, core_missing_count={core_missing_count}, rule={completeness_medium:.0%}-{completeness_high:.0%}且核心字段缺失<={core_missing_mild}, level=1"
+            logger.info(f"[DataPrepareChain] [DEGRADATION_CALC] {rule_desc}")
+            return 1
+        elif data_completeness >= completeness_low and core_missing_count <= core_missing_moderate:
+            rule_desc = f"completeness={data_completeness:.2f}, core_missing_count={core_missing_count}, rule={completeness_low:.0%}-{completeness_medium:.0%}且核心字段缺失<={core_missing_moderate}, level=2"
+            logger.info(f"[DataPrepareChain] [DEGRADATION_CALC] {rule_desc}")
             return 2
         else:
+            rule_desc = f"completeness={data_completeness:.2f}, core_missing_count={core_missing_count}, rule=<{completeness_low:.0%}或核心字段缺失>{core_missing_moderate}, level=3"
+            logger.info(f"[DataPrepareChain] [DEGRADATION_CALC] {rule_desc}")
             return 3

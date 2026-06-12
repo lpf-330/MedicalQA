@@ -5,6 +5,7 @@
 该模块定义了AgentResource类，为agent策略提供资源支持。
 """
 
+import logging
 from dataclasses import dataclass, field
 from typing import Dict, Optional, TYPE_CHECKING, Any
 
@@ -13,6 +14,8 @@ if TYPE_CHECKING:
     from src.orchestration.chain.chain import Chain
     from src.orchestration.tool_call_handler.tool_call_handler import ToolCallHandler
     from src.orchestration.model_business_service.model_business_service import ModelBusinessService
+
+logger = logging.getLogger(__name__)
 
 
 @dataclass
@@ -56,7 +59,12 @@ class AgentResource:
         Example:
             >>> chain = resource.get_chain("knowledge_chain")
         """
-        return self.chain_registry.get(chain_name)
+        chain = self.chain_registry.get(chain_name)
+        if chain is None:
+            logger.warning(f"[AgentResource.get_chain] Chain不存在: chain_name={chain_name}")
+        else:
+            logger.debug(f"[AgentResource.get_chain] 获取Chain: chain_name={chain_name}, chain_class={type(chain).__name__}")
+        return chain
 
     def has_chain(self, chain_name: str) -> bool:
         """
@@ -90,6 +98,9 @@ class AgentResource:
             raise ValueError("chain不能为None")
 
         self.chain_registry[chain_name] = chain
+        logger.info(f"[AgentResource.register_chain] Chain已注册: chain_name={chain_name}, chain_class={type(chain).__name__}")
+        logger.info(f"[CHAIN_REGISTRY] event=register, chain_name={chain_name}, chain_type={type(chain).__name__}")
+        logger.info(f"[AGENT_RESOURCE] chains={list(self.chain_registry.keys())}, tool_handlers={list(self.tool_handlers.keys())}, model_service={type(self.model_service).__name__ if self.model_service else None}")
 
     def unregister_chain(self, chain_name: str) -> Optional['Chain']:
         """
@@ -119,7 +130,12 @@ class AgentResource:
         Example:
             >>> handler = resource.get_tool_handler("neo4j_tool")
         """
-        return self.tool_handlers.get(tool_name)
+        handler = self.tool_handlers.get(tool_name)
+        if handler is None:
+            logger.warning(f"[AgentResource.get_tool_handler] ToolCallHandler不存在: tool_name={tool_name}")
+        else:
+            logger.debug(f"[AgentResource.get_tool_handler] 获取ToolCallHandler: tool_name={tool_name}, handler_class={type(handler).__name__}")
+        return handler
 
     def has_tool_handler(self, tool_name: str) -> bool:
         """
@@ -153,6 +169,8 @@ class AgentResource:
             raise ValueError("handler不能为None")
 
         self.tool_handlers[tool_name] = handler
+        logger.info(f"[AgentResource.register_tool_handler] ToolCallHandler已注册: tool_name={tool_name}, handler_class={type(handler).__name__}")
+        logger.info(f"[AGENT_RESOURCE] chains={list(self.chain_registry.keys())}, tool_handlers={list(self.tool_handlers.keys())}, model_service={type(self.model_service).__name__ if self.model_service else None}")
 
     def unregister_tool_handler(self, tool_name: str) -> Optional['ToolCallHandler']:
         """

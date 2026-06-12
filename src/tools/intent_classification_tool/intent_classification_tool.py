@@ -1,22 +1,23 @@
 # -*- coding: utf-8 -*-
 
 import logging
+import threading
 import time
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, Optional
 
-from src.tools.tool import Tool
+from src.tools.intent_classification_tool.intent_classification_tool_interface import IntentClassificationToolInterface
 from src.resource_manager.global_resource_manager import GlobalResourceManager
-from src.resource_manager.intent_model.intent_model_resource import IntentModelResource
+from src.resource_manager.intent_model import IntentModelClient
+from src.schemas.resource_type import ResourceType, ConfigId
+from src.config.business.consult_service_config import get_runtime_config
+from src.utils.logger import log_arch_event
 
 logger = logging.getLogger(__name__)
 
 
-class IntentClassificationTool(Tool):
+class IntentClassificationTool(IntentClassificationToolInterface):
 
     LABEL_MAPPING = {
-        "LABEL_0": "health_consultation",
-        "LABEL_1": "chat",
-        "LABEL_2": "other",
         "health": "health_consultation",
         "chat": "chat",
         "other": "other",
@@ -33,71 +34,65 @@ class IntentClassificationTool(Tool):
         "药", "片", "胶囊", "注射", "输液"
     ]
 
-    def __init__(
-        self,
-        model_path: str,
-        device: str = "cpu",
-        max_length: int = 128
-    ):
-        self._model_path = model_path
-        self._device = device
-        self._max_length = max_length
-        self._intent_resource: Optional[IntentModelResource] = None
+    def __init__(self):
+        self._intent_client: Optional[IntentModelClient] = None
         self._intent_handle = None
+        self._lock = threading.Lock()
 
     def _init_resource(self) -> None:
-        if self._intent_resource is not None:
-            logger.debug("[IntentClassificationTool] _init_resource skipped, already initialized")
-            return
+        """轻量初始化 — 不再acquire资源，资源在业务方法中按需获取"""
+        logger.info("[IntentClassificationTool] _init_resource completed (lightweight, no resource acquire)")
 
-        logger.info("[IntentClassificationTool] _init_resource started")
-        start_time = time.time()
-        try:
-            self._intent_handle = GlobalResourceManager.acquire("intent_model", "intent_model_config")
-            if self._intent_handle is not None:
-                self._intent_resource = self._intent_handle.resource
-                if not self._intent_resource.is_activate():
-                    self._intent_resource.activate()
+    def _acquire_resource(self) -> None:
+        """获取资源（幂等）— acquire-on-use 模式；线程安全"""
+        with self._lock:
+            if self._intent_client is not None:
+                return
+            try:
+                self._intent_handle = GlobalResourceManager.acquire(ResourceType.INTENT_MODEL, ConfigId.INTENT_MODEL_CONFIG)
+                logger.info("[TOOL_RESOURCE_ACQUIRE] tool=IntentClassificationTool, resource_type=intent_model")
+                if self._intent_handle is None:
+                    raise RuntimeError("Failed to acquire intent_model resource")
+                if not self._intent_handle.resource.is_activate():
+                    self._intent_handle.resource.activate()
+                self._intent_client = self._intent_handle.get_client()
                 logger.info("[IntentClassificationTool] intent_model resource acquired")
-            else:
-                logger.warning("[IntentClassificationTool] failed to acquire intent_model resource")
-
-            elapsed = time.time() - start_time
-            logger.info(f"[IntentClassificationTool] _init_resource completed, elapsed={elapsed:.3f}s, client_ready={self._intent_resource is not None}")
-        except Exception as e:
-            elapsed = time.time() - start_time
-            logger.error(f"[IntentClassificationTool] _init_resource failed, elapsed={elapsed:.3f}s, error={str(e)}")
-            raise
-
-    def release_source(self) -> None:
-        logger.info("[IntentClassificationTool] release_source started")
-        start_time = time.time()
-        try:
-            if self._intent_handle is not None:
-                GlobalResourceManager.release(self._intent_handle)
+            except Exception as e:
+                logger.debug(f"[IntentClassificationTool] 资源获取失败: {e}")
                 self._intent_handle = None
-                self._intent_resource = None
+                self._intent_client = None
+                raise
+
+    def _release_resource(self) -> None:
+        """释放资源 — release-after-use 模式；线程安全"""
+        with self._lock:
+            if self._intent_handle is not None:
+                try:
+                    GlobalResourceManager.release(self._intent_handle)
+                finally:
+                    self._intent_handle = None
+                    self._intent_client = None
                 logger.info("[IntentClassificationTool] intent_model resource released")
 
-            elapsed = time.time() - start_time
-            logger.info(f"[IntentClassificationTool] release_source completed, elapsed={elapsed:.3f}s")
-        except Exception as e:
-            elapsed = time.time() - start_time
-            logger.error(f"[IntentClassificationTool] release_source failed, elapsed={elapsed:.3f}s, error={str(e)}")
-            raise
+    def release_source(self) -> None:
+        """释放资源 — 委托给 _release_resource"""
+        logger.info(f"[TOOL_RELEASE] {self.__class__.__name__}释放资源")
+        self._release_resource()
 
     def destroy_source(self) -> None:
         """彻底销毁意图识别模型资源 - 断开连接"""
+        logger.info(f"[TOOL_DESTROY] {self.__class__.__name__}销毁资源")
         logger.info("[IntentClassificationTool] destroy_source started")
         start_time = time.time()
         try:
             if self._intent_handle is not None:
                 GlobalResourceManager.destroy(self._intent_handle)
                 self._intent_handle = None
-                self._intent_resource = None
+                self._intent_client = None
                 logger.info("[IntentClassificationTool] intent_model resource destroyed")
 
             elapsed = time.time() - start_time
+            log_arch_event(logger, component="IntentClassificationTool", stage="TOOL", event="destroy_source", status="success", design_id="ARCH-5.1", elapsed=f"{elapsed:.3f}s")
             logger.info(f"[IntentClassificationTool] destroy_source completed, elapsed={elapsed:.3f}s")
         except Exception as e:
             elapsed = time.time() - start_time
@@ -107,28 +102,24 @@ class IntentClassificationTool(Tool):
     def classify_intent(self, text: str) -> Dict[str, Any]:
         logger.debug(f"[IntentClassificationTool] classify_intent called, text_length={len(text)}")
         start_time = time.time()
+        self._acquire_resource()
         try:
-            if self._intent_resource is None:
-                raise RuntimeError("Tool not initialized, call _init_resource first")
-            adapter = self._intent_resource.get_adapter()
-            if adapter is None:
-                raise RuntimeError("Adapter not initialized")
-            result = adapter.predict(text=text)
-            raw_label = result.get("label", "")
+            result = self._intent_client.classify_intent(text)
+            raw_label = result.get("intent_label", "")
             intent_label = self.LABEL_MAPPING.get(raw_label, raw_label)
             confidence = result.get("confidence", 0.0)
-            
+
             matched_keywords = []
             for keyword in self.HEALTH_KEYWORDS:
                 if keyword in text:
                     matched_keywords.append(keyword)
-            
+
             if matched_keywords:
                 original_label = intent_label
                 intent_label = "health_consultation"
-                confidence = max(0.8, confidence)
+                confidence = max(get_runtime_config().confidence_high, confidence)
                 logger.info(f"[IntentClassificationTool] 关键词强制修正: original_label={original_label}, new_label={intent_label}, matched_keywords={matched_keywords}, confidence={confidence:.4f}")
-            
+
             intent_result = {
                 "intent_label": intent_label,
                 "confidence": confidence
@@ -140,33 +131,5 @@ class IntentClassificationTool(Tool):
             elapsed = time.time() - start_time
             logger.error(f"[IntentClassificationTool] classify_intent failed, elapsed={elapsed:.3f}s, error={str(e)}")
             raise
-
-    def extract_entities(self, text: str) -> List[Dict[str, Any]]:
-        logger.debug(f"[IntentClassificationTool] extract_entities called, text_length={len(text)}")
-        start_time = time.time()
-        try:
-            if self._intent_resource is None:
-                raise RuntimeError("Tool not initialized, call _init_resource first")
-            adapter = self._intent_resource.get_adapter()
-            if adapter is None:
-                raise RuntimeError("Adapter not initialized")
-            result = adapter.predict(text=text)
-            entities = []
-            label = result.get("label", "")
-            confidence = result.get("confidence", 0.0)
-            import re
-            if confidence > 0.3:
-                keywords = re.findall(r'[\u4e00-\u9fff]+', text)
-                for keyword in keywords:
-                    if len(keyword) >= 2:
-                        entities.append({
-                            "entity_name": keyword,
-                            "entity_type": "medical_term"
-                        })
-            elapsed = time.time() - start_time
-            logger.info(f"[IntentClassificationTool] extract_entities completed, elapsed={elapsed:.3f}s, entity_count={len(entities)}, confidence={confidence:.4f}")
-            return entities
-        except Exception as e:
-            elapsed = time.time() - start_time
-            logger.error(f"[IntentClassificationTool] extract_entities failed, elapsed={elapsed:.3f}s, error={str(e)}")
-            raise
+        finally:
+            self._release_resource()

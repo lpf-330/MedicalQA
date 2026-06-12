@@ -1,0 +1,610 @@
+{
+  "timestamp": "2026-06-05T16:12:10",
+  "model": "MedPsy-4B-AWQ (4-bit quantized)",
+  "sglang_url": "http://localhost:30001/v1/chat/completions",
+  "dimension_results": [
+    {
+      "id": "D1-01",
+      "type": "dimension",
+      "prompt": "你是健康评估专家。评估维度: 生理指标(权重0.3)\n子指标: 血压水平, 血糖水平, 血脂水平, BMI指数, 心率\n\n严格按以下JSON格式输出，不要输出任何其他内容:\n{\"dimension_score\":0.72,\"sub_indicator_scores\":{\"指标名\":0.65},\"dimension_reasoning\":\"总体评估\"}\n\n对每个子指标评分(0-1)。\n\n以下是评估依据:\n用户={\"age\": 68, \"gender\": \"男\", \"chronic_diseases\": [\"高血压\", \"2型糖尿病\"], \"medications\": [\"氨氯地平\", \"二甲双胍\"]} 异常=[{\"item\": \"收缩压\", \"value\": \"165mmHg\", \"status\": \"偏高\"}, {\"item\": \"空腹血糖\", \"value\": \"8.2mmol/L\", \"status\": \"偏高\"}, {\"item\": \"LDL-C\", \"value\": \"3.8mmol/L\", \"status\": \"偏高\"}] 风险={}\n知识={\"summary\": \"高血压合并糖尿病患者需严格控制血压和血糖\", \"refined_knowledge\": [\"血压目标<130/80mmHg\", \"空腹血糖4.4-7.0mmol/L\"]}",
+      "response": "{\"dimension_score\":0.72,\"subindicator_scores\":{\"血压水平\":0.65,\"血糖水平\":0.65,\"血脂水平\":0.7,\"BMI指数\":0.4,\"心率\":0.4},\"dimension_reasoning\":\"高血压合并糖尿病，血压血糖血脂控制不足\"}",
+      "elapsed_seconds": 60.52,
+      "usage": {
+        "prompt_tokens": 341,
+        "total_tokens": 1558,
+        "completion_tokens": 1217,
+        "prompt_tokens_details": null,
+        "reasoning_tokens": 1151
+      },
+      "error": null,
+      "dimension_id": "D1",
+      "dimension_name": "生理指标"
+    },
+    {
+      "id": "D1-02",
+      "type": "dimension",
+      "prompt": "你是健康评估专家。评估维度: 生理指标(权重0.3)\n子指标: 血压水平, 血糖水平, 血脂水平, BMI指数, 心率\n\n严格按以下JSON格式输出，不要输出任何其他内容:\n{\"dimension_score\":0.72,\"sub_indicator_scores\":{\"指标名\":0.65},\"dimension_reasoning\":\"总体评估\"}\n\n对每个子指标评分(0-1)。\n\n以下是评估依据:\n用户={\"age\": 72, \"gender\": \"女\", \"chronic_diseases\": [\"冠心病\", \"高血脂\"], \"medications\": [\"阿托伐他汀\", \"阿司匹林\"]} 异常=[{\"item\": \"LDL-C\", \"value\": \"4.1mmol/L\", \"status\": \"偏高\"}, {\"item\": \"BMI\", \"value\": \"28.5\", \"status\": \"超重\"}, {\"item\": \"心率\", \"value\": \"92次/分\", \"status\": \"偏快\"}] 风险={}\n知识={\"summary\": \"冠心病患者LDL-C需达标，BMI应控制\", \"refined_knowledge\": [\"LDL-C目标<1.8mmol/L\", \"BMI正常范围18.5-24\"]}",
+      "response": "{\"dimension_score\":0.72,\"subindicator_scores\":{\"血压水平\":0.7,\"血糖水平\":0.7,\"血脂水平\":0.3,\"BMI指数\":0.3,\"心率\":0.3},\"dimension_reasoning\":\"总体评估\"}",
+      "elapsed_seconds": 56.13,
+      "usage": {
+        "prompt_tokens": 337,
+        "total_tokens": 1476,
+        "completion_tokens": 1139,
+        "prompt_tokens_details": null,
+        "reasoning_tokens": 1082
+      },
+      "error": null,
+      "dimension_id": "D1",
+      "dimension_name": "生理指标"
+    },
+    {
+      "id": "D1-03",
+      "type": "dimension",
+      "prompt": "你是健康评估专家。评估维度: 生理指标(权重0.3)\n子指标: 血压水平, 血糖水平, 血脂水平, BMI指数, 心率\n\n严格按以下JSON格式输出，不要输出任何其他内容:\n{\"dimension_score\":0.72,\"sub_indicator_scores\":{\"指标名\":0.65},\"dimension_reasoning\":\"总体评估\"}\n\n对每个子指标评分(0-1)。\n\n以下是评估依据:\n用户={\"age\": 65, \"gender\": \"男\", \"chronic_diseases\": [\"慢性肾病3期\"], \"medications\": [\"依那普利\", \"呋塞米\"]} 异常=[{\"item\": \"血肌酐\", \"value\": \"180μmol/L\", \"status\": \"偏高\"}, {\"item\": \"eGFR\", \"value\": \"38\", \"status\": \"偏低\"}, {\"item\": \"血压\", \"value\": \"150/95mmHg\", \"status\": \"偏高\"}] 风险={}\n知识={\"summary\": \"慢性肾病需控制血压和蛋白摄入\", \"refined_knowledge\": [\"eGFR<60需积极干预\", \"血压目标<130/80\"]}",
+      "response": "{\"dimension_score\":0.72,\"subindicator_scores\":{\"血压水平\":0.4,\"血糖水平\":0.7,\"血脂水平\":0.7,\"BMI指数\":0.7,\"心率\":0.7},\"dimension_reasoning\":\"慢性肾病3期血压150/95mmHg偏高，其他指标未见明显异常\"}",
+      "elapsed_seconds": 72.33,
+      "usage": {
+        "prompt_tokens": 328,
+        "total_tokens": 1788,
+        "completion_tokens": 1460,
+        "prompt_tokens_details": null,
+        "reasoning_tokens": 1381
+      },
+      "error": null,
+      "dimension_id": "D1",
+      "dimension_name": "生理指标"
+    },
+    {
+      "id": "D1-04",
+      "type": "dimension",
+      "prompt": "你是健康评估专家。评估维度: 生理指标(权重0.3)\n子指标: 血压水平, 血糖水平, 血脂水平, BMI指数, 心率\n\n严格按以下JSON格式输出，不要输出任何其他内容:\n{\"dimension_score\":0.72,\"sub_indicator_scores\":{\"指标名\":0.65},\"dimension_reasoning\":\"总体评估\"}\n\n对每个子指标评分(0-1)。\n\n以下是评估依据:\n用户={\"age\": 75, \"gender\": \"女\", \"chronic_diseases\": [\"骨质疏松\", \"高血压\"], \"medications\": [\"阿仑膦酸钠\", \"缬沙坦\"]} 异常=[{\"item\": \"骨密度T值\", \"value\": \"-3.0\", \"status\": \"偏低\"}, {\"item\": \"维生素D\", \"value\": \"15ng/mL\", \"status\": \"不足\"}, {\"item\": \"血压\", \"value\": \"148/88mmHg\", \"status\": \"偏高\"}] 风险={}\n知识={\"summary\": \"骨质疏松需补充钙和维生素D\", \"refined_knowledge\": [\"T值<-2.5为骨质疏松\", \"维生素D目标>30ng/mL\"]}",
+      "response": "{\"dimension_score\":0.72,\"subindicator_scores\":{\"血压水平\":0.6,\"血糖水平\":0.7,\"血脂水平\":0.7,\"BMI指数\":0.7,\"心率\":0.7},\"dimension_reasoning\":\"总体评估\"}",
+      "elapsed_seconds": 68.53,
+      "usage": {
+        "prompt_tokens": 331,
+        "total_tokens": 1715,
+        "completion_tokens": 1384,
+        "prompt_tokens_details": null,
+        "reasoning_tokens": 1326
+      },
+      "error": null,
+      "dimension_id": "D1",
+      "dimension_name": "生理指标"
+    },
+    {
+      "id": "D2-01",
+      "type": "dimension",
+      "prompt": "你是健康评估专家。评估维度: 用药情况(权重0.2)\n子指标: 用药依从性, 药物副作用, 药物相互作用\n\n严格按以下JSON格式输出，不要输出任何其他内容:\n{\"dimension_score\":0.72,\"sub_indicator_scores\":{\"指标名\":0.65},\"dimension_reasoning\":\"总体评估\"}\n\n对每个子指标评分(0-1)。\n\n以下是评估依据:\n用户={\"age\": 70, \"gender\": \"男\", \"chronic_diseases\": [\"高血压\", \"痛风\"], \"medications\": [\"氨氯地平\", \"别嘌醇\", \"非甾体抗炎药\"]} 异常=[{\"item\": \"尿酸\", \"value\": \"520μmol/L\", \"status\": \"偏高\"}] 风险={}\n知识={\"summary\": \"别嘌醇需注意药物相互作用\", \"refined_knowledge\": [\"NSAIDs可能影响降压效果\"]}",
+      "response": "{\"dimension_score\":0.72,\"subindicator_scores\":{\"用药依从性\":0.65,\"药物副作用\":0.65,\"药物相互作用\":0.65},\"dimension_reasoning\":\"总体评估\"}",
+      "elapsed_seconds": 43.85,
+      "usage": {
+        "prompt_tokens": 271,
+        "total_tokens": 1164,
+        "completion_tokens": 893,
+        "prompt_tokens_details": null,
+        "reasoning_tokens": 844
+      },
+      "error": null,
+      "dimension_id": "D2",
+      "dimension_name": "用药情况"
+    },
+    {
+      "id": "D2-02",
+      "type": "dimension",
+      "prompt": "你是健康评估专家。评估维度: 用药情况(权重0.2)\n子指标: 用药依从性, 药物副作用, 药物相互作用\n\n严格按以下JSON格式输出，不要输出任何其他内容:\n{\"dimension_score\":0.72,\"sub_indicator_scores\":{\"指标名\":0.65},\"dimension_reasoning\":\"总体评估\"}\n\n对每个子指标评分(0-1)。\n\n以下是评估依据:\n用户={\"age\": 68, \"gender\": \"女\", \"chronic_diseases\": [\"心房颤动\", \"糖尿病\"], \"medications\": [\"华法林\", \"二甲双胍\", \"阿司匹林\"]} 异常=[{\"item\": \"INR\", \"value\": \"3.5\", \"status\": \"偏高\"}] 风险={}\n知识={\"summary\": \"华法林与阿司匹林联用增加出血风险\", \"refined_knowledge\": [\"INR目标2.0-3.0\", \"联用需密切监测\"]}",
+      "response": "{\"dimension_score\":0.72,\"subindicator_scores\":{\"用药依从性\":0.6,\"药物副作用\":0.7,\"药物相互作用\":0.8},\"dimension_reasoning\":\"华法林INR偏高提示监测不足，联用阿司匹林增加出血风险\"}",
+      "elapsed_seconds": 22.81,
+      "usage": {
+        "prompt_tokens": 282,
+        "total_tokens": 749,
+        "completion_tokens": 467,
+        "prompt_tokens_details": null,
+        "reasoning_tokens": 403
+      },
+      "error": null,
+      "dimension_id": "D2",
+      "dimension_name": "用药情况"
+    },
+    {
+      "id": "D3-01",
+      "type": "dimension",
+      "prompt": "你是健康评估专家。评估维度: 治疗状况(权重0.2)\n子指标: 治疗效果, 康复进度, 并发症控制\n\n严格按以下JSON格式输出，不要输出任何其他内容:\n{\"dimension_score\":0.72,\"sub_indicator_scores\":{\"指标名\":0.65},\"dimension_reasoning\":\"总体评估\"}\n\n对每个子指标评分(0-1)。\n\n以下是评估依据:\n用户={\"age\": 72, \"gender\": \"男\", \"chronic_diseases\": [\"脑梗死后遗症\"], \"medications\": [\"阿司匹林\", \"阿托伐他汀\", \"依达拉奉\"]} 异常=[{\"item\": \"肢体肌力\", \"value\": \"4级\", \"status\": \"减退\"}, {\"item\": \"语言功能\", \"value\": \"轻度障碍\", \"status\": \"异常\"}] 风险={}\n知识={\"summary\": \"脑梗死康复期需坚持康复训练\", \"refined_knowledge\": [\"6个月内是康复黄金期\"]}",
+      "response": "{\"dimension_score\":0.72,\"sub_indicator_scores\":{\"治疗效果\":0.7,\"康复进度\":0.65,\"并发症控制\":0.8},\"dimension_reasoning\":\"药物治疗有效，康复存在后遗症障碍\"}",
+      "elapsed_seconds": 31.33,
+      "usage": {
+        "prompt_tokens": 288,
+        "total_tokens": 927,
+        "completion_tokens": 639,
+        "prompt_tokens_details": null,
+        "reasoning_tokens": 587
+      },
+      "error": null,
+      "dimension_id": "D3",
+      "dimension_name": "治疗状况"
+    },
+    {
+      "id": "D3-02",
+      "type": "dimension",
+      "prompt": "你是健康评估专家。评估维度: 治疗状况(权重0.2)\n子指标: 治疗效果, 康复进度, 并发症控制\n\n严格按以下JSON格式输出，不要输出任何其他内容:\n{\"dimension_score\":0.72,\"sub_indicator_scores\":{\"指标名\":0.65},\"dimension_reasoning\":\"总体评估\"}\n\n对每个子指标评分(0-1)。\n\n以下是评估依据:\n用户={\"age\": 65, \"gender\": \"女\", \"chronic_diseases\": [\"2型糖尿病\", \"糖尿病肾病\"], \"medications\": [\"胰岛素\", \"ACEI\"]} 异常=[{\"item\": \"糖化血红蛋白\", \"value\": \"8.5%\", \"status\": \"偏高\"}, {\"item\": \"尿蛋白\", \"value\": \"++\", \"status\": \"阳性\"}] 风险={}\n知识={\"summary\": \"糖尿病肾病需严格控制血糖和血压\", \"refined_knowledge\": [\"HbA1c目标<7%\", \"ACEI可减少蛋白尿\"]}",
+      "response": "{\"dimension_score\":0.72,\"subindicator_scores\":{\"治疗效果\":0.65,\"康复进度\":0.6,\"并发症控制\":0.65},\"dimension_reasoning\":\"血糖血压控制不足，蛋白尿持续\"}",
+      "elapsed_seconds": 26.2,
+      "usage": {
+        "prompt_tokens": 292,
+        "total_tokens": 827,
+        "completion_tokens": 535,
+        "prompt_tokens_details": null,
+        "reasoning_tokens": 484
+      },
+      "error": null,
+      "dimension_id": "D3",
+      "dimension_name": "治疗状况"
+    },
+    {
+      "id": "D4-01",
+      "type": "dimension",
+      "prompt": "你是健康评估专家。评估维度: 饮食状况(权重0.15)\n子指标: 饮食均衡性, 营养摄入, 饮食禁忌遵守\n\n严格按以下JSON格式输出，不要输出任何其他内容:\n{\"dimension_score\":0.72,\"sub_indicator_scores\":{\"指标名\":0.65},\"dimension_reasoning\":\"总体评估\"}\n\n对每个子指标评分(0-1)。\n\n以下是评估依据:\n用户={\"age\": 70, \"gender\": \"男\", \"chronic_diseases\": [\"高血压\", \"痛风\"], \"medications\": [\"氨氯地平\", \"别嘌醇\"]} 异常=[{\"item\": \"尿酸\", \"value\": \"480μmol/L\", \"status\": \"偏高\"}, {\"item\": \"BMI\", \"value\": \"27\", \"status\": \"超重\"}] 风险={}\n知识={\"summary\": \"痛风患者应避免高嘌呤食物\", \"refined_knowledge\": [\"限制动物内脏和海鲜\", \"多饮水促进尿酸排泄\"]}",
+      "response": "{\"dimension_score\":0.72,\"subindicator_scores\":{\"饮食均衡性\":0.7,\"营养摄入\":0.7,\"饮食禁忌遵守\":0.5},\"dimension_reasoning\":\"总体评估\"}",
+      "elapsed_seconds": 50.6,
+      "usage": {
+        "prompt_tokens": 295,
+        "total_tokens": 1323,
+        "completion_tokens": 1028,
+        "prompt_tokens_details": null,
+        "reasoning_tokens": 983
+      },
+      "error": null,
+      "dimension_id": "D4",
+      "dimension_name": "饮食状况"
+    },
+    {
+      "id": "D4-02",
+      "type": "dimension",
+      "prompt": "你是健康评估专家。评估维度: 饮食状况(权重0.15)\n子指标: 饮食均衡性, 营养摄入, 饮食禁忌遵守\n\n严格按以下JSON格式输出，不要输出任何其他内容:\n{\"dimension_score\":0.72,\"sub_indicator_scores\":{\"指标名\":0.65},\"dimension_reasoning\":\"总体评估\"}\n\n对每个子指标评分(0-1)。\n\n以下是评估依据:\n用户={\"age\": 78, \"gender\": \"女\", \"chronic_diseases\": [\"慢性肾病4期\"], \"medications\": [\"碳酸氢钠\", \"促红素\"]} 异常=[{\"item\": \"血钾\", \"value\": \"5.8mmol/L\", \"status\": \"偏高\"}, {\"item\": \"白蛋白\", \"value\": \"30g/L\", \"status\": \"偏低\"}] 风险={}\n知识={\"summary\": \"慢性肾病需限制钾和蛋白质摄入\", \"refined_knowledge\": [\"避免高钾食物如香蕉橙子\", \"蛋白质0.6g/kg/天\"]}",
+      "response": "{\"dimension_score\":0.72,\"subindicator_scores\":{\"饮食禁忌遵守\":0.7,\"营养摄入\":0.6,\"饮食均衡性\":0.7},\"dimension_reasoning\":\"高钾血症提示高钾食物摄入不足，白蛋白低需优化蛋白质\"}",
+      "elapsed_seconds": 23.75,
+      "usage": {
+        "prompt_tokens": 299,
+        "total_tokens": 784,
+        "completion_tokens": 485,
+        "prompt_tokens_details": null,
+        "reasoning_tokens": 425
+      },
+      "error": null,
+      "dimension_id": "D4",
+      "dimension_name": "饮食状况"
+    },
+    {
+      "id": "D5-01",
+      "type": "dimension",
+      "prompt": "你是健康评估专家。评估维度: 检查情况(权重0.15)\n子指标: 检查完整性, 指标异常追踪, 复查及时性\n\n严格按以下JSON格式输出，不要输出任何其他内容:\n{\"dimension_score\":0.72,\"sub_indicator_scores\":{\"指标名\":0.65},\"dimension_reasoning\":\"总体评估\"}\n\n对每个子指标评分(0-1)。\n\n以下是评估依据:\n用户={\"age\": 66, \"gender\": \"男\", \"chronic_diseases\": [\"高血压\", \"糖尿病\"], \"medications\": [\"ARB类\", \"二甲双胍\"]} 异常=[{\"item\": \"糖化血红蛋白\", \"value\": \"8.0%\", \"status\": \"偏高\"}, {\"item\": \"眼底检查\", \"value\": \"未做\", \"status\": \"缺失\"}] 风险={}\n知识={\"summary\": \"糖尿病患者需定期做眼底和肾功能检查\", \"refined_knowledge\": [\"每年至少一次眼底检查\", \"每3月查HbA1c\"]}",
+      "response": "{\"dimension_score\":0.72,\"subindicator_scores\":{\"指标名\":0.65},\"dimension_reasoning\":\"眼底检查缺失，HbA1c偏高未追踪\"}",
+      "elapsed_seconds": 37.2,
+      "usage": {
+        "prompt_tokens": 297,
+        "total_tokens": 1055,
+        "completion_tokens": 758,
+        "prompt_tokens_details": null,
+        "reasoning_tokens": 716
+      },
+      "error": null,
+      "dimension_id": "D5",
+      "dimension_name": "检查情况"
+    },
+    {
+      "id": "D5-02",
+      "type": "dimension",
+      "prompt": "你是健康评估专家。评估维度: 检查情况(权重0.15)\n子指标: 检查完整性, 指标异常追踪, 复查及时性\n\n严格按以下JSON格式输出，不要输出任何其他内容:\n{\"dimension_score\":0.72,\"sub_indicator_scores\":{\"指标名\":0.65},\"dimension_reasoning\":\"总体评估\"}\n\n对每个子指标评分(0-1)。\n\n以下是评估依据:\n用户={\"age\": 73, \"gender\": \"女\", \"chronic_diseases\": [\"乳腺癌术后\"], \"medications\": [\"来曲唑\"]} 异常=[{\"item\": \"肿瘤标志物CA15-3\", \"value\": \"35U/mL\", \"status\": \"偏高\"}, {\"item\": \"骨扫描\", \"value\": \"未做\", \"status\": \"缺失\"}] 风险={}\n知识={\"summary\": \"乳腺癌术后需定期监测肿瘤标志物和骨扫描\", \"refined_knowledge\": [\"CA15-3>25需警惕复发\", \"来曲唑增加骨质疏松风险\"]}",
+      "response": "{\"dimension_score\":0.72,\"subindicator_scores\":{\"肿瘤标志物CA15-3\":0.65,\"骨扫描\":0.5},\"dimension_reasoning\":\"总体评估\"}",
+      "elapsed_seconds": 39.64,
+      "usage": {
+        "prompt_tokens": 300,
+        "total_tokens": 1107,
+        "completion_tokens": 807,
+        "prompt_tokens_details": null,
+        "reasoning_tokens": 764
+      },
+      "error": null,
+      "dimension_id": "D5",
+      "dimension_name": "检查情况"
+    },
+    {
+      "id": "D1-05",
+      "type": "dimension",
+      "prompt": "你是健康评估专家。评估维度: 生理指标(权重0.3)\n子指标: 血压水平, 血糖水平, 血脂水平, BMI指数, 心率\n\n严格按以下JSON格式输出，不要输出任何其他内容:\n{\"dimension_score\":0.72,\"sub_indicator_scores\":{\"指标名\":0.65},\"dimension_reasoning\":\"总体评估\"}\n\n对每个子指标评分(0-1)。\n\n以下是评估依据:\n用户={\"age\": 80, \"gender\": \"男\", \"chronic_diseases\": [\"心衰\", \"高血压\"], \"medications\": [\"沙库巴曲缬沙坦\", \"螺内酯\", \"呋塞米\"]} 异常=[{\"item\": \"BNP\", \"value\": \"800pg/mL\", \"status\": \"偏高\"}, {\"item\": \"血压\", \"value\": \"135/82mmHg\", \"status\": \"临界\"}, {\"item\": \"血钾\", \"value\": \"5.2mmol/L\", \"status\": \"偏高\"}] 风险={}\n知识={\"summary\": \"心衰患者需监测BNP和电解质\", \"refined_knowledge\": [\"BNP>400提示心衰\", \"螺内酯注意高钾风险\"]}",
+      "response": "{\"dimension_score\":0.72,\"subindicator_scores\":{\"血压\":0.7,\"BNP\":0.5,\"血糖\":0.8,\"血脂\":0.8,\"BMI\":0.8,\"心率\":0.8},\"dimension_reasoning\":\"80岁男性心衰高血压，BNP>400且血压临界\"}",
+      "elapsed_seconds": 70.95,
+      "usage": {
+        "prompt_tokens": 337,
+        "total_tokens": 1767,
+        "completion_tokens": 1430,
+        "prompt_tokens_details": null,
+        "reasoning_tokens": 1354
+      },
+      "error": null,
+      "dimension_id": "D1",
+      "dimension_name": "生理指标"
+    },
+    {
+      "id": "D2-03",
+      "type": "dimension",
+      "prompt": "你是健康评估专家。评估维度: 用药情况(权重0.2)\n子指标: 用药依从性, 药物副作用, 药物相互作用\n\n严格按以下JSON格式输出，不要输出任何其他内容:\n{\"dimension_score\":0.72,\"sub_indicator_scores\":{\"指标名\":0.65},\"dimension_reasoning\":\"总体评估\"}\n\n对每个子指标评分(0-1)。\n\n以下是评估依据:\n用户={\"age\": 69, \"gender\": \"女\", \"chronic_diseases\": [\"高血压\", \"糖尿病\", \"骨质疏松\"], \"medications\": [\"氨氯地平\", \"二甲双胍\", \"阿仑膦酸钠\", \"钙片\"]} 异常=[{\"item\": \"空腹血糖\", \"value\": \"7.8mmol/L\", \"status\": \"偏高\"}] 风险={}\n知识={\"summary\": \"多病共存需注意药物相互作用\", \"refined_knowledge\": [\"阿仑膦酸钠需空腹服用\", \"钙片与二甲双胍间隔2小时\"]}",
+      "response": "{\"dimension_score\":0.72,\"subindicator_scores\":{\"用药依从性\":0.6,\"药物副作用\":0.7,\"药物相互作用\":0.9},\"dimension_reasoning\":\"总体评估\"}",
+      "elapsed_seconds": 30.62,
+      "usage": {
+        "prompt_tokens": 295,
+        "total_tokens": 928,
+        "completion_tokens": 633,
+        "prompt_tokens_details": null,
+        "reasoning_tokens": 587
+      },
+      "error": null,
+      "dimension_id": "D2",
+      "dimension_name": "用药情况"
+    },
+    {
+      "id": "D3-03",
+      "type": "dimension",
+      "prompt": "你是健康评估专家。评估维度: 治疗状况(权重0.2)\n子指标: 治疗效果, 康复进度, 并发症控制\n\n严格按以下JSON格式输出，不要输出任何其他内容:\n{\"dimension_score\":0.72,\"sub_indicator_scores\":{\"指标名\":0.65},\"dimension_reasoning\":\"总体评估\"}\n\n对每个子指标评分(0-1)。\n\n以下是评估依据:\n用户={\"age\": 74, \"gender\": \"男\", \"chronic_diseases\": [\"帕金森病\"], \"medications\": [\"左旋多巴\", \"普拉克索\"]} 异常=[{\"item\": \"UPDRS评分\", \"value\": \"35分\", \"status\": \"中度\"}, {\"item\": \"步态\", \"value\": \"不稳\", \"status\": \"异常\"}] 风险={}\n知识={\"summary\": \"帕金森病药物需规律服用避免开关现象\", \"refined_knowledge\": [\"左旋多巴餐前1小时服用\", \"注意体位性低血压\"]}",
+      "response": "{\"dimension_score\":0.72,\"subindicator_scores\":{\"治疗效果\":0.65,\"康复进度\":0.5,\"并发症控制\":0.5},\"dimension_reasoning\":\"药物治疗部分有效，步态问题持续，低血压风险未充分控制\"}",
+      "elapsed_seconds": 53.83,
+      "usage": {
+        "prompt_tokens": 294,
+        "total_tokens": 1401,
+        "completion_tokens": 1107,
+        "prompt_tokens_details": null,
+        "reasoning_tokens": 1049
+      },
+      "error": null,
+      "dimension_id": "D3",
+      "dimension_name": "治疗状况"
+    },
+    {
+      "id": "D2-04",
+      "type": "dimension",
+      "prompt": "你是健康评估专家。评估维度: 用药情况(权重0.2)\n子指标: 用药依从性, 药物副作用, 药物相互作用\n\n严格按以下JSON格式输出，不要输出任何其他内容:\n{\"dimension_score\":0.72,\"sub_indicator_scores\":{\"指标名\":0.65},\"dimension_reasoning\":\"总体评估\"}\n\n对每个子指标评分(0-1)。\n\n以下是评估依据:\n用户={\"age\": 71, \"gender\": \"男\", \"chronic_diseases\": [\"COPD\", \"高血压\"], \"medications\": [\"沙美特罗替卡松\", \"氨氯地平\"]} 异常=[{\"item\": \"FEV1\", \"value\": \"55%预计值\", \"status\": \"偏低\"}, {\"item\": \"血压\", \"value\": \"145/90mmHg\", \"status\": \"偏高\"}] 风险={}\n知识={\"summary\": \"COPD患者吸入激素需注意口腔护理\", \"refined_knowledge\": [\"吸入后漱口预防鹅口疮\", \"定期肺功能复查\"]}",
+      "response": "{\"dimension_score\":0.72,\"subindicator_scores\":{\"用药依从性\":0.65,\"药物副作用\":0.65,\"药物相互作用\":0.7},\"dimension_reasoning\":\"总体评估\"}",
+      "elapsed_seconds": 31.28,
+      "usage": {
+        "prompt_tokens": 302,
+        "total_tokens": 948,
+        "completion_tokens": 646,
+        "prompt_tokens_details": null,
+        "reasoning_tokens": 598
+      },
+      "error": null,
+      "dimension_id": "D2",
+      "dimension_name": "用药情况"
+    },
+    {
+      "id": "D4-03",
+      "type": "dimension",
+      "prompt": "你是健康评估专家。评估维度: 饮食状况(权重0.15)\n子指标: 饮食均衡性, 营养摄入, 饮食禁忌遵守\n\n严格按以下JSON格式输出，不要输出任何其他内容:\n{\"dimension_score\":0.72,\"sub_indicator_scores\":{\"指标名\":0.65},\"dimension_reasoning\":\"总体评估\"}\n\n对每个子指标评分(0-1)。\n\n以下是评估依据:\n用户={\"age\": 67, \"gender\": \"男\", \"chronic_diseases\": [\"高血压\", \"冠心病\"], \"medications\": [\"阿托伐他汀\", \"阿司匹林\", \"美托洛尔\"]} 异常=[{\"item\": \"LDL-C\", \"value\": \"3.2mmol/L\", \"status\": \"偏高\"}, {\"item\": \"钠盐摄入\", \"value\": \">10g/天\", \"status\": \"超标\"}] 风险={}\n知识={\"summary\": \"冠心病患者应低盐低脂饮食\", \"refined_knowledge\": [\"每日钠盐<5g\", \"避免反式脂肪酸\"]}",
+      "response": "{\"dimension_score\":0.72,\"subindicator_scores\":{\"饮食禁忌遵守\":0.5},\"dimension_reasoning\":\"钠盐超标及LDL-C偏高，禁忌遵守差\"}",
+      "elapsed_seconds": 34.95,
+      "usage": {
+        "prompt_tokens": 308,
+        "total_tokens": 1020,
+        "completion_tokens": 712,
+        "prompt_tokens_details": null,
+        "reasoning_tokens": 671
+      },
+      "error": null,
+      "dimension_id": "D4",
+      "dimension_name": "饮食状况"
+    },
+    {
+      "id": "D5-03",
+      "type": "dimension",
+      "prompt": "你是健康评估专家。评估维度: 检查情况(权重0.15)\n子指标: 检查完整性, 指标异常追踪, 复查及时性\n\n严格按以下JSON格式输出，不要输出任何其他内容:\n{\"dimension_score\":0.72,\"sub_indicator_scores\":{\"指标名\":0.65},\"dimension_reasoning\":\"总体评估\"}\n\n对每个子指标评分(0-1)。\n\n以下是评估依据:\n用户={\"age\": 76, \"gender\": \"女\", \"chronic_diseases\": [\"心房颤动\", \"高血压\"], \"medications\": [\"利伐沙班\", \"地尔硫卓\"]} 异常=[{\"item\": \"肝功能ALT\", \"value\": \"60U/L\", \"status\": \"偏高\"}, {\"item\": \"肾功能检查\", \"value\": \"3月未查\", \"status\": \"超期\"}] 风险={}\n知识={\"summary\": \"房颤抗凝治疗需定期监测肝肾功能\", \"refined_knowledge\": [\"利伐沙班需监测CrCl\", \"每3月复查肝肾功能\"]}",
+      "response": "{\"dimension_score\":0.72,\"subindicator_scores\":{\"检查完整性\":0.65,\"指标异常追踪\":0.65,\"复查及时性\":0.65},\"dimension_reasoning\":\"肝肾功能监测不全，超期未复查\"}",
+      "elapsed_seconds": 20.96,
+      "usage": {
+        "prompt_tokens": 304,
+        "total_tokens": 732,
+        "completion_tokens": 428,
+        "prompt_tokens_details": null,
+        "reasoning_tokens": 371
+      },
+      "error": null,
+      "dimension_id": "D5",
+      "dimension_name": "检查情况"
+    },
+    {
+      "id": "D3-04",
+      "type": "dimension",
+      "prompt": "你是健康评估专家。评估维度: 治疗状况(权重0.2)\n子指标: 治疗效果, 康复进度, 并发症控制\n\n严格按以下JSON格式输出，不要输出任何其他内容:\n{\"dimension_score\":0.72,\"sub_indicator_scores\":{\"指标名\":0.65},\"dimension_reasoning\":\"总体评估\"}\n\n对每个子指标评分(0-1)。\n\n以下是评估依据:\n用户={\"age\": 63, \"gender\": \"女\", \"chronic_diseases\": [\"类风湿关节炎\"], \"medications\": [\"甲氨蝶呤\", \"来氟米特\", \"泼尼松\"]} 异常=[{\"item\": \"CRP\", \"value\": \"25mg/L\", \"status\": \"偏高\"}, {\"item\": \"ESR\", \"value\": \"45mm/h\", \"status\": \"偏高\"}] 风险={}\n知识={\"summary\": \"类风湿需定期监测炎症指标和药物副作用\", \"refined_knowledge\": [\"甲氨蝶呤需补充叶酸\", \"定期查肝功能和血常规\"]}",
+      "response": "炎症指标偏高，治疗效果不佳；慢性病康复慢；药物监测需加强。\n\n{\"dimension_score\":0.72,\"subindicator_scores\":{\"治疗效果\":0.65,\"康复进度\":0.65,\"并发症控制\":0.65},\"dimension_reasoning\":\"总体评估\"}",
+      "elapsed_seconds": 25.81,
+      "usage": {
+        "prompt_tokens": 300,
+        "total_tokens": 827,
+        "completion_tokens": 527,
+        "prompt_tokens_details": null,
+        "reasoning_tokens": 462
+      },
+      "error": null,
+      "dimension_id": "D3",
+      "dimension_name": "治疗状况"
+    },
+    {
+      "id": "D1-06",
+      "type": "dimension",
+      "prompt": "你是健康评估专家。评估维度: 生理指标(权重0.3)\n子指标: 血压水平, 血糖水平, 血脂水平, BMI指数, 心率\n\n严格按以下JSON格式输出，不要输出任何其他内容:\n{\"dimension_score\":0.72,\"sub_indicator_scores\":{\"指标名\":0.65},\"dimension_reasoning\":\"总体评估\"}\n\n对每个子指标评分(0-1)。\n\n以下是评估依据:\n用户={\"age\": 69, \"gender\": \"女\", \"chronic_diseases\": [\"甲状腺功能减退\", \"高血脂\"], \"medications\": [\"左甲状腺素\", \"瑞舒伐他汀\"]} 异常=[{\"item\": \"TSH\", \"value\": \"8.5mIU/L\", \"status\": \"偏高\"}, {\"item\": \"总胆固醇\", \"value\": \"6.2mmol/L\", \"status\": \"偏高\"}, {\"item\": \"BMI\", \"value\": \"26.8\", \"status\": \"超重\"}] 风险={}\n知识={\"summary\": \"甲减需调整左甲状腺素剂量\", \"refined_knowledge\": [\"TSH目标0.5-4.0\", \"甲减可继发高血脂\"]}",
+      "response": "{\"dimension_score\":0.72,\"subindicator_scores\":{\"血脂水平\":0.5,\"BMI指数\":0.5,\"血压水平\":0.7,\"血糖水平\":0.7,\"心率\":0.7},\"dimension_reasoning\":\"甲减继发高血脂及超重影响\"}",
+      "elapsed_seconds": 41.2,
+      "usage": {
+        "prompt_tokens": 328,
+        "total_tokens": 1166,
+        "completion_tokens": 838,
+        "prompt_tokens_details": null,
+        "reasoning_tokens": 773
+      },
+      "error": null,
+      "dimension_id": "D1",
+      "dimension_name": "生理指标"
+    }
+  ],
+  "risk_factor_results": [
+    {
+      "id": "F1-01",
+      "type": "risk_factor",
+      "prompt": "你是健康评估专家。评估风险因子: 疾病严重程度(权重0.25)\n\n严格按以下JSON格式输出，不要输出任何其他内容:\n{\"factor_score\":45,\"factor_reasoning\":\"评估理由\",\"related_diseases\":[\"疾病1\"]}\n\n评估风险程度(0-100)并给简短理由(20字内)。\n\n以下是评估依据:\n用户={\"age\": 68, \"gender\": \"男\", \"chronic_diseases\": [\"高血压3级\", \"2型糖尿病\"]} 异常=[{\"item\": \"收缩压\", \"value\": \"175mmHg\"}, {\"item\": \"空腹血糖\", \"value\": \"9.5mmol/L\"}] 实体={\"Disease\": [\"高血压\", \"糖尿病\"], \"Drug\": [\"氨氯地平\", \"二甲双胍\"]}",
+      "response": "{\"factor_score\":45,\"factor_reasoning\":\"高血压3级及血糖控制不良\",\"related_diseases\":[\"高血压\",\"糖尿病\"]}",
+      "elapsed_seconds": 27.65,
+      "usage": {
+        "prompt_tokens": 243,
+        "total_tokens": 809,
+        "completion_tokens": 566,
+        "prompt_tokens_details": null,
+        "reasoning_tokens": 536
+      },
+      "error": null,
+      "factor_id": "F1",
+      "factor_name": "疾病严重程度"
+    },
+    {
+      "id": "F1-02",
+      "type": "risk_factor",
+      "prompt": "你是健康评估专家。评估风险因子: 疾病严重程度(权重0.25)\n\n严格按以下JSON格式输出，不要输出任何其他内容:\n{\"factor_score\":45,\"factor_reasoning\":\"评估理由\",\"related_diseases\":[\"疾病1\"]}\n\n评估风险程度(0-100)并给简短理由(20字内)。\n\n以下是评估依据:\n用户={\"age\": 75, \"gender\": \"女\", \"chronic_diseases\": [\"冠心病\", \"心衰NYHA III级\"]} 异常=[{\"item\": \"BNP\", \"value\": \"900pg/mL\"}, {\"item\": \"LVEF\", \"value\": \"35%\"}] 实体={\"Disease\": [\"冠心病\", \"心衰\"], \"Drug\": [\"沙库巴曲缬沙坦\"]}",
+      "response": "{\"factor_score\":45,\"factor_reasoning\":\"NYHA III级、BNP 900、LVEF 35%示严重心衰\",\"related_diseases\":[\"冠心病\",\"心衰\"]}",
+      "elapsed_seconds": 28.32,
+      "usage": {
+        "prompt_tokens": 242,
+        "total_tokens": 822,
+        "completion_tokens": 580,
+        "prompt_tokens_details": null,
+        "reasoning_tokens": 531
+      },
+      "error": null,
+      "factor_id": "F1",
+      "factor_name": "疾病严重程度"
+    },
+    {
+      "id": "F1-03",
+      "type": "risk_factor",
+      "prompt": "你是健康评估专家。评估风险因子: 疾病严重程度(权重0.25)\n\n严格按以下JSON格式输出，不要输出任何其他内容:\n{\"factor_score\":45,\"factor_reasoning\":\"评估理由\",\"related_diseases\":[\"疾病1\"]}\n\n评估风险程度(0-100)并给简短理由(20字内)。\n\n以下是评估依据:\n用户={\"age\": 65, \"gender\": \"男\", \"chronic_diseases\": [\"慢性肾病4期\"]} 异常=[{\"item\": \"eGFR\", \"value\": \"22\"}, {\"item\": \"血肌酐\", \"value\": \"350μmol/L\"}] 实体={\"Disease\": [\"慢性肾病\"], \"Drug\": [\"促红素\"]}",
+      "response": "{\"factor_score\":45,\"factor_reasoning\":\"eGFR 22，慢性肾病4期严重\",\"related_diseases\":[\"慢性肾病\"]}",
+      "elapsed_seconds": 30.03,
+      "usage": {
+        "prompt_tokens": 229,
+        "total_tokens": 844,
+        "completion_tokens": 615,
+        "prompt_tokens_details": null,
+        "reasoning_tokens": 579
+      },
+      "error": null,
+      "factor_id": "F1",
+      "factor_name": "疾病严重程度"
+    },
+    {
+      "id": "F2-01",
+      "type": "risk_factor",
+      "prompt": "你是健康评估专家。评估风险因子: 并发症风险(权重0.2)\n\n严格按以下JSON格式输出，不要输出任何其他内容:\n{\"factor_score\":45,\"factor_reasoning\":\"评估理由\",\"related_diseases\":[\"疾病1\"]}\n\n评估风险程度(0-100)并给简短理由(20字内)。\n\n以下是评估依据:\n用户={\"age\": 72, \"gender\": \"男\", \"chronic_diseases\": [\"2型糖尿病\", \"高血压\"]} 异常=[{\"item\": \"尿蛋白\", \"value\": \"++\"}, {\"item\": \"眼底出血\", \"value\": \"阳性\"}] 实体={\"Disease\": [\"糖尿病\", \"高血压\"], \"Drug\": [\"胰岛素\", \"ARB类\"]}",
+      "response": "{\"factor_score\":45,\"factor_reasoning\":\"尿蛋白++和眼底出血阳性，糖尿病肾病及视网膜病变风险高\",\"related_diseases\":[\"糖尿病\",\"高血压\"]}",
+      "elapsed_seconds": 27.58,
+      "usage": {
+        "prompt_tokens": 226,
+        "total_tokens": 791,
+        "completion_tokens": 565,
+        "prompt_tokens_details": null,
+        "reasoning_tokens": 523
+      },
+      "error": null,
+      "factor_id": "F2",
+      "factor_name": "并发症风险"
+    },
+    {
+      "id": "F2-02",
+      "type": "risk_factor",
+      "prompt": "你是健康评估专家。评估风险因子: 并发症风险(权重0.2)\n\n严格按以下JSON格式输出，不要输出任何其他内容:\n{\"factor_score\":45,\"factor_reasoning\":\"评估理由\",\"related_diseases\":[\"疾病1\"]}\n\n评估风险程度(0-100)并给简短理由(20字内)。\n\n以下是评估依据:\n用户={\"age\": 70, \"gender\": \"女\", \"chronic_diseases\": [\"心房颤动\"]} 异常=[{\"item\": \"CHADS2评分\", \"value\": \"4分\"}, {\"item\": \"左房增大\", \"value\": \"52mm\"}] 实体={\"Disease\": [\"房颤\"], \"Drug\": [\"利伐沙班\"]}",
+      "response": "{\"factor_score\":45,\"factor_reasoning\":\"房颤CHADS2=4分，左房增大52mm，卒中高风险\",\"related_diseases\":[\"心房颤动\"]}",
+      "elapsed_seconds": 29.1,
+      "usage": {
+        "prompt_tokens": 224,
+        "total_tokens": 820,
+        "completion_tokens": 596,
+        "prompt_tokens_details": null,
+        "reasoning_tokens": 552
+      },
+      "error": null,
+      "factor_id": "F2",
+      "factor_name": "并发症风险"
+    },
+    {
+      "id": "F2-03",
+      "type": "risk_factor",
+      "prompt": "你是健康评估专家。评估风险因子: 并发症风险(权重0.2)\n\n严格按以下JSON格式输出，不要输出任何其他内容:\n{\"factor_score\":45,\"factor_reasoning\":\"评估理由\",\"related_diseases\":[\"疾病1\"]}\n\n评估风险程度(0-100)并给简短理由(20字内)。\n\n以下是评估依据:\n用户={\"age\": 68, \"gender\": \"男\", \"chronic_diseases\": [\"COPD\"]} 异常=[{\"item\": \"FEV1\", \"value\": \"40%预计值\"}, {\"item\": \"肺动脉压\", \"value\": \"45mmHg\"}] 实体={\"Disease\": [\"COPD\", \"肺心病\"], \"Drug\": [\"沙美特罗\"]}",
+      "response": "{\"factor_score\":85,\"factor_reasoning\":\"肺动脉压45mmHg，COPD进展致肺心病风险高\",\"related_diseases\":[\"肺心病\"]}",
+      "elapsed_seconds": 35.25,
+      "usage": {
+        "prompt_tokens": 233,
+        "total_tokens": 954,
+        "completion_tokens": 721,
+        "prompt_tokens_details": null,
+        "reasoning_tokens": 679
+      },
+      "error": null,
+      "factor_id": "F2",
+      "factor_name": "并发症风险"
+    },
+    {
+      "id": "F3-01",
+      "type": "risk_factor",
+      "prompt": "你是健康评估专家。评估风险因子: 用药风险(权重0.2)\n\n严格按以下JSON格式输出，不要输出任何其他内容:\n{\"factor_score\":45,\"factor_reasoning\":\"评估理由\",\"related_diseases\":[\"疾病1\"]}\n\n评估风险程度(0-100)并给简短理由(20字内)。\n\n以下是评估依据:\n用户={\"age\": 80, \"gender\": \"女\", \"chronic_diseases\": [\"高血压\", \"房颤\", \"骨质疏松\"]} 异常=[{\"item\": \"用药数量\", \"value\": \"7种\"}, {\"item\": \"跌倒史\", \"value\": \"近3月2次\"}] 实体={\"Disease\": [\"高血压\", \"房颤\", \"骨质疏松\"], \"Drug\": [\"华法林\", \"钙片\", \"ARB类\"]}",
+      "response": "{\"factor_score\":45,\"factor_reasoning\":\"华法林抗凝+跌倒史显著增加出血风险\",\"related_diseases\":[\"房颤\",\"骨质疏松\"]}",
+      "elapsed_seconds": 19.08,
+      "usage": {
+        "prompt_tokens": 245,
+        "total_tokens": 636,
+        "completion_tokens": 391,
+        "prompt_tokens_details": null,
+        "reasoning_tokens": 351
+      },
+      "error": null,
+      "factor_id": "F3",
+      "factor_name": "用药风险"
+    },
+    {
+      "id": "F3-02",
+      "type": "risk_factor",
+      "prompt": "你是健康评估专家。评估风险因子: 用药风险(权重0.2)\n\n严格按以下JSON格式输出，不要输出任何其他内容:\n{\"factor_score\":45,\"factor_reasoning\":\"评估理由\",\"related_diseases\":[\"疾病1\"]}\n\n评估风险程度(0-100)并给简短理由(20字内)。\n\n以下是评估依据:\n用户={\"age\": 70, \"gender\": \"男\", \"chronic_diseases\": [\"痛风\", \"高血压\"]} 异常=[{\"item\": \"尿酸\", \"value\": \"580μmol/L\"}, {\"item\": \"肝功能ALT\", \"value\": \"65U/L\"}] 实体={\"Disease\": [\"痛风\", \"高血压\"], \"Drug\": [\"别嘌醇\", \"非布司他\", \"氨氯地平\"]}",
+      "response": "{\"factor_score\":45,\"factor_reasoning\":\"肝功能异常，别嘌醇可能加重肝损伤\",\"related_diseases\":[\"痛风\",\"高血压\"]}",
+      "elapsed_seconds": 21.37,
+      "usage": {
+        "prompt_tokens": 240,
+        "total_tokens": 678,
+        "completion_tokens": 438,
+        "prompt_tokens_details": null,
+        "reasoning_tokens": 403
+      },
+      "error": null,
+      "factor_id": "F3",
+      "factor_name": "用药风险"
+    },
+    {
+      "id": "F4-01",
+      "type": "risk_factor",
+      "prompt": "你是健康评估专家。评估风险因子: 生活习惯风险(权重0.15)\n\n严格按以下JSON格式输出，不要输出任何其他内容:\n{\"factor_score\":45,\"factor_reasoning\":\"评估理由\",\"related_diseases\":[\"疾病1\"]}\n\n评估风险程度(0-100)并给简短理由(20字内)。\n\n以下是评估依据:\n用户={\"age\": 66, \"gender\": \"男\", \"chronic_diseases\": [\"高血压\", \"COPD\"]} 异常=[{\"item\": \"吸烟史\", \"value\": \"40年\"}, {\"item\": \"BMI\", \"value\": \"18.0\"}] 实体={\"Disease\": [\"高血压\", \"COPD\"], \"Drug\": [\"氨氯地平\", \"噻托溴铵\"]}",
+      "response": "{\"factor_score\":45,\"factor_reasoning\":\"40年吸烟史及BMI 18.0显著增加COPD/高血压风险\",\"related_diseases\":[\"COPD\",\"高血压\"]}",
+      "elapsed_seconds": 22.01,
+      "usage": {
+        "prompt_tokens": 234,
+        "total_tokens": 685,
+        "completion_tokens": 451,
+        "prompt_tokens_details": null,
+        "reasoning_tokens": 406
+      },
+      "error": null,
+      "factor_id": "F4",
+      "factor_name": "生活习惯风险"
+    },
+    {
+      "id": "F4-02",
+      "type": "risk_factor",
+      "prompt": "你是健康评估专家。评估风险因子: 生活习惯风险(权重0.15)\n\n严格按以下JSON格式输出，不要输出任何其他内容:\n{\"factor_score\":45,\"factor_reasoning\":\"评估理由\",\"related_diseases\":[\"疾病1\"]}\n\n评估风险程度(0-100)并给简短理由(20字内)。\n\n以下是评估依据:\n用户={\"age\": 73, \"gender\": \"女\", \"chronic_diseases\": [\"2型糖尿病\"]} 异常=[{\"item\": \"运动频率\", \"value\": \"几乎不运动\"}, {\"item\": \"饮食\", \"value\": \"嗜甜食\"}] 实体={\"Disease\": [\"2型糖尿病\"], \"Drug\": [\"二甲双胍\"]}",
+      "response": "{\"factor_score\":45,\"factor_reasoning\":\"不良生活习惯加重糖尿病控制风险\",\"related_diseases\":[\"2型糖尿病\"]}",
+      "elapsed_seconds": 33.61,
+      "usage": {
+        "prompt_tokens": 221,
+        "total_tokens": 909,
+        "completion_tokens": 688,
+        "prompt_tokens_details": null,
+        "reasoning_tokens": 659
+      },
+      "error": null,
+      "factor_id": "F4",
+      "factor_name": "生活习惯风险"
+    },
+    {
+      "id": "F4-03",
+      "type": "risk_factor",
+      "prompt": "你是健康评估专家。评估风险因子: 生活习惯风险(权重0.15)\n\n严格按以下JSON格式输出，不要输出任何其他内容:\n{\"factor_score\":45,\"factor_reasoning\":\"评估理由\",\"related_diseases\":[\"疾病1\"]}\n\n评估风险程度(0-100)并给简短理由(20字内)。\n\n以下是评估依据:\n用户={\"age\": 69, \"gender\": \"男\", \"chronic_diseases\": [\"高血脂\", \"脂肪肝\"]} 异常=[{\"item\": \"饮酒\", \"value\": \"每日白酒2两\"}, {\"item\": \"BMI\", \"value\": \"29\"}] 实体={\"Disease\": [\"高血脂\", \"脂肪肝\"], \"Drug\": [\"阿托伐他汀\"]}",
+      "response": "{\"factor_score\":45,\"factor_reasoning\":\"饮酒过量及BMI升高加重脂肪肝\",\"related_diseases\":[\"脂肪肝\",\"高血脂\"]}",
+      "elapsed_seconds": 25.11,
+      "usage": {
+        "prompt_tokens": 227,
+        "total_tokens": 742,
+        "completion_tokens": 515,
+        "prompt_tokens_details": null,
+        "reasoning_tokens": 481
+      },
+      "error": null,
+      "factor_id": "F4",
+      "factor_name": "生活习惯风险"
+    },
+    {
+      "id": "F5-01",
+      "type": "risk_factor",
+      "prompt": "你是健康评估专家。评估风险因子: 复查监测风险(权重0.1)\n\n严格按以下JSON格式输出，不要输出任何其他内容:\n{\"factor_score\":45,\"factor_reasoning\":\"评估理由\",\"related_diseases\":[\"疾病1\"]}\n\n评估风险程度(0-100)并给简短理由(20字内)。\n\n以下是评估依据:\n用户={\"age\": 71, \"gender\": \"女\", \"chronic_diseases\": [\"高血压\", \"糖尿病\"]} 异常=[{\"item\": \"上次复查\", \"value\": \"8个月前\"}, {\"item\": \"HbA1c\", \"value\": \"8.8%\"}] 实体={\"Disease\": [\"高血压\", \"糖尿病\"], \"Drug\": [\"缬沙坦\", \"格列美脲\"]}",
+      "response": "{\"factor_score\":45,\"factor_reasoning\":\"复查间隔长且血糖控制不良，需缩短监测频率\",\"related_diseases\":[\"高血压\",\"糖尿病\"]}",
+      "elapsed_seconds": 23.81,
+      "usage": {
+        "prompt_tokens": 233,
+        "total_tokens": 721,
+        "completion_tokens": 488,
+        "prompt_tokens_details": null,
+        "reasoning_tokens": 453
+      },
+      "error": null,
+      "factor_id": "F5",
+      "factor_name": "复查监测风险"
+    },
+    {
+      "id": "F5-02",
+      "type": "risk_factor",
+      "prompt": "你是健康评估专家。评估风险因子: 复查监测风险(权重0.1)\n\n严格按以下JSON格式输出，不要输出任何其他内容:\n{\"factor_score\":45,\"factor_reasoning\":\"评估理由\",\"related_diseases\":[\"疾病1\"]}\n\n评估风险程度(0-100)并给简短理由(20字内)。\n\n以下是评估依据:\n用户={\"age\": 67, \"gender\": \"男\", \"chronic_diseases\": [\"慢性肾病3期\"]} 异常=[{\"item\": \"肾功能复查\", \"value\": \"1年未查\"}, {\"item\": \"尿蛋白\", \"value\": \"+++\"}] 实体={\"Disease\": [\"慢性肾病\"], \"Drug\": [\"ACEI\"]}",
+      "response": "{\"factor_score\":45,\"factor_reasoning\":\"肾功能复查缺失，尿蛋白+++，慢性肾病进展风险高\",\"related_diseases\":[\"慢性肾病\"]}",
+      "elapsed_seconds": 20.52,
+      "usage": {
+        "prompt_tokens": 222,
+        "total_tokens": 643,
+        "completion_tokens": 421,
+        "prompt_tokens_details": null,
+        "reasoning_tokens": 383
+      },
+      "error": null,
+      "factor_id": "F5",
+      "factor_name": "复查监测风险"
+    },
+    {
+      "id": "F6-01",
+      "type": "risk_factor",
+      "prompt": "你是健康评估专家。评估风险因子: 预防措施风险(权重0.1)\n\n严格按以下JSON格式输出，不要输出任何其他内容:\n{\"factor_score\":45,\"factor_reasoning\":\"评估理由\",\"related_diseases\":[\"疾病1\"]}\n\n评估风险程度(0-100)并给简短理由(20字内)。\n\n以下是评估依据:\n用户={\"age\": 76, \"gender\": \"女\", \"chronic_diseases\": [\"骨质疏松\"]} 异常=[{\"item\": \"维生素D\", \"value\": \"未补充\"}, {\"item\": \"跌倒风险\", \"value\": \"高\"}] 实体={\"Disease\": [\"骨质疏松\"], \"Drug\": [\"阿仑膦酸钠\"]}",
+      "response": "{\"factor_score\":45,\"factor_reasoning\":\"维生素D缺乏及跌倒风险高，骨折预防不足\",\"related_diseases\":[\"骨质疏松\"]}",
+      "elapsed_seconds": 24.39,
+      "usage": {
+        "prompt_tokens": 224,
+        "total_tokens": 724,
+        "completion_tokens": 500,
+        "prompt_tokens_details": null,
+        "reasoning_tokens": 464
+      },
+      "error": null,
+      "factor_id": "F6",
+      "factor_name": "预防措施风险"
+    },
+    {
+      "id": "F6-02",
+      "type": "risk_factor",
+      "prompt": "你是健康评估专家。评估风险因子: 预防措施风险(权重0.1)\n\n严格按以下JSON格式输出，不要输出任何其他内容:\n{\"factor_score\":45,\"factor_reasoning\":\"评估理由\",\"related_diseases\":[\"疾病1\"]}\n\n评估风险程度(0-100)并给简短理由(20字内)。\n\n以下是评估依据:\n用户={\"age\": 70, \"gender\": \"男\", \"chronic_diseases\": [\"高血压\", \"糖尿病\"]} 异常=[{\"item\": \"疫苗接种\", \"value\": \"流感未接种\"}, {\"item\": \"足部护理\", \"value\": \"未注意\"}] 实体={\"Disease\": [\"高血压\", \"糖尿病\"], \"Drug\": [\"ARB类\", \"二甲双胍\"]}",
+      "response": "{\"factor_score\":45,\"factor_reasoning\":\"流感未接种和足部护理不良，增加糖尿病并发症风险\",\"related_diseases\":[\"高血压\",\"糖尿病\"]}",
+      "elapsed_seconds": 21.06,
+      "usage": {
+        "prompt_tokens": 229,
+        "total_tokens": 661,
+        "completion_tokens": 432,
+        "prompt_tokens_details": null,
+        "reasoning_tokens": 396
+      },
+      "error": null,
+      "factor_id": "F6",
+      "factor_name": "预防措施风险"
+    }
+  ],
+  "stats": {
+    "dimension_total": 20,
+    "dimension_success": 20,
+    "risk_factor_total": 15,
+    "risk_factor_success": 15
+  }
+}

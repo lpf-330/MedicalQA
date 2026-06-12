@@ -1,11 +1,23 @@
 # AI辅助生成：GLM-5，2026-04-15
 # -*- coding: utf-8 -*-
 
-from abc import ABC, abstractmethod
-from typing import Any, Dict, List
+from abc import abstractmethod
+from typing import Dict, List
+
+from src.adapters.base_adapter import BaseAdapter
 
 
-class MilvusAdapter(ABC):
+class MilvusAdapter(BaseAdapter):
+
+    @abstractmethod
+    def is_initialized(self) -> bool:
+        """
+        检查适配器是否已初始化
+        
+        Returns:
+            bool: 是否已初始化（已连接）
+        """
+        pass
 
     @abstractmethod
     def connect(self, uri: str, user: str, password: str, token: str) -> None:
@@ -31,7 +43,8 @@ class MilvusAdapter(ABC):
         query_vector: List[float],
         collections: List[str],
         top_k: int,
-        weights: Dict[str, float]
+        weights: Dict[str, float],
+        threshold: float = 0.6
     ) -> List[Dict]:
         pass
 

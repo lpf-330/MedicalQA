@@ -7,13 +7,16 @@
 from typing import Any, Dict, Optional, Type, TypeVar, Union
 from pathlib import Path
 import json
+import logging
 import os
 
 from .base_config import BaseConfig
 from .logging_config import LoggingConfig
+from src.utils.logger import log_arch_event
 
-# 泛型类型变量，用于类型注解
 T = TypeVar('T', bound=BaseConfig)
+
+logger = logging.getLogger(__name__)
 
 
 class ConfigLoader:
@@ -56,16 +59,20 @@ class ConfigLoader:
             ImportError: 缺少PyYAML依赖
         """
         file_path = Path(file_path)
+        logger.debug(f"[ConfigLoader.load_from_yaml] 扫描YAML配置文件: {file_path}")
         
         if not file_path.exists():
+            logger.error(f"[ConfigLoader.load_from_yaml] 配置文件不存在: {file_path}")
             raise FileNotFoundError(f"配置文件不存在: {file_path}")
         
         if file_path.suffix.lower() not in ['.yaml', '.yml']:
+            logger.error(f"[ConfigLoader.load_from_yaml] 不支持的YAML文件格式: {file_path.suffix}")
             raise ValueError(f"不支持的YAML文件格式: {file_path.suffix}")
         
         try:
             import yaml
         except ImportError:
+            logger.error("[ConfigLoader.load_from_yaml] 缺少PyYAML依赖")
             raise ImportError(
                 "缺少PyYAML依赖，请安装: pip install pyyaml"
             )
@@ -73,6 +80,8 @@ class ConfigLoader:
         with open(file_path, 'r', encoding='utf-8') as f:
             config = yaml.safe_load(f)
         
+        log_arch_event(logger, component="ConfigLoader", stage="CONFIG_LOAD", event="yaml_loaded", status="success", design_id="ARCH-0.1", file_path=str(file_path))
+        logger.info(f"[ConfigLoader.load_from_yaml] YAML配置文件加载成功: {file_path}, keys={list((config or {}).keys())}")
         return config or {}
     
     @staticmethod
@@ -91,16 +100,21 @@ class ConfigLoader:
             ValueError: 文件格式不支持
         """
         file_path = Path(file_path)
+        logger.debug(f"[ConfigLoader.load_from_json] 扫描JSON配置文件: {file_path}")
         
         if not file_path.exists():
+            logger.error(f"[ConfigLoader.load_from_json] 配置文件不存在: {file_path}")
             raise FileNotFoundError(f"配置文件不存在: {file_path}")
         
         if file_path.suffix.lower() != '.json':
+            logger.error(f"[ConfigLoader.load_from_json] 不支持的JSON文件格式: {file_path.suffix}")
             raise ValueError(f"不支持的JSON文件格式: {file_path.suffix}")
         
         with open(file_path, 'r', encoding='utf-8') as f:
             config = json.load(f)
         
+        log_arch_event(logger, component="ConfigLoader", stage="CONFIG_LOAD", event="json_loaded", status="success", design_id="ARCH-0.1", file_path=str(file_path))
+        logger.info(f"[ConfigLoader.load_from_json] JSON配置文件加载成功: {file_path}, keys={list((config or {}).keys())}")
         return config or {}
     
     @staticmethod
@@ -115,19 +129,18 @@ class ConfigLoader:
             Dict[str, Any]: 配置字典
         """
         config = {}
+        matched_count = 0
         
         for key, value in os.environ.items():
-            # 如果指定了前缀，只加载带前缀的环境变量
             if prefix and not key.startswith(prefix):
                 continue
             
-            # 移除前缀并转换为小写
             config_key = key[len(prefix):].lower() if prefix else key.lower()
-            
-            # 尝试解析值类型
             parsed_value = ConfigLoader._parse_env_value(value)
             config[config_key] = parsed_value
+            matched_count += 1
         
+        logger.info(f"[ConfigLoader.load_from_env] 环境变量加载完成: prefix='{prefix}', matched_count={matched_count}")
         return config
     
     @staticmethod
@@ -181,10 +194,11 @@ class ConfigLoader:
         """
         result = {}
         
-        for config in configs:
+        for i, config in enumerate(configs):
             if config:
                 result = ConfigLoader._deep_merge(result, config)
         
+        logger.debug(f"[ConfigLoader.merge_configs] 合并{len(configs)}个配置字典完成, keys={list(result.keys())}")
         return result
     
     @staticmethod
@@ -237,7 +251,8 @@ class ConfigLoader:
         Raises:
             ValueError: 配置文件格式不支持
         """
-        # 1. 从配置文件加载
+        logger.info(f"[ConfigLoader.load_config] 开始加载配置: config_class={config_class.__name__}, config_file={config_file}, env_prefix={env_prefix}")
+        
         file_config = {}
         if config_file:
             config_file = Path(config_file)
@@ -247,25 +262,26 @@ class ConfigLoader:
             elif config_file.suffix.lower() == '.json':
                 file_config = ConfigLoader.load_from_json(config_file)
             else:
+                logger.error(f"[ConfigLoader.load_config] 不支持的配置文件格式: {config_file.suffix}")
                 raise ValueError(
                     f"不支持的配置文件格式: {config_file.suffix}. "
                     f"支持的格式: {ConfigLoader.SUPPORTED_FORMATS}"
                 )
         
-        # 2. 从环境变量加载
         env_config = {}
         if env_prefix:
             env_config = ConfigLoader.load_from_env(env_prefix)
         
-        # 3. 合并所有配置源
         merged_config = ConfigLoader.merge_configs(
             file_config,
             env_config,
             kwargs
         )
         
-        # 4. 创建配置实例
-        return config_class(**merged_config)
+        instance = config_class(**merged_config)
+        log_arch_event(logger, component="ConfigLoader", stage="CONFIG_LOAD", event="config_instance_created", status="success", design_id="ARCH-0.1", config_class=config_class.__name__)
+        logger.info(f"[ConfigLoader.load_config] 配置实例创建成功: config_class={config_class.__name__}")
+        return instance
     
     @staticmethod
     def load_logging_config(
@@ -372,7 +388,8 @@ class ConfigLoader:
             else:
                 ConfigLoader.load_from_json(file_path)
             return True
-        except Exception:
+        except Exception as e:
+            logger.debug(f"[ConfigLoader] 配置文件验证失败: {e}")
             return False
     
     @staticmethod
